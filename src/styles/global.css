@@ -87,6 +87,38 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
   min-height: 42px;
 }
 .filters select:disabled { opacity: 0.4; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.near-btn {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-height: 42px;
+  cursor: pointer;
+}
+.near-btn:hover { border-color: var(--accent); }
+.near-btn[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.near-btn:disabled { opacity: 0.6; cursor: progress; }
+.geo-msg {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+}
 .filters :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .count { color: var(--muted); margin: 16px 0 8px; }
@@ -131,6 +163,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
 .status { margin: 0; color: var(--open); font-weight: 600; font-size: 0.9rem; }
 .status.closed { color: var(--closed); }
+.distance { color: var(--muted); font-weight: 500; }
+.distance:not(:empty)::before { content: ' · '; }
 .status.big { font-size: 1.05rem; margin: 8px 0 0; }
 .locate {
   font: inherit;

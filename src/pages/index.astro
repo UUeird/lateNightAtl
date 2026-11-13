@@ -60,11 +60,25 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
         {cuisines.map((c) => <option value={c}>{cap(c)}</option>)}
       </select>
     </label>
+    <div class="field">
+      <span class="field-label">Location</span>
+      <button type="button" class="near-btn" id="near-me" aria-pressed="false">Near me</button>
+    </div>
+    <label>Within
+      <select name="within" disabled>
+        <option value="">Any distance</option>
+        <option value="1">1 mile</option>
+        <option value="3">3 miles</option>
+        <option value="5">5 miles</option>
+        <option value="10">10 miles</option>
+      </select>
+    </label>
     <label class="search">Search
       <input type="search" name="q" placeholder="Name, food, area…" autocomplete="off" />
     </label>
   </form>
 
+  <p class="geo-msg" id="geo-msg" role="status" hidden></p>
   <p class="count" id="count" aria-live="polite">{places.length} places</p>
 
   <div class="explorer">
@@ -77,7 +91,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
             <span class="area">{data.area}</span>
           </p>
           <div class="card-foot">
-            <p class="status" data-status></p>
+            <p class="status"><span data-status></span><span class="distance" data-distance></span></p>
             <button type="button" class="locate" data-locate={id}>Map</button>
           </div>
         </li>
