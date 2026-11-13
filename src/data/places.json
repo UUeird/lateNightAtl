@@ -1,0 +1,756 @@
+[
+  {
+    "id": "argosy",
+    "name": "Argosy",
+    "type": "bar",
+    "cuisine": [
+      "american"
+    ],
+    "area": "East Atlanta Village",
+    "address": "470 Flat Shoals Ave SE, Atlanta, GA 30316",
+    "lat": 33.74133,
+    "lng": -84.34621,
+    "hours": {
+      "sun": [
+        [
+          "17:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "17:00",
+          "01:00"
+        ]
+      ],
+      "tue": [
+        [
+          "17:00",
+          "01:00"
+        ]
+      ],
+      "wed": [
+        [
+          "17:00",
+          "01:00"
+        ]
+      ],
+      "thu": [
+        [
+          "17:00",
+          "01:00"
+        ]
+      ],
+      "fri": [
+        [
+          "17:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "17:00",
+          "02:00"
+        ]
+      ]
+    },
+    "phone": "(404) 577-0407",
+    "notes": "Gastropub with a deep beer list.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "octopus-bar",
+    "name": "Octopus Bar",
+    "type": "restaurant",
+    "cuisine": [
+      "southeast asian"
+    ],
+    "area": "East Atlanta Village",
+    "address": "560 Gresham Ave SE, Atlanta, GA 30316",
+    "lat": 33.73941,
+    "lng": -84.34566,
+    "hours": {
+      "tue": [
+        [
+          "22:30",
+          "02:30"
+        ]
+      ],
+      "wed": [
+        [
+          "22:30",
+          "02:30"
+        ]
+      ],
+      "thu": [
+        [
+          "22:30",
+          "02:30"
+        ]
+      ],
+      "fri": [
+        [
+          "22:30",
+          "02:30"
+        ]
+      ],
+      "sat": [
+        [
+          "22:30",
+          "02:30"
+        ]
+      ]
+    },
+    "phone": "(404) 627-9911",
+    "notes": "Doesn't open until 10:30 PM. Last food call around 2:15 AM.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "southern-feedstore",
+    "name": "Southern Feedstore",
+    "type": "restaurant",
+    "cuisine": [
+      "food hall"
+    ],
+    "area": "East Atlanta Village",
+    "address": "1245 Glenwood Ave SE, Atlanta, GA 30316",
+    "lat": 33.74004,
+    "lng": -84.34666,
+    "hours": {
+      "sun": [
+        [
+          "08:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "08:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "08:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "08:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "08:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "08:00",
+          "04:00"
+        ]
+      ],
+      "sat": [
+        [
+          "08:00",
+          "04:00"
+        ]
+      ]
+    },
+    "notes": "Food hall. Individual stalls keep their own hours and may close earlier.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "sister-louisas-church",
+    "name": "Sister Louisa's Church",
+    "type": "bar",
+    "area": "Edgewood",
+    "address": "466 Edgewood Ave SE, Atlanta, GA 30312",
+    "lat": 33.75448,
+    "lng": -84.37235,
+    "hours": {
+      "sun": [
+        [
+          "17:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "17:00",
+          "03:00"
+        ]
+      ],
+      "tue": [
+        [
+          "17:00",
+          "03:00"
+        ]
+      ],
+      "wed": [
+        [
+          "17:00",
+          "03:00"
+        ]
+      ],
+      "thu": [
+        [
+          "17:00",
+          "03:00"
+        ]
+      ],
+      "fri": [
+        [
+          "17:00",
+          "03:00"
+        ]
+      ],
+      "sat": [
+        [
+          "17:00",
+          "03:00"
+        ]
+      ]
+    },
+    "url": "https://www.sisterlouisaschurch.com",
+    "phone": "(404) 522-8275",
+    "notes": "Ping pong upstairs, church-kitsch art everywhere.",
+    "hoursSource": "https://www.sisterlouisaschurch.com",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "clermont-lounge",
+    "name": "Clermont Lounge",
+    "type": "club",
+    "area": "Poncey-Highland",
+    "address": "789 Ponce De Leon Ave NE, Atlanta, GA 30306",
+    "lat": 33.77347,
+    "lng": -84.3614,
+    "hours": {
+      "mon": [
+        [
+          "20:00",
+          "03:00"
+        ]
+      ],
+      "tue": [
+        [
+          "20:00",
+          "03:00"
+        ]
+      ],
+      "wed": [
+        [
+          "20:00",
+          "03:00"
+        ]
+      ],
+      "thu": [
+        [
+          "15:00",
+          "03:00"
+        ]
+      ],
+      "fri": [
+        [
+          "15:00",
+          "03:00"
+        ]
+      ],
+      "sat": [
+        [
+          "15:00",
+          "03:00"
+        ]
+      ]
+    },
+    "phone": "(404) 874-4783",
+    "notes": "Atlanta's oldest strip club, in the basement of Hotel Clermont. 21+.",
+    "hoursSource": "https://joinpearl.co/bars/atlanta-united-states-georgia/clermont-lounge",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "woodys-cheesesteaks",
+    "name": "Woody's CheeseSteaks",
+    "type": "restaurant",
+    "cuisine": [
+      "sandwiches",
+      "cheesesteaks"
+    ],
+    "area": "Midtown",
+    "address": "981 Monroe Dr NE, Atlanta, GA 30308",
+    "lat": 33.77936,
+    "lng": -84.36956,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ]
+    },
+    "phone": "(404) 876-1939",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "mamas-cocina-latina",
+    "name": "Mama's Cocina Latina",
+    "type": "restaurant",
+    "cuisine": [
+      "mexican"
+    ],
+    "area": "Lindbergh",
+    "address": "1958 Piedmont Rd NE, Atlanta, GA 30324",
+    "lat": 33.81097,
+    "lng": -84.36708,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 874-6152",
+    "notes": "Late-night drive-thru.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "ginos-ny-pizza-bar",
+    "name": "Gino's NY Pizza Bar",
+    "type": "restaurant",
+    "cuisine": [
+      "pizza"
+    ],
+    "area": "Lindbergh",
+    "address": "1740 Cheshire Bridge Rd NE, Atlanta, GA 30324",
+    "lat": 33.80827,
+    "lng": -84.36553,
+    "hours": {
+      "sun": [
+        [
+          "12:00",
+          "04:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "06:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "06:00"
+        ]
+      ]
+    },
+    "phone": "(404) 874-4466",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "mister-burger-buckhead",
+    "name": "Mister Burger",
+    "type": "restaurant",
+    "cuisine": [
+      "burgers"
+    ],
+    "area": "Buckhead",
+    "address": "308 Pharr Rd NE, Atlanta, GA 30305",
+    "lat": 33.83712,
+    "lng": -84.37744,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "03:30"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "03:30"
+        ]
+      ]
+    },
+    "notes": "Drive-thru.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "elbow-room",
+    "name": "Elbow Room",
+    "type": "bar",
+    "cuisine": [
+      "american"
+    ],
+    "area": "Buckhead",
+    "address": "248 Pharr Rd NE, Atlanta, GA 30305",
+    "lat": 33.83734,
+    "lng": -84.37924,
+    "hours": {
+      "sun": [
+        [
+          "12:30",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ]
+    },
+    "phone": "(404) 231-3308",
+    "notes": "Kitchen open until 2 AM.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "metro-diner-and-bar",
+    "name": "Metro Diner & Bar",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Downtown",
+    "address": "229 Peachtree St NE, Atlanta, GA 30303",
+    "lat": 33.75992,
+    "lng": -84.38648,
+    "hours": {
+      "sun": [
+        [
+          "06:00",
+          "04:00"
+        ]
+      ],
+      "mon": [
+        [
+          "06:00",
+          "04:00"
+        ]
+      ],
+      "tue": [
+        [
+          "06:00",
+          "04:00"
+        ]
+      ],
+      "wed": [
+        [
+          "06:00",
+          "04:00"
+        ]
+      ],
+      "thu": [
+        [
+          "06:00",
+          "04:00"
+        ]
+      ],
+      "fri": [
+        [
+          "06:00",
+          "05:30"
+        ]
+      ],
+      "sat": [
+        [
+          "06:00",
+          "05:30"
+        ]
+      ]
+    },
+    "phone": "(404) 577-1420",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "landmark-diner-downtown",
+    "name": "Landmark Diner",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast",
+      "greek"
+    ],
+    "area": "Downtown",
+    "address": "60 Luckie St NW, Atlanta, GA 30303",
+    "lat": 33.75661,
+    "lng": -84.38909,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 659-1756",
+    "notes": "Breakfast served around the clock.",
+    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "pho-24",
+    "name": "Pho 24",
+    "type": "restaurant",
+    "cuisine": [
+      "vietnamese"
+    ],
+    "area": "Buford Highway",
+    "address": "4646 Buford Hwy NE, Chamblee, GA 30341",
+    "lat": 33.87758,
+    "lng": -84.29335,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "hoursSource": "https://www.gayot.com/restaurants/pho-24-chamblee-ga-30341_7at131001.html",
+    "lastVerified": "2026-11-13"
+  }
+]

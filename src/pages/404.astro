@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+<Base title="Not found">
+  <article class="place">
+    <h1>Nothing open here</h1>
+    <p><a href={url()}>Back to all places</a></p>
+  </article>
+</Base>

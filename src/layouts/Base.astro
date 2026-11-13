@@ -1,0 +1,38 @@
+---
+import '../styles/global.css';
+import { url } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = 'Where to eat, drink and get things done late at night in Atlanta.' } = Astro.props;
+const fullTitle = title ? `${title} · Late Night ATL` : 'Late Night ATL';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href={url()}>Late Night <span>ATL</span></a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>Hours change. Call ahead or check the business's own site before you go.</p>
+      <p><a href="https://github.com/UUeird/lateNightAtl/issues/new">Suggest a place or a correction</a></p>
+    </footer>
+  </body>
+</html>

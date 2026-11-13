@@ -1,0 +1,91 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { TYPES } from '../../data/taxonomy';
+import { DAYS, DAY_NAMES, formatDay, is24h } from '../../lib/hours';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const places = await getCollection('places');
+  return places.map((place) => ({ params: { id: place.id }, props: { place } }));
+}
+
+interface Props {
+  place: CollectionEntry<'places'>;
+}
+const { place } = Astro.props;
+const p = place.data;
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.address)}`;
+const schemaDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': p.type === 'bar' || p.type === 'club' ? 'BarOrPub' : ['restaurant', 'diner', 'cafe'].includes(p.type) ? 'Restaurant' : 'LocalBusiness',
+  name: p.name,
+  address: p.address,
+  geo: { '@type': 'GeoCoordinates', latitude: p.lat, longitude: p.lng },
+  ...(p.url && { url: p.url }),
+  ...(p.phone && { telephone: p.phone }),
+  ...(p.cuisine.length && { servesCuisine: p.cuisine }),
+  openingHoursSpecification: DAYS.flatMap((d, i) =>
+    (p.hours[d] ?? []).map(([opens, closes]) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: schemaDay[i],
+      opens,
+      closes: closes === '24:00' ? '23:59' : closes,
+    })),
+  ),
+};
+const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+<Base title={p.name} description={`${p.name}: ${TYPES[p.type].toLowerCase()} in ${p.area}, Atlanta. Late-night hours, map and directions.`}>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+  <article class="place">
+    <p class="back"><a href={url()}>← All places</a></p>
+    <h1>{p.name}</h1>
+    <p class="meta">{[TYPES[p.type], ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
+    <p class="status big" id="status" data-hours={JSON.stringify(p.hours)}></p>
+
+    <div class="place-grid">
+      <section>
+        <h2>Hours</h2>
+        {is24h(p.hours) ? <p>Open 24 hours, every day.</p> : (
+          <table class="hours">
+            <tbody>
+              {DAYS.map((_, i) => (
+                <tr data-day={i}><th scope="row">{DAY_NAMES[i]}</th><td>{formatDay(p.hours, i)}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <p class="verified">Hours last checked {verified}{p.hoursSource && <> against <a href={p.hoursSource} rel="noopener">this source</a></>}.</p>
+
+        <h2>Details</h2>
+        <p>{p.address}<br /><a href={directions}>Directions</a></p>
+        {p.phone && <p><a href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>{p.phone}</a></p>}
+        {p.url && <p><a href={p.url} rel="noopener">Website</a></p>}
+        {p.notes && <p class="notes">{p.notes}</p>}
+      </section>
+      <div class="map map-small" id="map" data-lat={p.lat} data-lng={p.lng}></div>
+    </div>
+  </article>
+
+  <script>
+    import L from 'leaflet';
+    import { createMap, markerStyle } from '../../scripts/map';
+    import { atlantaNow, formatTime, openSpanAt } from '../../lib/hours';
+
+    const el = document.getElementById('map')!;
+    const ll: [number, number] = [Number(el.dataset.lat), Number(el.dataset.lng)];
+    const map = createMap(el, { center: ll, zoom: 15, scrollWheelZoom: false });
+    L.circleMarker(ll, markerStyle).addTo(map);
+
+    const status = document.getElementById('status')!;
+    const { day, minutes } = atlantaNow();
+    const span = openSpanAt(JSON.parse(status.dataset.hours!), day, minutes);
+    status.textContent = !span ? 'Closed now' : span[1] - span[0] >= 7 * 1440 ? 'Open 24 hours' : `Open now · closes ${formatTime(span[1])}`;
+    status.classList.toggle('closed', !span);
+    document.querySelector(`tr[data-day="${day}"]`)?.classList.add('today');
+  </script>
+</Base>
