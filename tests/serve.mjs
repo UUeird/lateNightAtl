@@ -6,7 +6,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 const root = resolve(process.argv[2] ?? 'dist');
 const port = Number(process.argv[3] ?? 4400);
 const types = {
-  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.json': 'application/json', '.ico': 'image/x-icon', '.woff2': 'font/woff2',
 };
 

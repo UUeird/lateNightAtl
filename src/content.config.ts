@@ -1,7 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { file } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { AREAS, TYPES } from './data/taxonomy';
+import { AREAS, TAGS, TYPES } from './data/taxonomy';
 
 // "HH:MM", 24-hour clock. "24:00" is allowed as a closing time.
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$|^24:00$/, 'Use 24-hour "HH:MM"');
@@ -23,6 +23,7 @@ const places = defineCollection({
       .union([typeKey, z.array(typeKey).min(1)])
       .transform((t) => (Array.isArray(t) ? t : [t])),
     cuisine: z.array(z.string().toLowerCase()).default([]),
+    tags: z.array(z.enum(Object.keys(TAGS) as [keyof typeof TAGS, ...(keyof typeof TAGS)[]])).default([]),
     area: z.enum(AREAS),
     address: z.string(),
     lat: z.number().min(33.4).max(34.2),
@@ -32,8 +33,9 @@ const places = defineCollection({
     phone: z.string().optional(),
     notes: z.string().optional(),
     lastVerified: z.iso.date(),
-    // Where the hours came from (official site, guide, etc.), so they can be re-checked.
-    hoursSource: z.url().optional(),
+    // Every page relied on for this entry (hours, tags, notes), so it can be re-checked.
+    // See "Sources" in the README for what counts.
+    sources: z.array(z.url()).default([]),
   }),
 });
 

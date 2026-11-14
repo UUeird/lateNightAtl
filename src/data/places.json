@@ -56,7 +56,9 @@
     },
     "phone": "(404) 577-0407",
     "notes": "Gastropub with a deep beer list.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -104,7 +106,9 @@
     },
     "phone": "(404) 627-9911",
     "notes": "Doesn't open until 10:30 PM. Last food call around 2:15 AM.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -163,7 +167,9 @@
       ]
     },
     "notes": "Food hall. Individual stalls keep their own hours and may close earlier.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -218,16 +224,22 @@
         ]
       ]
     },
-    "url": "https://www.sisterlouisaschurch.com",
     "phone": "(404) 522-8275",
-    "notes": "Ping pong upstairs, church-kitsch art everywhere.",
-    "hoursSource": "https://www.sisterlouisaschurch.com",
+    "notes": "Ping pong upstairs, church-kitsch art everywhere. One listing says it's closed Sundays, so call ahead then. (Its old website domain now belongs to an unrelated site.)",
+    "sources": [
+      "https://sites.google.com/view/atlantaundergroundpingpong/atlpingpongtables/churchitsabar",
+      "https://roadtrippers.com/us/atlanta-ga/food-drink/sister-louisas-church-of-the-living-room-ping-pong-emporium"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
     "id": "clermont-lounge",
     "name": "Clermont Lounge",
     "type": "club",
+    "tags": [
+      "cover",
+      "21-plus"
+    ],
     "area": "Poncey-Highland",
     "address": "789 Ponce De Leon Ave NE, Atlanta, GA 30306",
     "lat": 33.77347,
@@ -271,8 +283,10 @@
       ]
     },
     "phone": "(404) 874-4783",
-    "notes": "Atlanta's oldest strip club, in the basement of Hotel Clermont. 21+.",
-    "hoursSource": "https://joinpearl.co/bars/atlanta-united-states-georgia/clermont-lounge",
+    "notes": "Atlanta's oldest strip club, in the basement of Hotel Clermont. The cover charge changes night to night.",
+    "sources": [
+      "https://joinpearl.co/bars/atlanta-united-states-georgia/clermont-lounge"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -332,7 +346,9 @@
       ]
     },
     "phone": "(404) 876-1939",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -392,7 +408,9 @@
     },
     "phone": "(404) 874-6152",
     "notes": "Late-night drive-thru.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -451,7 +469,9 @@
       ]
     },
     "phone": "(404) 874-4466",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -510,7 +530,9 @@
       ]
     },
     "notes": "Drive-thru.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -570,7 +592,9 @@
     },
     "phone": "(404) 231-3308",
     "notes": "Kitchen open until 2 AM.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -631,7 +655,9 @@
       ]
     },
     "phone": "(404) 577-1420",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -694,7 +720,9 @@
     },
     "phone": "(404) 659-1756",
     "notes": "Breakfast served around the clock.",
-    "hoursSource": "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants",
+    "sources": [
+      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -752,7 +780,9 @@
         ]
       ]
     },
-    "hoursSource": "https://www.gayot.com/restaurants/pho-24-chamblee-ga-30341_7at131001.html",
+    "sources": [
+      "https://www.gayot.com/restaurants/pho-24-chamblee-ga-30341_7at131001.html"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -761,6 +791,9 @@
     "type": "club",
     "cuisine": [
       "american"
+    ],
+    "tags": [
+      "21-plus"
     ],
     "area": "Buckhead",
     "address": "3771 Roswell Rd NE, Atlanta, GA 30342",
@@ -812,8 +845,12 @@
     },
     "url": "https://www.johnnyshideaway.com",
     "phone": "(404) 233-8026",
-    "notes": "Dance club open since 1979, with Sinatra-era memorabilia and pub food.",
-    "hoursSource": "https://www.johnnyshideaway.com",
+    "notes": "Dance club open since 1979, with Sinatra-era memorabilia and pub food. Must be 21 with ID. Some listings mention a cover on weekend nights, but their site doesn't, so call ahead if it matters. No digital wallet payments.",
+    "sources": [
+      "https://www.johnnyshideaway.com",
+      "https://www.atly.com/location/Johnny's-Hideaway",
+      "https://atlanta.com/articles/georgia/johnnys-hideaway-atlanta-georgia"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -852,7 +889,9 @@
     },
     "url": "https://www.darkhorseatlanta.com",
     "phone": "(404) 873-3607",
-    "hoursSource": "https://www.darkhorseatlanta.com",
+    "sources": [
+      "https://www.darkhorseatlanta.com"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -914,7 +953,9 @@
     },
     "phone": "(404) 872-0028",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1885/",
+    "sources": [
+      "https://locations.wafflehouse.com/atlanta-ga-1885/"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -976,7 +1017,9 @@
     },
     "phone": "(404) 522-9873",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1996/",
+    "sources": [
+      "https://locations.wafflehouse.com/atlanta-ga-1996/"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1038,7 +1081,9 @@
     },
     "phone": "(404) 219-9057",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-2209/",
+    "sources": [
+      "https://locations.wafflehouse.com/atlanta-ga-2209/"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1100,7 +1145,9 @@
     },
     "phone": "(404) 351-0172",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1172/",
+    "sources": [
+      "https://locations.wafflehouse.com/atlanta-ga-1172/"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1162,7 +1209,9 @@
     },
     "phone": "(404) 634-9414",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-412/",
+    "sources": [
+      "https://locations.wafflehouse.com/atlanta-ga-412/"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1224,7 +1273,9 @@
     },
     "phone": "(404) 231-0023",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1058/",
+    "sources": [
+      "https://locations.wafflehouse.com/atlanta-ga-1058/"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1284,7 +1335,9 @@
     },
     "phone": "(404) 373-4534",
     "notes": "The store is open 24 hours; the pharmacy counter closes earlier, so call ahead for prescriptions.",
-    "hoursSource": "https://www.cvs.com/store-locator/atlanta-ga-pharmacies/1554-n-decatur-road-ne-atlanta-ga-30307/storeid=4720",
+    "sources": [
+      "https://www.cvs.com/store-locator/atlanta-ga-pharmacies/1554-n-decatur-road-ne-atlanta-ga-30307/storeid=4720"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1343,7 +1396,9 @@
       ]
     },
     "notes": "The store is open 24 hours; the pharmacy counter closes earlier, so call ahead for prescriptions.",
-    "hoursSource": "https://www.cvs.com/store-locator/decatur-ga-pharmacies/225-west-ponce-deleon-avenue-decatur-ga-30030/storeid=2367",
+    "sources": [
+      "https://www.cvs.com/store-locator/decatur-ga-pharmacies/225-west-ponce-deleon-avenue-decatur-ga-30030/storeid=2367"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1403,7 +1458,9 @@
     },
     "phone": "(404) 378-0504",
     "notes": "Dive bar by the train tracks with a late kitchen. No official website; these hours come from listings, so call ahead.",
-    "hoursSource": "https://creativeloafing.com/business-2780-trackside-tavern",
+    "sources": [
+      "https://creativeloafing.com/business-2780-trackside-tavern"
+    ],
     "lastVerified": "2026-11-13"
   },
   {
@@ -1465,7 +1522,64 @@
     },
     "phone": "(404) 294-8758",
     "notes": "Open 24 hours, every day.",
-    "hoursSource": "https://locations.wafflehouse.com/decatur-ga-1000/",
+    "sources": [
+      "https://locations.wafflehouse.com/decatur-ga-1000/"
+    ],
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "anansi",
+    "name": "Anansi Cocktail Lounge",
+    "type": "bar",
+    "area": "Avondale Estates",
+    "address": "2700 E College Ave, Suite 4000, Avondale Estates, GA 30030",
+    "lat": 33.77508,
+    "lng": -84.27843,
+    "hours": {
+      "mon": [
+        [
+          "18:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "18:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "18:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "18:00",
+          "01:00"
+        ]
+      ],
+      "fri": [
+        [
+          "18:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "18:00",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://www.anansiatl.com/",
+    "phone": "(404) 997-8713",
+    "notes": "Cocktail lounge under the Willis apartments. Happy hour 6-8 PM Monday-Saturday. Closed Sunday.",
+    "sources": [
+      "https://www.anansiatl.com/",
+      "https://www.ajc.com/food-and-dining/2026/07/12-essential-atlanta-cocktail-bars-you-need-to-try/"
+    ],
     "lastVerified": "2026-11-13"
   }
 ]

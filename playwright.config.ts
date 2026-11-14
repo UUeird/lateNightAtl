@@ -12,7 +12,9 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
   // Screenshots differ slightly by OS (fonts), so baselines are kept per platform.
   snapshotPathTemplate: '{testDir}/__screenshots__/{platform}/{projectName}/{arg}{ext}',
-  expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' } },
+  // threshold: how different a pixel's color must be to count. The default (0.2) misses
+  // changes on this dark palette, e.g. a whole toolbar redesign; 0.05 catches them.
+  expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01, threshold: 0.05, animations: 'disabled' } },
   use: {
     baseURL: `http://localhost:${PORT}`,
     timezoneId: 'America/New_York',
@@ -21,8 +23,9 @@ export default defineConfig({
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
-    { name: 'phone', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
-    { name: 'small-phone', use: { ...devices['iPhone SE'], browserName: 'chromium' } },
+    // Phones skip tests tagged @any-screen (see ANY in fixtures.ts): desktop covers them.
+    { name: 'phone', grepInvert: /@any-screen/, use: { ...devices['iPhone 13'], browserName: 'chromium' } },
+    { name: 'small-phone', grepInvert: /@any-screen/, use: { ...devices['iPhone SE'], browserName: 'chromium' } },
   ],
   webServer: {
     command: `ASTRO_OUT_DIR=./dist-test PLACES_FILE=tests/fixtures/places.json npx astro build && node tests/serve.mjs dist-test ${PORT}`,

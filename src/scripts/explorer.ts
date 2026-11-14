@@ -1,6 +1,9 @@
-import L from 'leaflet';
-import { createMap, markerStyle } from './map';
-import { TYPE_ALIASES } from '../data/taxonomy';
+import type { Marker, LngLatBounds } from 'maplibre-gl';
+import { DEFAULT_OFF_TYPES, TYPE_ALIASES, type TypeKey } from '../data/taxonomy';
+import { milesBetween, type LngLat } from '../lib/geo';
+import { directionsFor } from '../lib/directions';
+import { formatMiles, locationErrorMessage } from '../lib/location';
+import { attachScrollUi } from './scroll-ui';
 import { atlantaNow, closesLabel, openSpanAt, tonight, type Hours } from '../lib/hours';
 
 interface Place {
@@ -8,40 +11,34 @@ interface Place {
   name: string;
   types: string[];
   typeLabel: string;
+  /** Tag labels, e.g. "Cover charge". */
+  tags: string[];
   cuisine: string[];
   area: string;
   lat: number;
   lng: number;
   hours: Hours;
   url: string;
-  directions: string;
+  address: string;
 }
 
-const METERS_PER_MILE = 1609.344;
-const ATL_CENTER = L.latLng(33.749, -84.388);
-const formatMiles = (mi: number) => (mi < 0.1 ? '< 0.1 mi' : `${mi < 10 ? mi.toFixed(1) : Math.round(mi)} mi`);
+const ATL_CENTER: LngLat = [-84.388, 33.749];
 
-const FIT_OPTS: L.FitBoundsOptions = { padding: [40, 40], maxZoom: 15 };
-
-/** Where to turn location on, for the visitor's device. */
-function locationSettingsHint(): string {
-  const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod/.test(ua)) return 'On iPhone: Settings → Privacy & Security → Location Services → turn it on, and set your browser to “While Using”.';
-  if (/Android/.test(ua)) return 'On Android: turn on Location in Quick Settings, and allow it for your browser.';
-  if (/Mac/.test(ua)) return 'On a Mac: System Settings → Privacy & Security → Location Services → turn it on for your browser, then restart the browser.';
-  if (/Windows/.test(ua)) return 'On Windows: Settings → Privacy & security → Location → turn it on, and allow apps to use it.';
-  return 'Check that location is turned on for your browser in your device settings.';
-}
-
-function locationErrorMessage(code: number): string {
-  if (code === 1) return 'Location permission was denied. To use Near me, allow location for this site in your browser’s site settings.';
-  if (code === 3) return 'Finding your location took too long. Try again, ideally with Wi-Fi on.';
-  return `Your device couldn’t find your location. ${locationSettingsHint()}`;
-}
+const FIT_OPTS = { padding: 40, maxZoom: 14, duration: 400 };
+/** Phones: keep dots out from under the map buttons (top right) and the search box (bottom). */
+const PHONE_FIT_PADDING = { top: 40, right: 64, bottom: 92, left: 32 };
+const PLACE_ZOOM = 14;
 
 const DEFAULTS: Record<string, string> = { night: 'tonight', at: '1260', q: '' };
 /** Multi-select filters behind the "Filters" button. Several values in one filter match any of them. */
-const EXTRA_KEYS = ['area', 'type', 'cuisine'] as const;
+const EXTRA_KEYS = ['type', 'cuisine'] as const;
+/** Where a visitor's filter choices are remembered between visits (this browser only). */
+const PREFS_KEY = 'lateNightAtl:filters';
+/** Only what kind of place: which night and what time start fresh each visit. */
+interface Prefs {
+  type: string[];
+  cuisine: string[];
+}
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -56,6 +53,9 @@ const isPhoneQuery = matchMedia('(max-width: 800px)');
 function initStickyToolbar(phone: MediaQueryList) {
   const toolbar = document.getElementById('toolbar')!;
   const resultsBar = toolbar.querySelector<HTMLElement>('.results-bar')!;
+  // Only the filters hold the rows open while focused (typing a search, picking a time);
+  // the List/Map buttons below them shouldn't, or tapping List would pin them for good.
+  const filters = toolbar.querySelector<HTMLElement>('#filters')!;
   const root = document.documentElement;
 
   const measure = () => {
@@ -75,12 +75,12 @@ function initStickyToolbar(phone: MediaQueryList) {
       if (Math.abs(dy) < 8) return;
       lastY = y;
       const pastTop = y > toolbar.offsetHeight;
-      if (dy > 0 && pastTop && !toolbar.contains(document.activeElement)) setCollapsed(true);
+      if (dy > 0 && pastTop && !filters.contains(document.activeElement)) setCollapsed(true);
       else if (dy < 0 || !pastTop) setCollapsed(false);
     },
     { passive: true },
   );
-  toolbar.addEventListener('focusin', () => setCollapsed(false));
+  filters.addEventListener('focusin', () => setCollapsed(false));
   phone.addEventListener('change', () => setCollapsed(false));
   return toolbar;
 }
@@ -91,45 +91,79 @@ export function initExplorer() {
   const list = document.getElementById('list')!;
   const count = document.getElementById('count')!;
   const empty = document.getElementById('empty')!;
+  const listNote = document.getElementById('list-note')!;
+  // Custom fading scrollbar and edge fades for the list (desktop, where it scrolls on its own).
+  const refreshScrollUi = attachScrollUi(list);
   const atSelect = form.elements.namedItem('at') as HTMLSelectElement;
+  const nightChip = document.getElementById('night-chip')!;
+  const atChip = document.getElementById('at-chip')!;
   const cards = new Map(places.map((p) => [p.id, list.querySelector<HTMLElement>(`[data-id="${p.id}"]`)!]));
 
-  const map = createMap('map');
-  const layer = L.layerGroup().addTo(map);
-  const markers = new Map(
-    places.map((p) => [
-      p.id,
-      L.circleMarker([p.lat, p.lng], markerStyle).bindPopup(''),
-    ]),
-  );
+  type Result = { p: Place; end: number; label: string; miles: number };
+  /** The latest results, for the map to draw whenever it's ready. */
+  let latest: Result[] = [];
+
+  /**
+   * The map loads after the list: MapLibre is most of the page's code, so it comes in its
+   * own chunk, fetched once the list and filters already work. Until then, map updates
+   * are skipped; when it arrives it draws the current results.
+   */
+  const mapReady = import('./map').then(({ createMap, dot, locateControl, maplibregl, placeLabels, placeMarker }) => {
+    const map = createMap('map');
+    // "Near me" lives on the map, under + and −, as on place pages.
+    const locate = locateControl(toggleNear, 'Near me');
+    locate.button.id = 'near-me';
+    map.addControl(locate.control, 'top-left');
+    setLocateState = locate.setState;
+    setLocateState(nearState);
+    const markers = new Map(
+      places.map((p) => [
+        p.id,
+        placeMarker([p.lng, p.lat], p.name).setPopup(new maplibregl.Popup({ offset: 14, maxWidth: '320px', focusAfterOpen: false })),
+      ]),
+    );
+    const youEl = dot('you');
+    youEl.title = 'You are here';
+    const view = {
+      map,
+      markers,
+      shown: new Set<Marker>(),
+      setLabels: placeLabels(map, isPhoneQuery),
+      youMarker: new maplibregl.Marker({ element: youEl, anchor: 'center' }).setLngLat(ATL_CENTER),
+      bounds: (pts: LngLat[]) => pts.reduce((b, pt) => b.extend(pt), new maplibregl.LngLatBounds(pts[0], pts[0])),
+    };
+    mv = view;
+    drawMap(true);
+    map.once('idle', () => performance.mark('map-ready'));
+    return view;
+  });
+  let mv: Awaited<typeof mapReady> | null = null;
 
   // "Near me": the browser's geolocation, only on request. The location stays in the page.
-  let here: L.LatLng | null = null;
-  const youMarker = L.circleMarker([0, 0], { radius: 7, color: '#fff', weight: 3, fillColor: '#4ea1ff', fillOpacity: 1 })
-    .bindTooltip('You are here');
-  const nearBtn = document.getElementById('near-me') as HTMLButtonElement;
+  let here: LngLat | null = null;
   const withinSel = form.elements.namedItem('within') as HTMLSelectElement;
   const geoMsg = document.getElementById('geo-msg')!;
   const say = (text = '') => {
     geoMsg.textContent = text;
     geoMsg.hidden = !text;
   };
-  const nearText = nearBtn.querySelector('.near-text')!;
   const withinChip = document.getElementById('within-chip')!;
-  const setNear = (on: boolean) => {
-    nearBtn.setAttribute('aria-pressed', String(on));
-    nearText.textContent = 'Near me';
-    nearBtn.disabled = false;
+  // The map's locate button arrives with the map; until then its state just waits here.
+  let nearState: 'idle' | 'busy' | 'on' = 'idle';
+  let setLocateState: (state: typeof nearState) => void = () => {};
+  const setNear = (state: typeof nearState) => {
+    nearState = state;
+    setLocateState(state);
+    const on = state === 'on';
     withinSel.disabled = !on;
     withinChip.hidden = !on;
     if (!on) withinSel.value = '';
   };
 
-  nearBtn.addEventListener('click', () => {
+  function toggleNear() {
     if (here) {
       here = null;
-      youMarker.remove();
-      setNear(false);
+      setNear('idle');
       say();
       update(true);
       return;
@@ -138,67 +172,127 @@ export function initExplorer() {
       say('Location isn’t available here. It needs a secure (https) connection and a browser that supports it.');
       return;
     }
-    nearBtn.disabled = true;
-    nearText.textContent = 'Locating…';
+    setNear('busy');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        here = L.latLng(pos.coords.latitude, pos.coords.longitude);
-        youMarker.setLatLng(here).addTo(map);
-        setNear(true);
-        const miles = here.distanceTo(ATL_CENTER) / METERS_PER_MILE;
+        here = [pos.coords.longitude, pos.coords.latitude];
+        setNear('on');
+        const miles = milesBetween(here, ATL_CENTER);
         say(miles > 40 ? `You look to be about ${Math.round(miles)} miles from Atlanta. Distances are from where you are now.` : '');
         update(true);
       },
       (err) => {
-        setNear(false);
+        setNear('idle');
         say(locationErrorMessage(err.code));
       },
       { enableHighAccuracy: false, timeout: 15_000, maximumAge: 300_000 },
     );
-  });
-
-  // Restore filters from the URL so filtered views can be shared.
-  const params = new URLSearchParams(location.search);
-  const checkboxes = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[type=checkbox][name="${name}"]`)];
-  for (const [name, value] of params) {
-    if ((EXTRA_KEYS as readonly string[]).includes(name)) {
-      const v = name === 'type' ? (TYPE_ALIASES[value] ?? value) : value;
-      for (const box of checkboxes(name)) if (box.value === v) box.checked = true;
-      continue;
-    }
-    const el = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
-    if (el) el.value = value;
   }
 
-  let fitTo: L.LatLngBounds | null = null;
-  const badge = document.getElementById('filter-badge')!;
-  const extraFilters = document.getElementById('extra-filters')!;
-  const moreBtn = document.getElementById('more-filters') as HTMLButtonElement;
+  // Where the filters start. A link with filters in it (a shared view) shows exactly that.
+  // Otherwise tonight at 9 PM, with the visitor's own last Type and Cuisine choices,
+  // remembered in this browser, or by default any cuisine and every type but errands
+  // (grocery, pharmacy).
+  const params = new URLSearchParams(location.search);
+  const checkboxes = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[type=checkbox][name="${name}"]`)];
+  const typeBoxes = checkboxes('type');
+  const defaultTypes = typeBoxes.map((b) => b.value).filter((v) => !DEFAULT_OFF_TYPES.includes(v as TypeKey));
+
+  const savedPrefs = (): Partial<Prefs> => {
+    try {
+      const v: unknown = JSON.parse(localStorage.getItem(PREFS_KEY) ?? 'null');
+      return v && typeof v === 'object' ? (v as Partial<Prefs>) : {};
+    } catch {
+      return {};
+    }
+  };
+  const savePrefs = () => {
+    const prefs: Prefs = {
+      type: typeBoxes.filter((b) => b.checked).map((b) => b.value),
+      cuisine: checkboxes('cuisine').filter((b) => b.checked).map((b) => b.value),
+    };
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch {
+      // Storage blocked (private mode, settings): the choices last for this visit only.
+    }
+  };
+  const tick = (name: string, values: unknown) => {
+    if (!Array.isArray(values)) return false;
+    for (const box of checkboxes(name)) box.checked = values.includes(box.value);
+    return true;
+  };
+
+  const shared = [...params.keys()].some((k) => k in DEFAULTS || (EXTRA_KEYS as readonly string[]).includes(k));
+  if (shared) {
+    for (const box of typeBoxes) box.checked = !params.has('type') && defaultTypes.includes(box.value);
+    for (const [name, value] of params) {
+      if ((EXTRA_KEYS as readonly string[]).includes(name)) {
+        const v = name === 'type' ? (TYPE_ALIASES[value] ?? value) : value;
+        for (const box of checkboxes(name)) if (box.value === v) box.checked = true;
+        continue;
+      }
+      const el = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
+      if (el) el.value = value;
+    }
+  } else {
+    const saved = savedPrefs();
+    if (!tick('type', saved.type)) tick('type', defaultTypes);
+    tick('cuisine', saved.cuisine);
+  }
+
+  let fitTo: LngLatBounds | null = null;
   const clearBtn = document.getElementById('clear-filters') as HTMLButtonElement;
   const menus = [...form.querySelectorAll<HTMLDetailsElement>('.chip-menu')];
-  const showExtras = (open: boolean) => {
-    extraFilters.hidden = !open;
-    moreBtn.setAttribute('aria-expanded', String(open));
-  };
-  // Open the extra filters if a shared link uses them.
-  if (EXTRA_KEYS.some((k) => params.get(k))) showExtras(true);
 
   const popupHtml = (p: Place, status: string) =>
     `<a class="popup-name" href="${p.url}">${escapeHtml(p.name)}</a>` +
     `<div class="popup-meta">${escapeHtml(p.typeLabel)} · ${escapeHtml(p.area)}</div>` +
-    `<div class="popup-status">${escapeHtml(status)}</div>` +
+    `<div class="popup-status">${escapeHtml(status)}${p.tags.map((t) => ` <span class="tag">${escapeHtml(t)}</span>`).join('')}</div>` +
     `<div class="popup-actions">` +
-    `<a class="btn btn-primary" href="${p.directions}">Directions</a>` +
+    `<a class="btn btn-primary" href="${escapeHtml(directionsFor(p.address).main.url)}">Directions</a>` +
     `<a class="btn" href="${p.url}">Details</a>` +
     `</div>`;
+
+  /** Frame the current results. Skipped while the map is hidden (phones, list view). */
+  let framed = false;
+  function refit() {
+    if (!mv || !fitTo || !mv.map.getContainer().offsetWidth) return;
+    const padding = isPhoneQuery.matches ? PHONE_FIT_PADDING : FIT_OPTS.padding;
+    mv.map.fitBounds(fitTo, { ...FIT_OPTS, padding, duration: framed ? FIT_OPTS.duration : 0 }); // no fly-in on first view
+    framed = true;
+  }
+
+  /** Bring the map in line with the latest results (no-op until the map has loaded). */
+  function drawMap(fit: boolean) {
+    if (!mv) return;
+    for (const m of mv.shown) m.remove();
+    mv.shown.clear();
+    for (const { p, label } of latest) {
+      const m = mv.markers.get(p.id)!;
+      m.getPopup()!.setHTML(popupHtml(p, label));
+      mv.shown.add(m.addTo(mv.map));
+    }
+    if (here) mv.youMarker.setLngLat(here).addTo(mv.map);
+    else mv.youMarker.remove();
+    // Frame the user and the closest few results, or all results.
+    const pts: LngLat[] = latest.slice(0, here ? 5 : undefined).map(({ p }) => [p.lng, p.lat]);
+    if (here) pts.unshift(here);
+    fitTo = pts.length ? mv.bounds(pts) : null;
+    // Names for the results, best first, so they win when two compete for space.
+    mv.setLabels(latest.map(({ p }) => ({ name: p.name, at: [p.lng, p.lat] })));
+    if (fit) refit();
+  }
 
   function update(fit: boolean) {
     const data = new FormData(form);
     const f = Object.fromEntries(data) as Record<string, string>;
     const picked = Object.fromEntries(EXTRA_KEYS.map((k) => [k, new Set(data.getAll(k) as string[])]));
-    const { area, type, cuisine } = picked;
+    const { type, cuisine } = picked;
     const live = f.night === 'now';
     atSelect.disabled = live;
+    nightChip.classList.toggle('is-set', f.night !== 'tonight');
+    atChip.classList.toggle('is-set', !live && f.at !== DEFAULTS.at);
     const now = atlantaNow();
     const night = live ? now.day : f.night === 'tonight' ? tonight() : Number(f.night);
     const t = live ? now.minutes : Number(f.at);
@@ -206,92 +300,107 @@ export function initExplorer() {
 
     const within = Number(f.within) || Infinity;
 
-    const results: { p: Place; end: number; label: string; miles: number }[] = [];
+    const results: Result[] = [];
     for (const p of places) {
       const span = openSpanAt(p.hours, night, t);
-      const miles = here ? here.distanceTo([p.lat, p.lng]) / METERS_PER_MILE : NaN;
+      const miles = here ? milesBetween(here, [p.lng, p.lat]) : NaN;
       const ok =
         span &&
         !(miles > within) &&
-        (!area.size || area.has(p.area)) &&
         (!type.size || p.types.some((t) => type.has(t))) &&
         (!cuisine.size || p.cuisine.some((c) => cuisine.has(c))) &&
-        (!q || [p.name, p.area, p.typeLabel, ...p.cuisine].join(' ').toLowerCase().includes(q));
+        (!q || [p.name, p.area, p.typeLabel, ...p.cuisine, ...p.tags].join(' ').toLowerCase().includes(q));
       cards.get(p.id)!.hidden = !ok;
       if (ok) results.push({ p, end: span[1], label: closesLabel(span[1], span[0]), miles });
     }
 
     // Nearest first when location is on, otherwise latest-closing first.
     results.sort((a, b) => (here ? a.miles - b.miles : b.end - a.end) || a.p.name.localeCompare(b.p.name));
-    layer.clearLayers();
     for (const { p, label, miles } of results) {
       const card = cards.get(p.id)!;
       card.querySelector('[data-status]')!.textContent = label;
       card.querySelector('[data-distance]')!.textContent = here ? formatMiles(miles) : '';
       list.appendChild(card);
-      layer.addLayer(markers.get(p.id)!.setPopupContent(popupHtml(p, label)));
     }
 
+    list.appendChild(listNote); // keep the note after the re-sorted cards
+    refreshScrollUi();
+    listNote.hidden = !results.length;
     count.textContent = `${results.length} ${results.length === 1 ? 'place' : 'places'}`;
     empty.hidden = results.length > 0;
 
-    // Frame the user and the closest few results, or all results.
-    const pts = here ? [here, ...results.slice(0, 5).map(({ p }) => L.latLng(p.lat, p.lng))] : results.map(({ p }) => L.latLng(p.lat, p.lng));
-    fitTo = pts.length ? L.latLngBounds(pts) : null;
-    if (fit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
+    latest = results;
+    drawMap(fit);
 
-    // Show how many of the tucked-away filters are active.
+    // Menu labels and active states; "Clear filters" (desktop) once any is in use.
     const extras = EXTRA_KEYS.reduce((n, k) => n + picked[k].size, 0);
+    withinChip.classList.toggle('is-set', !!f.within);
     for (const menu of menus) {
       const on = checkboxes(menu.dataset.filter!).filter((b) => b.checked);
       menu.querySelector('.menu-text')!.textContent =
         on.length === 0 ? menu.dataset.all! : on.length === 1 ? on[0].parentElement!.textContent! : `${on.length} ${menu.dataset.plural}`;
       menu.classList.toggle('is-active', on.length > 0);
     }
-    badge.textContent = String(extras);
-    badge.hidden = !extras;
     clearBtn.hidden = !extras;
 
     // Keep the URL in sync, omitting defaults.
     const out = new URLSearchParams();
     // Location-based settings stay out of shared links.
     for (const [k, v] of Object.entries(f)) if (k in DEFAULTS && v !== DEFAULTS[k] && !(k === 'at' && live)) out.set(k, v);
-    for (const k of EXTRA_KEYS) for (const v of picked[k]) out.append(k, v);
+    for (const k of EXTRA_KEYS) {
+      if (k === 'type') {
+        // Types only when they differ from the default; "all" when none are ticked.
+        const same = picked.type.size === defaultTypes.length && defaultTypes.every((v) => picked.type.has(v));
+        if (same) continue;
+        if (!picked.type.size) out.append('type', 'all');
+      }
+      for (const v of picked[k]) out.append(k, v);
+    }
     const qs = out.toString();
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
   }
 
   const toolbar = initStickyToolbar(isPhoneQuery);
 
+
   // Phones show either the list or the map (see .explorer[data-view] in CSS).
   const explorer = document.getElementById('explorer')!;
   const viewBtns = document.querySelectorAll<HTMLButtonElement>('.view-toggle [data-view]');
   const isPhone = () => isPhoneQuery.matches;
-  function showView(view: 'list' | 'map', refit = true) {
+  function showView(view: 'list' | 'map', refitMap = true) {
     explorer.dataset.view = view;
     viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
     if (view === 'map') {
       // The map may have been laid out while hidden.
-      map.invalidateSize();
-      if (refit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
+      mv?.map.resize();
+      if (refitMap) refit();
     }
     window.scrollTo({ top: Math.min(window.scrollY, explorer.offsetTop - toolbar.offsetHeight - 12) });
   }
   viewBtns.forEach((b) => b.addEventListener('click', () => showView(b.dataset.view as 'list' | 'map')));
 
-  list.addEventListener('click', (e) => {
+  list.addEventListener('click', async (e) => {
     const id = (e.target as HTMLElement).closest<HTMLElement>('[data-locate]')?.dataset.locate;
     if (!id) return;
-    const m = markers.get(id)!;
     if (isPhone()) showView('map', false);
-    map.setView(m.getLatLng(), Math.max(map.getZoom(), 15));
-    m.openPopup();
+    const { map, markers } = await mapReady; // usually long since loaded
+    const m = markers.get(id)!;
+    map.jumpTo({ center: m.getLngLat(), zoom: Math.max(map.getZoom(), PLACE_ZOOM) });
+    if (!m.getPopup()!.isOpen()) m.togglePopup();
     if (!isPhone()) document.getElementById('map')!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
-  moreBtn.addEventListener('click', () => showExtras(moreBtn.getAttribute('aria-expanded') !== 'true'));
+  // Each menu's own Clear.
+  for (const menu of menus) {
+    menu.querySelector('.menu-clear')!.addEventListener('click', () => {
+      for (const box of checkboxes(menu.dataset.filter!)) box.checked = false;
+      savePrefs();
+      update(true);
+    });
+  }
   clearBtn.addEventListener('click', () => {
     for (const k of EXTRA_KEYS) for (const box of checkboxes(k)) box.checked = false;
+    savePrefs();
     update(true);
   });
 
@@ -314,6 +423,7 @@ export function initExplorer() {
 
   let timer: number | undefined;
   form.addEventListener('input', (e) => {
+    if (['type', 'cuisine'].includes((e.target as HTMLInputElement).name)) savePrefs();
     const isText = (e.target as HTMLElement).matches('input[type=search]');
     clearTimeout(timer);
     timer = window.setTimeout(() => update(true), isText ? 150 : 0);
@@ -326,4 +436,7 @@ export function initExplorer() {
   }, 60_000);
 
   update(true);
+  // Load-time marks (visible in the browser's Performance panel): list usable; the map's
+  // 'map-ready' is set when it first finishes drawing.
+  performance.mark('list-ready');
 }

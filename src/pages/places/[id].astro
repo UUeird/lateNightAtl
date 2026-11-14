@@ -1,10 +1,10 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { typeLabel } from '../../data/taxonomy';
+import { TAGS, typeLabel } from '../../data/taxonomy';
 import { DAYS, DAY_NAMES, formatDay, is24h } from '../../lib/hours';
 import { url } from '../../lib/url';
-import { directionsUrl } from '../../lib/directions';
+import { appleDirectionsUrl, googleDirectionsUrl } from '../../lib/directions';
 
 export async function getStaticPaths() {
   const places = await getCollection('places');
@@ -17,7 +17,7 @@ interface Props {
 const { place } = Astro.props;
 const p = place.data;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const directions = directionsUrl(p.address);
+const directions = googleDirectionsUrl(p.address); // switched to Apple Maps on Apple devices, below
 // The state and ZIP add little on a button: "229 Peachtree St NE, Atlanta".
 const shortAddress = p.address.replace(/,\s*GA\s+\d{5}(-\d{4})?$/, '');
 const schemaDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -40,28 +40,45 @@ const jsonLd = {
     })),
   ),
 };
+/** A source's site, for display: "ajc.com" rather than the full address. */
+const sourceHost = (u: string) => new URL(u).hostname.replace(/^www\./, '');
 const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 ---
-<Base title={p.name} description={`${p.name}: ${typeLabel(p.type).toLowerCase()} in ${p.area}, Atlanta. Late-night hours, map and directions.`}>
+<Base hasMap title={p.name} description={`${p.name}: ${typeLabel(p.type).toLowerCase()} in ${p.area}, Atlanta. Late-night hours, map and directions.`}>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <article class="place">
-    <p class="back"><a href={url()}>← All places</a></p>
-    <h1>{p.name}</h1>
-    <p class="meta">{[typeLabel(p.type), ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
-    <p class="status big" id="status" data-hours={JSON.stringify(p.hours)}></p>
-    <div class="actions">
-      <a class="btn btn-primary btn-detail" href={directions}>
-        <span>Directions</span><span class="btn-sub">{shortAddress}</span>
-      </a>
-      {p.phone && (
-        <a class="btn btn-detail" href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>
-          <span>Call</span><span class="btn-sub">{p.phone}</span>
-        </a>
+    <div class="place-info">
+      <p class="back"><a href={url()}>← All places</a></p>
+      <h1>{p.name}</h1>
+      <p class="meta">{[typeLabel(p.type), ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
+      {p.tags.length > 0 && (
+        <ul class="tags" aria-label="Good to know">
+          {p.tags.map((t) => <li class="tag">{TAGS[t]}</li>)}
+        </ul>
       )}
-      {p.url && <a class="btn" href={p.url} rel="noopener">Website</a>}
-    </div>
+      <p class="status big" id="status-line">
+        <span id="status" data-hours={JSON.stringify(p.hours)}></span><span class="away" id="away" hidden></span>
+      </p>
+      <div class="route" id="route" hidden>
+        <div class="route-modes" role="group" aria-label="Route from you">
+          <button type="button" data-mode="auto" aria-pressed="false">Drive</button>
+          <button type="button" data-mode="pedestrian" aria-pressed="false">Walk</button>
+        </div>
+        <span class="route-summary" id="route-summary" aria-live="polite"></span>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary btn-detail" id="directions" href={directions} data-address={p.address}>
+          <span>Directions</span><span class="btn-sub">{shortAddress}</span>
+        </a>
+        {p.phone && (
+          <a class="btn btn-detail" href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>
+            <span>Call</span><span class="btn-sub">{p.phone}</span>
+          </a>
+        )}
+        {p.url && <a class="btn" href={p.url} rel="noopener">Website</a>}
+      </div>
+      <p class="other-maps">Or open in <a id="other-maps" href={appleDirectionsUrl(p.address)}>Apple Maps</a></p>
 
-    <div class="place-grid">
       <section>
         <h2>Hours</h2>
         {is24h(p.hours) ? <p>Open 24 hours, every day.</p> : (
@@ -73,29 +90,168 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
             </tbody>
           </table>
         )}
-        <p class="verified">Hours last checked {verified}{p.hoursSource && <> against <a href={p.hoursSource} rel="noopener">this source</a></>}.</p>
+        <p class="verified">
+          Hours last checked {verified}.{' '}
+          {p.sources.length > 0 && (
+            <span class="sources">
+              {p.sources.length === 1 ? 'Source' : 'Sources'}:{' '}
+              {p.sources.map((s, i) => <>{i > 0 && ', '}<a href={s} rel="noopener">{sourceHost(s)}</a></>)}.
+            </span>
+          )}
+          {' '}Hours change, so call ahead or check their site before you go.
+        </p>
 
         {p.notes && <><h2>Notes</h2><p class="notes">{p.notes}</p></>}
       </section>
+    </div>
+    <div class="map-col">
       <div class="map map-small" id="map" data-lat={p.lat} data-lng={p.lng}></div>
+      <p class="geo-msg" id="geo-msg" role="status" hidden></p>
+      <p class="route-note" id="route-note" hidden>
+        Routes come from OpenStreetMap’s routing service (<a href="https://fossgis.de/" rel="noopener">FOSSGIS</a>), which receives your
+        location to plan them. Times assume clear roads; Directions gives live traffic.
+      </p>
     </div>
   </article>
 
   <script>
-    import L from 'leaflet';
-    import { createMap, markerStyle } from '../../scripts/map';
+    import { createMap, locateControl, maplibregl, placeMarker, routeLine, youMarker, type LngLat } from '../../scripts/map';
+    import { fetchRoute, formatDuration, type Route, type RouteMode } from '../../lib/route';
+    import { directionsFor } from '../../lib/directions';
+
+    // Directions in your platform's maps app (Apple Maps on iPhone and Mac), with the other
+    // one offered underneath.
+    const directionsLink = document.getElementById('directions') as HTMLAnchorElement;
+    const otherMaps = document.getElementById('other-maps') as HTMLAnchorElement;
+    const { main, other } = directionsFor(directionsLink.dataset.address!);
+    directionsLink.href = main.url;
+    otherMaps.href = other.url;
+    otherMaps.textContent = other.name;
     import { atlantaNow, formatTime, openSpanAt } from '../../lib/hours';
+    import { milesBetween } from '../../lib/geo';
+    import { formatMiles, getPosition, locationAlreadyAllowed, locationAvailable, locationErrorMessage } from '../../lib/location';
 
     const el = document.getElementById('map')!;
-    const ll: [number, number] = [Number(el.dataset.lat), Number(el.dataset.lng)];
-    const map = createMap(el, { center: ll, zoom: 15, scrollWheelZoom: false });
-    L.circleMarker(ll, markerStyle).addTo(map);
+    const at: LngLat = [Number(el.dataset.lng), Number(el.dataset.lat)];
+    // Scrolling the page shouldn't zoom the map; the +/- buttons and pinch still do.
+    const map = createMap(el, { center: at, zoom: 14.5, scrollZoom: false });
+    placeMarker(at, undefined, false).addTo(map);
+
+    // Where you are relative to the place: a dot on the map and "2.3 mi away" by the status.
+    // Shown straight away if you've already allowed location for the site; otherwise only
+    // when you press the map's location button, so the page never prompts on its own.
+    const away = document.getElementById('away')!;
+    const geoMsg = document.getElementById('geo-msg')!;
+    const say = (text = '') => {
+      geoMsg.textContent = text;
+      geoMsg.hidden = !text;
+    };
+    /** Beyond this, framing both would zoom out to the whole region; just give the distance. */
+    const FRAME_BOTH_MILES = 40;
+    const you = youMarker();
+    let shown = false;
+    let here: LngLat | null = null;
+    const locate = locateControl(() => (shown ? hideMe() : showMe(true)));
+    map.addControl(locate.control, 'top-left');
+    locate.setState('idle');
+
+    function hideMe() {
+      shown = false;
+      here = null;
+      you.remove();
+      away.hidden = true;
+      clearRoute();
+      routeBox.hidden = true;
+      say();
+      locate.setState('idle');
+      map.easeTo({ center: at, zoom: 14.5 });
+    }
+
+    async function showMe(asked: boolean) {
+      if (!locationAvailable()) {
+        if (asked) say('Location isn’t available here. It needs a secure (https) connection and a browser that supports it.');
+        return;
+      }
+      locate.setState('busy');
+      try {
+        const pos = await getPosition();
+        here = [pos.coords.longitude, pos.coords.latitude];
+        const miles = milesBetween(here, at);
+        shown = true;
+        routes.clear();
+        clearRoute();
+        routeBox.hidden = miles > FRAME_BOTH_MILES; // too far to be worth a route here
+        you.setLngLat(here).addTo(map);
+        away.textContent = ` · ${formatMiles(miles)} away`;
+        away.hidden = false;
+        say();
+        locate.setState('on');
+        if (miles <= FRAME_BOTH_MILES) {
+          // Extra room on the left keeps both dots clear of the map's buttons.
+          const padding = { top: 60, bottom: 60, right: 60, left: 90 };
+          map.fitBounds(new maplibregl.LngLatBounds(at, at).extend(here), { padding, maxZoom: 15, duration: asked ? 500 : 0 });
+        }
+      } catch (err) {
+        locate.setState('idle');
+        if (asked) say(locationErrorMessage((err as GeolocationPositionError).code));
+      }
+    }
+
+    // Routes: fetched only when you pick Drive or Walk (each is sent to the routing
+    // service, with your location), at most once per mode for where you are.
+    const routeBox = document.getElementById('route')!;
+    const routeSummary = document.getElementById('route-summary')!;
+    const routeNote = document.getElementById('route-note')!;
+    const modeBtns = [...routeBox.querySelectorAll<HTMLButtonElement>('[data-mode]')];
+    const line = routeLine(map);
+    const routes = new Map<RouteMode, Route>();
+    let mode: RouteMode | null = null;
+
+    function clearRoute() {
+      mode = null;
+      line.clear();
+      routeSummary.textContent = '';
+      modeBtns.forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    }
+
+    async function showRoute(next: RouteMode) {
+      if (!here) return;
+      if (mode === next) {
+        clearRoute(); // tap the chosen one again to hide it
+        return;
+      }
+      mode = next;
+      modeBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === next)));
+      routeNote.hidden = false;
+      let route = routes.get(next);
+      if (!route) {
+        routeSummary.textContent = 'Finding a route…';
+        try {
+          route = await fetchRoute(here, at, next);
+          routes.set(next, route);
+        } catch {
+          if (mode === next) routeSummary.textContent = 'Couldn’t get a route right now. Directions still works.';
+          return;
+        }
+      }
+      if (mode !== next) return; // switched while it loaded
+      routeSummary.textContent = `About ${formatDuration(route.seconds)} · ${formatMiles(route.miles)}`;
+      // Fit the route first; the line then draws itself from you to the place.
+      const bounds = route.line.reduce((b, pt) => b.extend(pt), new maplibregl.LngLatBounds(at, at));
+      map.fitBounds(bounds, { padding: { top: 60, bottom: 60, right: 60, left: 90 }, maxZoom: 16, duration: 500 });
+      line.show(route.line);
+    }
+    modeBtns.forEach((b) => b.addEventListener('click', () => showRoute(b.dataset.mode as RouteMode)));
+
+    locationAlreadyAllowed().then((ok) => {
+      if (ok) showMe(false);
+    });
 
     const status = document.getElementById('status')!;
     const { day, minutes } = atlantaNow();
     const span = openSpanAt(JSON.parse(status.dataset.hours!), day, minutes);
     status.textContent = !span ? 'Closed now' : span[1] - span[0] >= 7 * 1440 ? 'Open 24 hours' : `Open now · closes ${formatTime(span[1])}`;
-    status.classList.toggle('closed', !span);
+    document.getElementById('status-line')!.classList.toggle('closed', !span);
     document.querySelector(`tr[data-day="${day}"]`)?.classList.add('today');
   </script>
 </Base>

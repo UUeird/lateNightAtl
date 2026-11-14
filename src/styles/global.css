@@ -31,6 +31,36 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
   max-width: 1280px;
   margin: 0 auto;
   padding: 20px 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+/* GitHub corner (top right of every page); the Octocat waves on hover. */
+.github-corner { position: absolute; top: 0; right: 0; z-index: 700; }
+.github-corner svg { display: block; width: 72px; height: 72px; fill: var(--text); color: var(--bg); }
+.github-corner:hover svg { fill: var(--accent); }
+.github-corner .octo-arm { transform-origin: 130px 106px; }
+.github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
+@keyframes octocat-wave { 0%, 100% { transform: rotate(0); } 20%, 60% { transform: rotate(-25deg); } 40%, 80% { transform: rotate(10deg); } }
+@media (max-width: 800px) { .github-corner svg { width: 56px; height: 56px; } }
+@media (prefers-reduced-motion: reduce) { .github-corner:hover .octo-arm { animation: none; } }
+.list-note { color: var(--muted); font-size: 0.8rem; padding: 6px 14px 10px; }
+
+/* Fading scrollbar thumb (scroll-ui.ts): appears while scrolling, fades after. */
+.scrollthumb {
+  position: absolute; top: 0; width: 4px;
+  will-change: transform;
+  border-radius: 4px;
+  background: var(--muted);
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+  pointer-events: none;
+  z-index: 5;
+}
+.scrollthumb.is-visible { opacity: 0.55; transition: opacity 0.12s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .scrollthumb, .fit-screen .list-panel::before, .fit-screen .list-panel::after { transition: none; }
 }
 .brand {
   font-size: 1.5rem;
@@ -41,15 +71,6 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 }
 .brand span { color: var(--accent); }
 
-.site-footer {
-  max-width: 1280px;
-  margin: 48px auto 0;
-  padding: 24px 16px 40px;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-.site-footer p { margin: 4px 0; }
 
 /* Desktop home: the page fits the window. The list scrolls in its own column and the
    map fills the height beside it, however tall the window is. */
@@ -58,7 +79,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
   .fit-screen main { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; }
   .fit-screen .site-header { width: 100%; }
   .fit-screen .toolbar { position: static; }
-  .fit-screen .empty { grid-area: list; } /* shown only when the list is empty */
+  .fit-screen .empty { grid-area: list; align-self: start; } /* shown only when the list is empty */
   .fit-screen .explorer {
     flex: 1;
     min-height: 0;
@@ -67,22 +88,55 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
     align-items: stretch;
     padding-bottom: 12px;
   }
-  .fit-screen .list { height: 100%; overflow-y: auto; align-content: start; overscroll-behavior: contain; padding: 2px; margin: -2px; }
+  /* The list sits in a rounded panel like the map's, scrolling inside it. */
+  .fit-screen .list-panel {
+    height: 100%;
+    overflow: hidden;
+    background: #101122;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .fit-screen .list {
+    height: 100%;
+    overflow-y: auto;
+    align-content: start;
+    overscroll-behavior: contain;
+    padding: 8px;
+    /* Native bar hidden; scroll-ui.ts draws a fading thumb instead. */
+    scrollbar-width: none;
+  }
+  .fit-screen .list::-webkit-scrollbar { display: none; }
+  /* Edge fades, shown only while there's more list past that edge (scroll-ui.ts sets the
+     classes). They start just under full strength so a card crossing the edge is
+     attenuated, not sliced, and end in the panel's own fill so they're invisible at rest. */
+  .fit-screen .list-panel::before,
+  .fit-screen .list-panel::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 36px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .fit-screen .list-panel::before { top: 0; background: linear-gradient(to bottom, rgb(16 17 34 / 0.92), rgb(16 17 34 / 0.55) 45%, transparent); }
+  .fit-screen .list-panel::after { bottom: 0; background: linear-gradient(to top, #101122, rgb(16 17 34 / 0.6) 45%, transparent); }
+  .fit-screen .list-panel.scrolled-top::before,
+  .fit-screen .list-panel.scrollable-bottom::after { opacity: 1; }
+  .fit-screen .empty { position: relative; z-index: 3; padding: 16px; }
   .fit-screen .map { position: relative; top: 0; height: auto; min-height: 0; }
-  .fit-screen .site-footer { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 0; padding: 8px 16px 10px; width: 100%; }
 }
 
 /* Filters: one compact row (two short rows on phones) */
 :root { --control-h: 36px; }
 .filters { display: flex; flex-direction: column; gap: 8px; }
-.filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-/* On desktop the two groups flow as one row; on phones each is its own row. */
-.filter-main, .filter-when { display: contents; }
+.filter-bar { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-.search { position: relative; display: flex; flex: 1 1 260px; }
+.search { position: relative; display: flex; flex: 1 1 120px; min-width: 120px; }
 .search input {
   width: 100%;
   height: var(--control-h);
@@ -94,7 +148,9 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
   border: 1px solid var(--border);
   border-radius: 999px;
 }
-.search input::placeholder { color: var(--muted); }
+.search input::placeholder { color: var(--muted); text-overflow: ellipsis; }
+/* Text too long for the box ends in "…" rather than a hard cut (while not being edited). */
+.search input { text-overflow: ellipsis; }
 .search-icon {
   position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
   width: 17px; height: 17px;
@@ -176,26 +232,23 @@ label.chip { padding: 0 0 0 14px; }
 .menu-option:hover { background: var(--surface); }
 .menu-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 select option { background: var(--surface-2); color: var(--text); }
-/* Desktop order: search, night, open at, near me, within, filters */
-.near-btn { order: 1; }
-.within-chip { order: 2; }
-.more-btn { order: 3; }
-.near-btn svg { width: 15px; height: 15px; fill: currentColor; }
-.near-btn[aria-pressed='true'] { background-color: var(--accent); border-color: var(--accent); color: var(--bg); }
-.near-btn:disabled { opacity: 0.6; cursor: progress; }
-.more-btn[aria-expanded='true'] { border-color: var(--accent); }
-.more-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-.badge {
-  background: var(--accent);
-  color: var(--bg);
-  border-radius: 999px;
-  font-size: 0.75rem;
-  min-width: 20px;
-  height: 20px;
-  line-height: 20px;
-  padding: 0 6px;
-  text-align: center;
+.cal-icon { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+label.night-chip { padding-left: 12px; gap: 4px; }
+/* A night other than tonight is a choice worth showing, even as just the icon. */
+.night-chip.is-set, .at-chip.is-set { border-color: var(--accent); color: var(--accent); }
+/* "Right now" makes the time moot. */
+.at-chip:has(select:disabled) { opacity: 0.5; }
+label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
+/* The clock says "open at"; the time alone keeps the desktop row to one line. */
+.at-chip .chip-label { display: none; }
+.within-chip.is-set { border-color: var(--accent); color: var(--accent); }
+/* Each menu's own Clear, at the foot of its list, once something in it is ticked. */
+.menu-clear {
+  display: block; width: 100%; min-height: 40px; margin-top: 4px;
+  font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--accent);
+  background: none; border: 0; border-top: 1px solid var(--border); cursor: pointer;
 }
+.chip-menu:not(.is-active) .menu-clear { display: none; }
 .clear-btn {
   height: var(--control-h);
   padding: 0 6px;
@@ -248,7 +301,8 @@ select option { background: var(--surface-2); color: var(--text); }
   gap: 16px;
   align-items: start;
 }
-.list { grid-area: list; list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.list-panel { grid-area: list; position: relative; min-height: 0; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .empty { grid-area: empty; color: var(--muted); margin: 0; }
 .map {
   grid-area: map;
@@ -282,6 +336,22 @@ select option { background: var(--surface-2); color: var(--text); }
 .card-sub .status { font-size: inherit; }
 .card-sub .meta { font-size: inherit; }
 .card-sub .meta::before { content: ' · '; color: var(--muted); }
+/* "Good to know" tags (cover charge, cash only, 21+): small amber outline pills. */
+.tag {
+  display: inline-block;
+  padding: 0 7px;
+  border: 1px solid rgb(255 200 87 / 0.45);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.card-sub .tag { margin-left: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 8px 0 0; padding: 0; }
+.tags .tag { font-size: 0.85rem; padding: 1px 10px; }
 .card .locate { grid-column: 2; grid-row: 1 / span 2; }
 .card { position: relative; }
 .card h2 a { color: var(--text); text-decoration: none; }
@@ -314,35 +384,106 @@ select option { background: var(--surface-2); color: var(--text); }
 .place h1 { font-size: clamp(1.6rem, 5vw, 2.4rem); line-height: 1.15; margin: 4px 0; letter-spacing: -0.02em; }
 .place h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 28px 0 8px; }
 .back { margin: 8px 0; }
-.place-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px; align-items: start; }
-.map-small { grid-area: auto; position: relative; top: 0; height: 380px; margin-top: 28px; }
-@media (max-width: 800px) { .place-grid { grid-template-columns: 1fr; } .map-small { height: 300px; margin-top: 0; } }
+/* Desktop: details on the left, the map beside them from the top of the page down. */
+.place { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px 32px; align-items: start; }
+.map-small { grid-area: auto; position: relative; top: 0; height: clamp(380px, 70vh, 640px); margin-top: 12px; }
+@media (max-width: 800px) {
+  /* Phones: one column, with the map right under the status and Drive/Walk (what it
+     shows), above Directions/Call. The details column dissolves so its parts and the
+     map can be ordered together. */
+  .place { grid-template-columns: 1fr; gap: 0; }
+  .place-info { display: contents; }
+  .map-col { order: 1; margin-top: 16px; }
+  .place-info > .actions, .place-info > section { order: 2; }
+  .map-small { height: 300px; margin-top: 0; }
+}
 .hours { border-collapse: collapse; width: 100%; max-width: 420px; }
 .hours th, .hours td { text-align: left; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); font-weight: normal; }
 .hours th { color: var(--muted); width: 8.5em; }
 .hours tr.today th, .hours tr.today td { color: var(--accent); font-weight: 600; }
 .verified, .notes { color: var(--muted); font-size: 0.9rem; }
 
-/* Leaflet popups in the dark theme */
-/* Prefixed with .map so these win over Leaflet's own stylesheet whatever order they load in. */
-.map .leaflet-popup-content-wrapper, .map .leaflet-popup-tip { background: var(--surface-2); color: var(--text); }
-.map .leaflet-popup-content a { color: var(--accent); }
-.map .leaflet-popup-content { margin: 14px 16px; min-width: 200px; }
-.map .leaflet-popup-close-button { color: var(--muted); }
+/* MapLibre popups and controls in the dark theme.
+   Prefixed with .map so these win over MapLibre's own stylesheet whatever order they load in. */
+.map .maplibregl-popup-content {
+  min-width: 220px;
+  padding: 14px 44px 14px 16px;
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  font-size: 0.9rem;
+}
+.map .maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--surface-2); }
+.map .maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--surface-2); }
+.map .maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--surface-2); }
+.map .maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--surface-2); }
+.map .maplibregl-popup-content a { color: var(--accent); }
+/* A clear, roomy close button. */
+.map .maplibregl-popup-close-button {
+  top: 6px; right: 6px;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  font: 400 26px/1 system-ui, sans-serif;
+  color: var(--text);
+  border-radius: 8px;
+}
+.map .maplibregl-popup-close-button:hover { color: var(--accent); background: var(--surface); }
 .popup-name { display: block; font-weight: 700; font-size: 1rem; text-decoration: none; }
 .popup-meta { color: var(--muted); margin-top: 2px; }
 .popup-status { color: var(--open); font-weight: 600; margin-top: 4px; }
 .popup-actions { display: flex; gap: 8px; margin-top: 12px; }
-.map .leaflet-popup-content .popup-actions .btn { flex: 1; min-height: 40px; padding: 0 12px; font-size: 0.9rem; color: var(--text); }
-.map .leaflet-popup-content .popup-actions .btn-primary { color: var(--bg); }
-.map.leaflet-container { font: inherit; font-size: 0.9rem; background: var(--surface); }
-.map .leaflet-control-attribution { background: rgba(11, 12, 24, 0.8) !important; color: var(--muted); }
-.map .leaflet-control-attribution a { color: var(--muted); }
+.map .maplibregl-popup-content .popup-actions .btn { flex: 1; min-height: 40px; padding: 0 12px; font-size: 0.9rem; color: var(--text); }
+.map .maplibregl-popup-content .popup-actions .btn-primary { color: var(--bg); }
+.map.maplibregl-map { font: inherit; background: var(--surface); overflow: hidden; }
+/* Zoom buttons: dark, and thumb-sized. */
+.map .maplibregl-ctrl-group { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; box-shadow: none; overflow: hidden; }
+.map .maplibregl-ctrl-group button { width: 36px; height: 36px; }
+.map .maplibregl-ctrl-group button + button { border-top: 1px solid var(--border); }
+.map .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1) brightness(0.9); }
+.map .maplibregl-ctrl-group button:hover { background-color: var(--surface); }
+.map .maplibregl-ctrl.maplibregl-ctrl-attrib,
+.map .maplibregl-ctrl.maplibregl-ctrl-attrib.maplibregl-compact-show { background: rgb(11 12 24 / 0.85); color: var(--muted); }
+.map .maplibregl-ctrl.maplibregl-ctrl-attrib.maplibregl-compact { background: rgb(29 32 56 / 0.9); }
+.map .maplibregl-ctrl-attrib a { color: var(--muted); }
+.map .maplibregl-ctrl-attrib-button { filter: invert(1); }
 
-.dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6); }
+/* Map dots: a fixed-size dot centered in a larger, invisible tap target. */
+.map-dot { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: none; border: 0; cursor: pointer; }
+.map-dot-you { pointer-events: none; }
+/* Thumb-sized tap target on touch screens; the visible dot stays the same. */
+@media (pointer: coarse) { .map-dot-place { width: 40px; height: 40px; } }
+.map-dot::after { content: ''; display: block; border-radius: 50%; box-sizing: border-box; }
+.map-dot-place::after { width: 18px; height: 18px; background: var(--accent); border: 2px solid #0f1020; }
+.map-dot-place:hover::after, .map-dot-place:focus-visible::after { transform: scale(1.2); }
+.map-dot-place:focus-visible { outline: none; }
+.map-dot-place:focus-visible::after { box-shadow: 0 0 0 3px #fff; }
+/* The map's "show my location" button (place pages). */
+.map .map-locate { display: grid; place-items: center; }
+.map .map-locate svg { width: 16px; height: 16px; fill: var(--text); }
+.map .map-locate[data-state='on'] svg { fill: #4ea1ff; }
+.map .map-locate[data-state='busy'] { cursor: progress; opacity: 0.6; }
+.away { color: var(--muted); font-weight: 500; }
+/* Drive / Walk route picker (place pages), shown once your location is. */
+.route { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 10px; }
+.route[hidden] { display: none; }
+.route-modes { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.route-modes button {
+  font: inherit; font-size: 0.9rem; font-weight: 600;
+  min-height: 36px; padding: 0 14px;
+  color: var(--text); background: var(--surface); border: 0; cursor: pointer;
+}
+.route-modes button + button { border-left: 1px solid var(--border); }
+.route-modes button[aria-pressed='true'] { background: #4ea1ff; color: #0b0c18; }
+.route-summary { color: var(--text); font-weight: 600; font-size: 0.95rem; }
+.route-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
+@media (max-width: 800px) { .route-modes button { min-height: 40px; } }
+.map-col .geo-msg { margin-top: 10px; }
+.map-dot-you::after { width: 16px; height: 16px; background: #4ea1ff; border: 3px solid #fff; box-shadow: 0 0 0 1px #0f1020; }
 
 /* Place page actions */
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.other-maps { order: 2; margin: 8px 0 0; color: var(--muted); font-size: 0.875rem; }
 .btn {
   display: inline-flex;
   align-items: center;
@@ -368,40 +509,46 @@ select option { background: var(--surface-2); color: var(--text); }
   .brand { font-size: 1.3rem; }
 
   :root { --control-h: 40px; }
-  /* Row 1: search + Near me + Filters icons. Row 2: night (natural width) + open at (the rest). */
-  .filter-main, .filter-when { display: flex; gap: 8px; width: 100%; }
-  .filter-when { flex-wrap: wrap; }
-  .search { flex: 1 1 auto; min-width: 0; }
-  .near-btn, .more-btn { order: 0; flex: none; min-width: 40px; padding: 0 10px; justify-content: center; }
-  .near-btn svg { width: 17px; height: 17px; }
-  .more-btn { position: relative; }
-  /* Badge sits on the icon's corner so the button stays square. */
-  .more-btn .badge {
-    position: absolute; top: -5px; right: -5px;
-    min-width: 18px; height: 18px; line-height: 18px; font-size: 0.7rem; padding: 0 5px;
+  /* One row of icons sharing the width equally: night, time, (Within),
+     type, cuisine. Their words are hidden; selects lie invisibly over their icons so
+     a tap opens the native picker; menus open as a full-width sheet under the row. */
+  .filter-bar { gap: 6px; }
+  .filter-bar .icon-chip { position: relative; flex: 1 1 0; min-width: 0; padding: 0; justify-content: center; background-image: none; }
+  .filter-bar .chip-menu { position: static; flex: 1 1 0; min-width: 0; display: flex; }
+  .filter-bar .chip-menu > summary.icon-chip { width: 100%; }
+  .icon-chip .chip-label, .icon-chip .menu-text { display: none; }
+  /* inset -1px: over the chip's border too, so the tap target is the full 40px. */
+  .icon-chip select { position: absolute; inset: -1px; width: auto; height: auto; margin: 0; opacity: 0; padding: 0; }
+  /* Search floats at the bottom of the screen, over the map (or the list), within thumb
+     reach. Fixed inside the toolbar, which therefore collapses by its sticky top rather
+     than a transform (a transform would pin the box to the toolbar instead). */
+  .search {
+    position: fixed;
+    /* Inset 12px inside the map's frame (which has a 16px gutter), clear of its edges. */
+    left: 28px; right: 28px;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    z-index: 650;
+    min-width: 0;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(0 0 0 / 0.3);
   }
-  .night-chip { flex: 0 1 auto; }
-  .at-chip { flex: 1 1 0; min-width: 150px; }
-  .within-chip { flex: 1 1 100%; }
-  label.when-chip select { flex: 1 1 auto; min-width: 0; }
-  .near-text, .more-text {
-    position: absolute; width: 1px; height: 1px; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-  }
-  .extra-filters { display: grid; grid-template-columns: 1fr 1fr; }
-  .extra-filters[hidden] { display: none; }
-  /* Menus open as a full-width sheet under the filter row. */
-  .extra-filters { position: relative; }
-  .chip-menu { position: static; min-width: 0; }
-  .chip-menu > summary { width: 100%; }
-  .menu-panel { right: 0; min-width: 0; }
+  .search input { height: 48px; background: var(--surface-2); padding-left: 42px; }
+  .search input:not(:placeholder-shown) { border-color: var(--accent); }
+  .search-icon { left: 15px; width: 19px; height: 19px; }
+  /* Map buttons (+, −, location) in the top right, nearer the thumb. */
+  .map .maplibregl-ctrl-top-left { left: auto; right: 0; align-items: flex-end; }
+  .map .maplibregl-ctrl-top-left .maplibregl-ctrl { float: right; clear: both; margin: 10px 10px 0 0; }
+  /* Keep the map's attribution clear of the floating search. */
+  .map:not(.map-small) .maplibregl-ctrl-bottom-right,
+  .map:not(.map-small) .maplibregl-ctrl-bottom-left { bottom: 72px; }
+  .menu-panel { left: 0; right: 0; top: calc(100% + 6px); min-width: 0; }
   .menu-option { min-height: 44px; }
-  .chip { padding: 0 12px; }
-  label.chip { padding-left: 12px; }
-  select.chip, .chip select, .chip-menu > summary { padding-right: 28px; background-position: right 10px center; }
+  /* Each menu has its own Clear on phones. */
+  .clear-btn { display: none !important; }
 
   .results-bar { margin-top: 10px; }
-  .toolbar.is-collapsed { transform: translateY(calc(-1 * var(--collapse-by, 0px))); }
+  .toolbar { transition: top 0.2s ease; }
+  .toolbar.is-collapsed { top: calc(-1 * var(--collapse-by, 0px)); }
   .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
   .view-toggle button {
     font: inherit;
@@ -423,12 +570,29 @@ select option { background: var(--surface-2); color: var(--text); }
   .explorer { grid-template-areas: none; margin-top: 12px; }
   .explorer > * { grid-area: auto; }
   .explorer[data-view='list'] .map { display: none; }
-  .explorer[data-view='map'] .list,
+  .explorer[data-view='map'] .list-panel,
   .explorer[data-view='map'] .empty { display: none; }
   .map:not(.map-small) { height: calc(100dvh - var(--toolbar-h, 150px) - 24px); min-height: 320px; }
 
-  .site-footer { margin-top: 32px; }
+  /* Room under the last card for the floating search. */
+  main { padding-bottom: 32px; }
+  .fit-screen main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  /* Map view: the page fits the screen, like desktop, and the map fills what's left in
+     its own rounded frame instead of running off the bottom. */
+  body.fit-screen:has(.explorer[data-view='map']) { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  .fit-screen:has(.explorer[data-view='map']) .site-header { width: 100%; }
+  .fit-screen:has(.explorer[data-view='map']) main {
+    flex: 1; min-height: 0; width: 100%;
+    display: flex; flex-direction: column;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .explorer[data-view='map'] { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+  .explorer[data-view='map'] .map { height: 100%; min-height: 0; }
 }
 
-/* Thumb-sized map zoom buttons on touch screens */
-.map.leaflet-touch .leaflet-bar a { width: 40px; height: 40px; line-height: 40px; }
+/* Thumb-sized map buttons and popup close on touch screens */
+@media (pointer: coarse) {
+  .map .maplibregl-ctrl-group button { width: 40px; height: 40px; }
+  .map .maplibregl-popup-close-button { top: 4px; right: 4px; width: 40px; height: 40px; }
+  .map .maplibregl-popup-content { padding-right: 48px; }
+}

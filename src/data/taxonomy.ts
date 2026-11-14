@@ -40,6 +40,25 @@ export const TYPES = {
 
 export type TypeKey = keyof typeof TYPES;
 
+/** Types left out of the Type filter until someone ticks them: errands, not a night out. */
+export const DEFAULT_OFF_TYPES: readonly TypeKey[] = ['grocery', 'pharmacy'];
+
+/**
+ * "Good to know" tags: things that decide whether a late-night plan works. Optional, and
+ * a place without a tag means we don't know, not that it doesn't apply. Put the
+ * specifics (how much, which nights) in the place's notes.
+ */
+export const TAGS = {
+  cover: 'Cover charge',
+  'cash-only': 'Cash only',
+  '21-plus': '21+',
+} as const;
+
+export type TagKey = keyof typeof TAGS;
+
+/** Shorter tag labels for the list cards, where space is tight. */
+export const TAG_SHORT: Record<TagKey, string> = { cover: 'Cover', 'cash-only': 'Cash only', '21-plus': '21+' };
+
 /** Display label for a place's types, e.g. "Grocery & Pharmacy". */
 export const typeLabel = (types: readonly TypeKey[]) => types.map((t) => TYPES[t]).join(' & ');
 

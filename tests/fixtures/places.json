@@ -76,6 +76,8 @@
     "id": "castleberry-late-lounge",
     "name": "Castleberry Late Lounge (sample)",
     "type": "club",
+    "tags": ["cover", "21-plus"],
+    "sources": ["https://www.example.com/castleberry/hours", "https://example.org/atl/castleberry"],
     "area": "Castleberry Hill",
     "address": "600 Example St SW, Atlanta, GA 30313",
     "lat": 33.7493, "lng": -84.4012,

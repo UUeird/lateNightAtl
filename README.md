@@ -27,7 +27,7 @@ npx playwright show-report   # see failures, with screenshot diffs
 
 ## Adding or editing places
 
-All places live in [`src/data/places.json`](src/data/places.json). Each entry's `hoursSource` records where its hours came from, so it's easy to re-check them.
+All places live in [`src/data/places.json`](src/data/places.json). Each entry's `sources` lists the pages its facts came from, so they're easy to re-check.
 
 ```json
 {
@@ -43,14 +43,26 @@ All places live in [`src/data/places.json`](src/data/places.json). Each entry's 
     "sat": [["11:00", "15:00"], ["17:00", "03:00"]]
   },
   "url": "https://…", "phone": "(404) 555-0100", "notes": "Cash only",
+  "sources": ["https://…/hours"],
   "lastVerified": "2026-11-13"
 }
 ```
+
+### Sources
+
+List every page you relied on in `sources`, for the hours, tags and notes alike. The place page shows them by site name.
+
+- **The place's own site** (or its official social account) is enough on its own; cite the exact page.
+- **Listings and press** (Yelp, Google, guides, blogs) need two that agree. One source alone can go in `notes`, worded as unconfirmed, but not in `hours` or `tags`.
+- Update `lastVerified` whenever you re-check.
+
+A weekly GitHub Action (`.github/workflows/external-links.yml`) checks every link in the data and opens an issue listing any that are gone or have moved. Run it locally with `npm run check:links`.
 
 - **hours**: 24-hour `"HH:MM"`, Atlanta time. A close at or before the open time means it closes after midnight (`["18:00", "02:00"]`). A missing day means closed that day. Open 24 hours is `["00:00", "24:00"]`.
 - **type** is one value, or a list when a place is several things (`["grocery", "pharmacy"]` for a CVS).
 - **type** and **area** must be values from [`src/data/taxonomy.ts`](src/data/taxonomy.ts). Add new ones there.
 - **cuisine** is free text, lowercase. The cuisine filter lists whatever values the data contains.
+- **tags** (optional) flag things worth knowing before you go: `cover`, `cash-only`, `21-plus` (see `TAGS` in the taxonomy). Leave a tag off when unsure; no tag means "unknown", not "no". Put specifics such as price or which nights in **notes**.
 - **lat/lng**: right-click the spot in Google Maps or OpenStreetMap to copy them.
 - `npm run build` fails with a clear message if an entry is malformed.
 
@@ -64,4 +76,4 @@ Every push to `main` builds and deploys the site through [`.github/workflows/dep
 
 The site is served at https://latenightatl.com. The domain is set in `public/CNAME` and in `site` in `astro.config.mjs`.
 
-Map tiles come from OpenStreetMap's standard tile server, darkened with CSS. Its [usage policy](https://operations.osmfoundation.org/policies/tiles/) allows light traffic. If the site gets busy, switch the URL in `src/scripts/map.ts` to a provider such as Stadia Maps or MapTiler (both have free tiers and use domain-restricted keys).
+Maps are drawn in the browser with [MapLibre](https://maplibre.org/) from [OpenFreeMap](https://openfreemap.org/)'s free vector tiles (no key or account). The colors are the site's own: `PALETTE` in [`src/scripts/map.ts`](src/scripts/map.ts) recolors OpenFreeMap's "dark" style by layer id.
