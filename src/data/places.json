@@ -752,5 +752,584 @@
     },
     "hoursSource": "https://www.gayot.com/restaurants/pho-24-chamblee-ga-30341_7at131001.html",
     "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "johnnys-hideaway",
+    "name": "Johnny's Hideaway",
+    "type": "club",
+    "cuisine": [
+      "american"
+    ],
+    "area": "Buckhead",
+    "address": "3771 Roswell Rd NE, Atlanta, GA 30342",
+    "lat": 33.85746,
+    "lng": -84.38164,
+    "hours": {
+      "sun": [
+        [
+          "12:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "03:00"
+        ]
+      ],
+      "sat": [
+        [
+          "12:00",
+          "03:00"
+        ]
+      ]
+    },
+    "url": "https://www.johnnyshideaway.com",
+    "phone": "(404) 233-8026",
+    "notes": "Dance club open since 1979, with Sinatra-era memorabilia and pub food.",
+    "hoursSource": "https://www.johnnyshideaway.com",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "dark-horse-tavern",
+    "name": "Dark Horse Tavern",
+    "type": "bar",
+    "area": "Virginia-Highland",
+    "address": "816 N Highland Ave NE, Atlanta, GA 30306",
+    "lat": 33.77683,
+    "lng": -84.35272,
+    "hours": {
+      "wed": [
+        [
+          "18:30",
+          "01:30"
+        ]
+      ],
+      "thu": [
+        [
+          "18:30",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "20:00",
+          "03:00"
+        ]
+      ],
+      "sat": [
+        [
+          "20:00",
+          "03:00"
+        ]
+      ]
+    },
+    "url": "https://www.darkhorseatlanta.com",
+    "phone": "(404) 873-3607",
+    "hoursSource": "https://www.darkhorseatlanta.com",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-5th-st",
+    "name": "Waffle House (5th St)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Midtown",
+    "address": "66 5th St NW, Atlanta, GA 30308",
+    "lat": 33.77668,
+    "lng": -84.38944,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 872-0028",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1885/",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-downtown",
+    "name": "Waffle House (Downtown)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Downtown",
+    "address": "135 Andrew Young International Blvd NW, Atlanta, GA 30303",
+    "lat": 33.75986,
+    "lng": -84.3918,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 522-9873",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1996/",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-glenwood",
+    "name": "Waffle House (Glenwood Ave)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Glenwood Park",
+    "address": "860 Glenwood Ave SE, Atlanta, GA 30316",
+    "lat": 33.74002,
+    "lng": -84.35972,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 219-9057",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-2209/",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-howell-mill",
+    "name": "Waffle House (Howell Mill)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "West Midtown",
+    "address": "1700 Howell Mill Rd NW, Atlanta, GA 30318",
+    "lat": 33.80061,
+    "lng": -84.416,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 351-0172",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1172/",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-cheshire-bridge",
+    "name": "Waffle House (Cheshire Bridge)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Lindbergh",
+    "address": "2264 Cheshire Bridge Rd NE, Atlanta, GA 30324",
+    "lat": 33.81696,
+    "lng": -84.35256,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 634-9414",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-412/",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-piedmont",
+    "name": "Waffle House (Piedmont Rd)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Buckhead",
+    "address": "3016 Piedmont Rd NE, Atlanta, GA 30305",
+    "lat": 33.83736,
+    "lng": -84.36865,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 231-0023",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/atlanta-ga-1058/",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "cvs-emory-village",
+    "name": "CVS (Emory Village)",
+    "type": "pharmacy",
+    "area": "Druid Hills",
+    "address": "1554 N Decatur Rd NE, Atlanta, GA 30307",
+    "lat": 33.78804,
+    "lng": -84.32705,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 373-4534",
+    "notes": "The store is open 24 hours; the pharmacy counter closes earlier, so call ahead for prescriptions.",
+    "hoursSource": "https://www.cvs.com/store-locator/atlanta-ga-pharmacies/1554-n-decatur-road-ne-atlanta-ga-30307/storeid=4720",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "cvs-decatur",
+    "name": "CVS (Decatur)",
+    "type": "pharmacy",
+    "area": "Decatur",
+    "address": "225 W Ponce de Leon Ave, Decatur, GA 30030",
+    "lat": 33.77588,
+    "lng": -84.29915,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "notes": "The store is open 24 hours; the pharmacy counter closes earlier, so call ahead for prescriptions.",
+    "hoursSource": "https://www.cvs.com/store-locator/decatur-ga-pharmacies/225-west-ponce-deleon-avenue-decatur-ga-30030/storeid=2367",
+    "lastVerified": "2026-11-13"
   }
 ]
