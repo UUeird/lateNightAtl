@@ -10,6 +10,21 @@ npm run dev      # http://localhost:4321/
 npm run build    # type-check, validate data, and build to dist/
 ```
 
+## Tests
+
+```sh
+npm test             # unit tests + browser tests
+npm run test:unit    # hours logic only (fast)
+npm run test:e2e     # browser tests: desktop, iPhone 13, iPhone SE sizes
+npm run test:update  # accept intended visual changes (rewrites reference screenshots)
+npx playwright show-report   # see failures, with screenshot diffs
+```
+
+- **Unit tests** (`tests/unit/`) cover the opening-hours logic: past-midnight hours, 24-hour places, split hours, the 5 AM night rollover.
+- **Browser tests** (`tests/e2e/`) build the site from `tests/fixtures/places.json`, a fixed set of fictional places, with the clock frozen at Friday 10:30 PM. Editing the real data never breaks them. They check filters, "Near me", the phone list/map switch, every place page, that nothing scrolls sideways, that phone tap targets are at least 40px, that the browser logs no errors, and they compare screenshots against references.
+- **Reference screenshots** live in `tests/e2e/__screenshots__/darwin/` (macOS). After an intended design change, run `npm run test:update` and commit the new screenshots.
+- Tests run **locally only**. Run `npm test` before pushing. GitHub Actions only builds and deploys, and the build still fails on malformed data in `places.json`.
+
 ## Adding or editing places
 
 All places live in [`src/data/places.json`](src/data/places.json). Each entry's `hoursSource` records where its hours came from, so it's easy to re-check them.

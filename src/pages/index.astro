@@ -42,29 +42,32 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
         {times.map((t) => <option value={t} selected={t === 1260}>{formatTime(t)}</option>)}
       </select>
     </label>
-    <label>Area
+    <div class="field near-field">
+      <span class="field-label">Location</span>
+      <button type="button" class="near-btn" id="near-me" aria-pressed="false">Near me</button>
+    </div>
+    <button type="button" class="more-btn" id="more-filters" aria-expanded="false" aria-controls="filters">
+      More filters<span class="badge" id="filter-badge" hidden></span>
+    </button>
+    <label class="extra">Area
       <select name="area">
         <option value="">All areas</option>
         {areas.map((a) => <option value={a}>{a}</option>)}
       </select>
     </label>
-    <label>Type
+    <label class="extra">Type
       <select name="type">
         <option value="">All types</option>
         {types.map(([k, label]) => <option value={k}>{label}</option>)}
       </select>
     </label>
-    <label>Cuisine
+    <label class="extra">Cuisine
       <select name="cuisine">
         <option value="">Any cuisine</option>
         {cuisines.map((c) => <option value={c}>{cap(c)}</option>)}
       </select>
     </label>
-    <div class="field">
-      <span class="field-label">Location</span>
-      <button type="button" class="near-btn" id="near-me" aria-pressed="false">Near me</button>
-    </div>
-    <label>Within
+    <label class="extra">Within
       <select name="within" disabled>
         <option value="">Any distance</option>
         <option value="1">1 mile</option>
@@ -79,13 +82,19 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   </form>
 
   <p class="geo-msg" id="geo-msg" role="status" hidden></p>
-  <p class="count" id="count" aria-live="polite">{places.length} places</p>
+  <div class="results-bar">
+    <p class="count" id="count" aria-live="polite">{places.length} places</p>
+    <div class="view-toggle" role="group" aria-label="View">
+      <button type="button" data-view="list" aria-pressed="true">List</button>
+      <button type="button" data-view="map" aria-pressed="false">Map</button>
+    </div>
+  </div>
 
-  <div class="explorer">
+  <div class="explorer" id="explorer" data-view="list">
     <ol class="list" id="list">
       {places.map(({ id, data }) => (
         <li class="card" data-id={id}>
-          <h2><a href={url(`places/${id}/`)}>{data.name}</a></h2>
+          <h2><a class="card-link" href={url(`places/${id}/`)}>{data.name}</a></h2>
           <p class="meta">
             {[TYPES[data.type], ...data.cuisine.map(cap)].join(' · ')}
             <span class="area">{data.area}</span>

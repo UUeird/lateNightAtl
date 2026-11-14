@@ -46,6 +46,11 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
     <h1>{p.name}</h1>
     <p class="meta">{[TYPES[p.type], ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
     <p class="status big" id="status" data-hours={JSON.stringify(p.hours)}></p>
+    <div class="actions">
+      <a class="btn btn-primary" href={directions}>Directions</a>
+      {p.phone && <a class="btn" href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>Call</a>}
+      {p.url && <a class="btn" href={p.url} rel="noopener">Website</a>}
+    </div>
 
     <div class="place-grid">
       <section>
@@ -62,9 +67,8 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
         <p class="verified">Hours last checked {verified}{p.hoursSource && <> against <a href={p.hoursSource} rel="noopener">this source</a></>}.</p>
 
         <h2>Details</h2>
-        <p>{p.address}<br /><a href={directions}>Directions</a></p>
-        {p.phone && <p><a href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>{p.phone}</a></p>}
-        {p.url && <p><a href={p.url} rel="noopener">Website</a></p>}
+        <p>{p.address}</p>
+        {p.phone && <p>{p.phone}</p>}
         {p.notes && <p class="notes">{p.notes}</p>}
       </section>
       <div class="map map-small" id="map" data-lat={p.lat} data-lng={p.lng}></div>

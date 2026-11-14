@@ -12,7 +12,8 @@ const span = z.tuple([time, time]);
 const day = z.array(span).optional(); // missing or [] = closed that day
 
 const places = defineCollection({
-  loader: file('src/data/places.json'),
+  // PLACES_FILE lets tests build against fixed fixture data.
+  loader: file(process.env.PLACES_FILE ?? 'src/data/places.json'),
   schema: z.object({
     name: z.string(),
     type: z.enum(Object.keys(TYPES) as [keyof typeof TYPES, ...(keyof typeof TYPES)[]]),

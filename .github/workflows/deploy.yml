@@ -1,5 +1,6 @@
 name: Deploy to GitHub Pages
 
+# Tests run locally (`npm test`), not here. The build still type-checks and validates places.json.
 on:
   push:
     branches: [main]

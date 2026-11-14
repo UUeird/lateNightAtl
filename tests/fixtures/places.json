@@ -1,0 +1,130 @@
+[
+  {
+    "id": "night-owl-diner",
+    "name": "Night Owl Diner (sample)",
+    "type": "diner",
+    "cuisine": ["american", "breakfast"],
+    "area": "Midtown",
+    "address": "100 Example St NE, Atlanta, GA 30308",
+    "lat": 33.7815, "lng": -84.3835,
+    "hours": {
+      "sun": [["00:00", "24:00"]], "mon": [["00:00", "24:00"]], "tue": [["00:00", "24:00"]],
+      "wed": [["00:00", "24:00"]], "thu": [["00:00", "24:00"]], "fri": [["00:00", "24:00"]],
+      "sat": [["00:00", "24:00"]]
+    },
+    "notes": "Sample entry. Replace with real places.",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "edgewood-hi-fi",
+    "name": "Edgewood Hi-Fi (sample)",
+    "type": "bar",
+    "area": "Edgewood",
+    "address": "200 Example Ave NE, Atlanta, GA 30312",
+    "lat": 33.7542, "lng": -84.3745,
+    "hours": {
+      "wed": [["20:00", "02:30"]], "thu": [["20:00", "02:30"]],
+      "fri": [["20:00", "03:00"]], "sat": [["20:00", "03:00"]], "sun": [["20:00", "00:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "buford-hwy-noodle-house",
+    "name": "Buford Hwy Noodle House (sample)",
+    "type": "restaurant",
+    "cuisine": ["chinese", "noodles"],
+    "area": "Buford Highway",
+    "address": "300 Example Hwy NE, Atlanta, GA 30341",
+    "lat": 33.8655, "lng": -84.3005,
+    "hours": {
+      "sun": [["11:00", "02:00"]], "mon": [["11:00", "02:00"]], "tue": [["11:00", "02:00"]],
+      "wed": [["11:00", "02:00"]], "thu": [["11:00", "02:00"]],
+      "fri": [["11:00", "04:00"]], "sat": [["11:00", "04:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "little-five-slice",
+    "name": "Little Five Slice (sample)",
+    "type": "restaurant",
+    "cuisine": ["pizza"],
+    "area": "Little Five Points",
+    "address": "400 Example St NE, Atlanta, GA 30307",
+    "lat": 33.7643, "lng": -84.3496,
+    "hours": {
+      "sun": [["12:00", "00:00"]], "mon": [["12:00", "00:00"]], "tue": [["12:00", "00:00"]],
+      "wed": [["12:00", "00:00"]], "thu": [["12:00", "00:00"]],
+      "fri": [["12:00", "03:00"]], "sat": [["12:00", "03:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "eav-taqueria-tardia",
+    "name": "Taqueria Tardía (sample)",
+    "type": "restaurant",
+    "cuisine": ["mexican", "tacos"],
+    "area": "East Atlanta Village",
+    "address": "500 Example Ave SE, Atlanta, GA 30316",
+    "lat": 33.7402, "lng": -84.342,
+    "hours": {
+      "tue": [["17:00", "02:30"]], "wed": [["17:00", "02:30"]], "thu": [["17:00", "02:30"]],
+      "fri": [["17:00", "02:30"]], "sat": [["17:00", "02:30"]], "sun": [["17:00", "00:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "castleberry-late-lounge",
+    "name": "Castleberry Late Lounge (sample)",
+    "type": "club",
+    "area": "Castleberry Hill",
+    "address": "600 Example St SW, Atlanta, GA 30313",
+    "lat": 33.7493, "lng": -84.4012,
+    "hours": {
+      "thu": [["22:00", "03:00"]], "fri": [["22:00", "04:00"]], "sat": [["22:00", "04:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "westside-pho",
+    "name": "Westside Phở & Bánh Mì (sample)",
+    "type": "restaurant",
+    "cuisine": ["vietnamese"],
+    "area": "West Midtown",
+    "address": "700 Example Blvd NW, Atlanta, GA 30318",
+    "lat": 33.7862, "lng": -84.4105,
+    "hours": {
+      "sun": [["10:00", "22:30"]], "mon": [["10:00", "22:30"]], "tue": [["10:00", "22:30"]],
+      "wed": [["10:00", "22:30"]], "thu": [["10:00", "22:30"]],
+      "fri": [["10:00", "23:30"]], "sat": [["10:00", "23:30"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "poncey-24-pharmacy",
+    "name": "Poncey 24 Pharmacy (sample)",
+    "type": "pharmacy",
+    "area": "Poncey-Highland",
+    "address": "800 Example Ave NE, Atlanta, GA 30306",
+    "lat": 33.7728, "lng": -84.3572,
+    "hours": {
+      "sun": [["00:00", "24:00"]], "mon": [["00:00", "24:00"]], "tue": [["00:00", "24:00"]],
+      "wed": [["00:00", "24:00"]], "thu": [["00:00", "24:00"]], "fri": [["00:00", "24:00"]],
+      "sat": [["00:00", "24:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "decatur-midnight-cafe",
+    "name": "Midnight Café (sample)",
+    "type": "cafe",
+    "cuisine": ["coffee", "dessert"],
+    "area": "Decatur",
+    "address": "900 Example St, Decatur, GA 30030",
+    "lat": 33.7746, "lng": -84.296,
+    "hours": {
+      "mon": [["07:00", "00:00"]], "tue": [["07:00", "00:00"]], "wed": [["07:00", "00:00"]],
+      "thu": [["07:00", "00:00"]], "fri": [["07:00", "00:00"]], "sat": [["08:00", "00:00"]]
+    },
+    "lastVerified": "2026-11-13"
+  }
+]

@@ -19,6 +19,8 @@ const METERS_PER_MILE = 1609.344;
 const ATL_CENTER = L.latLng(33.749, -84.388);
 const formatMiles = (mi: number) => (mi < 0.1 ? '< 0.1 mi' : `${mi < 10 ? mi.toFixed(1) : Math.round(mi)} mi`);
 
+const FIT_OPTS: L.FitBoundsOptions = { padding: [40, 40], maxZoom: 15 };
+
 const DEFAULTS: Record<string, string> = { night: 'tonight', at: '1260', area: '', type: '', cuisine: '', q: '' };
 
 const escapeHtml = (s: string) =>
@@ -104,6 +106,14 @@ export function initExplorer() {
     if (el) el.value = value;
   }
 
+  let fitTo: L.LatLngBounds | null = null;
+  const badge = document.getElementById('filter-badge')!;
+  // Open the extra filters if a shared link uses them.
+  if (['area', 'type', 'cuisine'].some((k) => params.get(k))) {
+    form.classList.add('expanded');
+    document.getElementById('more-filters')!.setAttribute('aria-expanded', 'true');
+  }
+
   const popupHtml = (p: Place, status: string) =>
     `<a href="${p.url}"><strong>${escapeHtml(p.name)}</strong></a><br>${escapeHtml(p.typeLabel)} · ${escapeHtml(p.area)}<br>${escapeHtml(status)}`;
 
@@ -147,13 +157,15 @@ export function initExplorer() {
     count.textContent = `${results.length} ${results.length === 1 ? 'place' : 'places'}`;
     empty.hidden = results.length > 0;
 
-    if (fit && here) {
-      // Frame the user and the closest few results.
-      const pts = [here, ...results.slice(0, 5).map(({ p }) => L.latLng(p.lat, p.lng))];
-      map.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 15 });
-    } else if (fit && results.length) {
-      map.fitBounds(L.latLngBounds(results.map(({ p }) => [p.lat, p.lng])), { padding: [40, 40], maxZoom: 15 });
-    }
+    // Frame the user and the closest few results, or all results.
+    const pts = here ? [here, ...results.slice(0, 5).map(({ p }) => L.latLng(p.lat, p.lng))] : results.map(({ p }) => L.latLng(p.lat, p.lng));
+    fitTo = pts.length ? L.latLngBounds(pts) : null;
+    if (fit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
+
+    // Show how many of the tucked-away filters are active.
+    const extras = ['area', 'type', 'cuisine', 'within'].filter((k) => f[k]).length;
+    badge.textContent = String(extras);
+    badge.hidden = !extras;
 
     // Keep the URL in sync, omitting defaults.
     const out = new URLSearchParams();
@@ -163,13 +175,36 @@ export function initExplorer() {
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
   }
 
+  // Phones show either the list or the map (see .explorer[data-view] in CSS).
+  const explorer = document.getElementById('explorer')!;
+  const viewBtns = document.querySelectorAll<HTMLButtonElement>('.view-toggle [data-view]');
+  const isPhone = () => matchMedia('(max-width: 800px)').matches;
+  function showView(view: 'list' | 'map', refit = true) {
+    explorer.dataset.view = view;
+    viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+    if (view === 'map') {
+      // The map may have been laid out while hidden.
+      map.invalidateSize();
+      if (refit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
+    }
+    window.scrollTo({ top: Math.min(window.scrollY, explorer.offsetTop - 80) });
+  }
+  viewBtns.forEach((b) => b.addEventListener('click', () => showView(b.dataset.view as 'list' | 'map')));
+
   list.addEventListener('click', (e) => {
     const id = (e.target as HTMLElement).closest<HTMLElement>('[data-locate]')?.dataset.locate;
     if (!id) return;
     const m = markers.get(id)!;
+    if (isPhone()) showView('map', false);
     map.setView(m.getLatLng(), Math.max(map.getZoom(), 15));
     m.openPopup();
-    document.getElementById('map')!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (!isPhone()) document.getElementById('map')!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  const moreBtn = document.getElementById('more-filters') as HTMLButtonElement;
+  moreBtn.addEventListener('click', () => {
+    const open = form.classList.toggle('expanded');
+    moreBtn.setAttribute('aria-expanded', String(open));
   });
 
   let timer: number | undefined;
