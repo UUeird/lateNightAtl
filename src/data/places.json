@@ -62,7 +62,7 @@
   {
     "id": "octopus-bar",
     "name": "Octopus Bar",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "southeast asian"
     ],
@@ -110,7 +110,7 @@
   {
     "id": "southern-feedstore",
     "name": "Southern Feedstore",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "food hall"
     ],
@@ -278,7 +278,7 @@
   {
     "id": "woodys-cheesesteaks",
     "name": "Woody's CheeseSteaks",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "sandwiches",
       "cheesesteaks"
@@ -338,7 +338,7 @@
   {
     "id": "mamas-cocina-latina",
     "name": "Mama's Cocina Latina",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "mexican"
     ],
@@ -398,7 +398,7 @@
   {
     "id": "ginos-ny-pizza-bar",
     "name": "Gino's NY Pizza Bar",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "pizza"
     ],
@@ -457,7 +457,7 @@
   {
     "id": "mister-burger-buckhead",
     "name": "Mister Burger",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "burgers"
     ],
@@ -576,10 +576,11 @@
   {
     "id": "metro-diner-and-bar",
     "name": "Metro Diner & Bar",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Downtown",
     "address": "229 Peachtree St NE, Atlanta, GA 30303",
@@ -636,11 +637,12 @@
   {
     "id": "landmark-diner-downtown",
     "name": "Landmark Diner",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
       "breakfast",
-      "greek"
+      "greek",
+      "diner"
     ],
     "area": "Downtown",
     "address": "60 Luckie St NW, Atlanta, GA 30303",
@@ -698,7 +700,7 @@
   {
     "id": "pho-24",
     "name": "Pho 24",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": [
       "vietnamese"
     ],
@@ -856,10 +858,11 @@
   {
     "id": "waffle-house-5th-st",
     "name": "Waffle House (5th St)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Midtown",
     "address": "66 5th St NW, Atlanta, GA 30308",
@@ -917,10 +920,11 @@
   {
     "id": "waffle-house-downtown",
     "name": "Waffle House (Downtown)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Downtown",
     "address": "135 Andrew Young International Blvd NW, Atlanta, GA 30303",
@@ -978,10 +982,11 @@
   {
     "id": "waffle-house-glenwood",
     "name": "Waffle House (Glenwood Ave)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Glenwood Park",
     "address": "860 Glenwood Ave SE, Atlanta, GA 30316",
@@ -1039,10 +1044,11 @@
   {
     "id": "waffle-house-howell-mill",
     "name": "Waffle House (Howell Mill)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "West Midtown",
     "address": "1700 Howell Mill Rd NW, Atlanta, GA 30318",
@@ -1100,10 +1106,11 @@
   {
     "id": "waffle-house-cheshire-bridge",
     "name": "Waffle House (Cheshire Bridge)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Lindbergh",
     "address": "2264 Cheshire Bridge Rd NE, Atlanta, GA 30324",
@@ -1161,10 +1168,11 @@
   {
     "id": "waffle-house-piedmont",
     "name": "Waffle House (Piedmont Rd)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Buckhead",
     "address": "3016 Piedmont Rd NE, Atlanta, GA 30305",
@@ -1222,7 +1230,10 @@
   {
     "id": "cvs-emory-village",
     "name": "CVS (Emory Village)",
-    "type": "pharmacy",
+    "type": [
+      "grocery",
+      "pharmacy"
+    ],
     "area": "Druid Hills",
     "address": "1554 N Decatur Rd NE, Atlanta, GA 30307",
     "lat": 33.78804,
@@ -1279,7 +1290,10 @@
   {
     "id": "cvs-decatur",
     "name": "CVS (Decatur)",
-    "type": "pharmacy",
+    "type": [
+      "grocery",
+      "pharmacy"
+    ],
     "area": "Decatur",
     "address": "225 W Ponce de Leon Ave, Decatur, GA 30030",
     "lat": 33.77588,
@@ -1395,10 +1409,11 @@
   {
     "id": "waffle-house-avondale",
     "name": "Waffle House (Avondale Estates)",
-    "type": "diner",
+    "type": "food",
     "cuisine": [
       "american",
-      "breakfast"
+      "breakfast",
+      "diner"
     ],
     "area": "Avondale Estates",
     "address": "2840 E College Ave, Decatur, GA 30030",

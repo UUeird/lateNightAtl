@@ -28,8 +28,7 @@ export const AREAS = [
 ] as const;
 
 export const TYPES = {
-  restaurant: 'Restaurant',
-  diner: 'Diner',
+  food: 'Food',
   bar: 'Bar',
   club: 'Club',
   cafe: 'Café',
@@ -40,3 +39,9 @@ export const TYPES = {
 } as const;
 
 export type TypeKey = keyof typeof TYPES;
+
+/** Display label for a place's types, e.g. "Grocery & Pharmacy". */
+export const typeLabel = (types: readonly TypeKey[]) => types.map((t) => TYPES[t]).join(' & ');
+
+/** Old type values in shared links, mapped to what replaced them. */
+export const TYPE_ALIASES: Record<string, TypeKey> = { restaurant: 'food', diner: 'food' };

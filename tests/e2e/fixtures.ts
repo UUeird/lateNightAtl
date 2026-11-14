@@ -38,6 +38,14 @@ export async function openMoreFilters(page: Page) {
   if ((await btn.getAttribute('aria-expanded')) !== 'true') await btn.click();
 }
 
+/** Tick one option in an Area/Type/Cuisine menu (opening the panel and menu as needed). */
+export async function pick(page: Page, name: string, value: string) {
+  await openMoreFilters(page);
+  const menu = page.locator(`.chip-menu[data-filter="${name}"]`);
+  if (!(await menu.evaluate((d: HTMLDetailsElement) => d.open))) await menu.locator('summary').click();
+  await menu.locator(`input[value="${value}"]`).check();
+}
+
 export async function waitForMap(page: Page) {
   await page.locator('.leaflet-interactive').first().waitFor({ state: 'attached' });
 }

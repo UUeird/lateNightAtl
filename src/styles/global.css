@@ -51,6 +51,27 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 }
 .site-footer p { margin: 4px 0; }
 
+/* Desktop home: the page fits the window. The list scrolls in its own column and the
+   map fills the height beside it, however tall the window is. */
+@media (min-width: 801px) {
+  body.fit-screen { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  .fit-screen main { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; }
+  .fit-screen .site-header { width: 100%; }
+  .fit-screen .toolbar { position: static; }
+  .fit-screen .empty { grid-area: list; } /* shown only when the list is empty */
+  .fit-screen .explorer {
+    flex: 1;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: 'list map';
+    align-items: stretch;
+    padding-bottom: 12px;
+  }
+  .fit-screen .list { height: 100%; overflow-y: auto; align-content: start; overscroll-behavior: contain; padding: 2px; margin: -2px; }
+  .fit-screen .map { position: relative; top: 0; height: auto; min-height: 0; }
+  .fit-screen .site-footer { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 0; padding: 8px 16px 10px; width: 100%; }
+}
+
 /* Filters: one compact row (two short rows on phones) */
 :root { --control-h: 36px; }
 .filters { display: flex; flex-direction: column; gap: 8px; }
@@ -97,7 +118,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
   cursor: pointer;
 }
 .chip:hover { border-color: var(--accent); }
-select.chip, .chip select {
+select.chip, .chip select, .chip-menu > summary {
   appearance: none;
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%239b9cb5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -120,6 +141,40 @@ label.chip { padding: 0 0 0 14px; }
   cursor: pointer;
 }
 .chip-label { color: var(--muted); font-weight: 500; }
+/* Multi-select filter menus: a chip that opens a checkbox list. */
+.chip-menu { position: relative; }
+.chip-menu > summary { list-style: none; user-select: none; }
+.chip-menu > summary::-webkit-details-marker { display: none; }
+.chip-menu[open] > summary, .chip-menu.is-active > summary { border-color: var(--accent); }
+.chip-menu.is-active > summary { color: var(--accent); }
+.menu-text { overflow: hidden; text-overflow: ellipsis; }
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  min-width: max(100%, 200px);
+  max-height: min(60vh, 360px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.45);
+}
+.menu-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.menu-option:hover { background: var(--surface); }
+.menu-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 select option { background: var(--surface-2); color: var(--text); }
 /* Desktop order: search, night, open at, near me, within, filters */
 .near-btn { order: 1; }
@@ -193,7 +248,7 @@ select option { background: var(--surface-2); color: var(--text); }
   gap: 16px;
   align-items: start;
 }
-.list { grid-area: list; list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.list { grid-area: list; list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .empty { grid-area: empty; color: var(--muted); margin: 0; }
 .map {
   grid-area: map;
@@ -210,13 +265,24 @@ select option { background: var(--surface-2); color: var(--text); }
   .map { position: relative; top: 0; height: 45vh; min-height: 280px; }
 }
 
+/* Two lines per place: name, then status · area · type. Map button on the right. */
 .card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
+  padding: 8px 10px 8px 14px;
 }
-.card h2 { font-size: 1.1rem; margin: 0 0 2px; }
+.card h2 { font-size: 1rem; line-height: 1.35; margin: 0; }
+.card h2, .card-sub { grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-sub { margin: 0; font-size: 0.85rem; line-height: 1.4; }
+.card-sub .status { font-size: inherit; }
+.card-sub .meta { font-size: inherit; }
+.card-sub .meta::before { content: ' · '; color: var(--muted); }
+.card .locate { grid-column: 2; grid-row: 1 / span 2; }
 .card { position: relative; }
 .card h2 a { color: var(--text); text-decoration: none; }
 /* Whole card opens the place page; the Map button sits above the link. */
@@ -227,7 +293,6 @@ select option { background: var(--surface-2); color: var(--text); }
 .card h2 a:hover { color: var(--accent); }
 .meta { margin: 0; color: var(--muted); font-size: 0.9rem; }
 .area::before { content: ' — '; }
-.card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
 .status { margin: 0; color: var(--open); font-weight: 600; font-size: 0.9rem; }
 .status.closed { color: var(--closed); }
 .distance { color: var(--muted); font-weight: 500; }
@@ -293,6 +358,9 @@ select option { background: var(--surface-2); color: var(--text); }
 }
 .btn:hover { border-color: var(--accent); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+/* A button that also shows what it acts on: the address, the phone number. */
+.btn-detail { flex-direction: column; align-items: flex-start; padding: 6px 16px; line-height: 1.25; text-align: left; }
+.btn-sub { font-size: 0.82rem; font-weight: 500; opacity: 0.8; }
 
 /* Phones */
 @media (max-width: 800px) {
@@ -322,10 +390,15 @@ select option { background: var(--surface-2); color: var(--text); }
   }
   .extra-filters { display: grid; grid-template-columns: 1fr 1fr; }
   .extra-filters[hidden] { display: none; }
-  .extra-filters select.chip { width: 100%; min-width: 0; }
+  /* Menus open as a full-width sheet under the filter row. */
+  .extra-filters { position: relative; }
+  .chip-menu { position: static; min-width: 0; }
+  .chip-menu > summary { width: 100%; }
+  .menu-panel { right: 0; min-width: 0; }
+  .menu-option { min-height: 44px; }
   .chip { padding: 0 12px; }
   label.chip { padding-left: 12px; }
-  select.chip, .chip select { padding-right: 28px; background-position: right 10px center; }
+  select.chip, .chip select, .chip-menu > summary { padding-right: 28px; background-position: right 10px center; }
 
   .results-bar { margin-top: 10px; }
   .toolbar.is-collapsed { transform: translateY(calc(-1 * var(--collapse-by, 0px))); }
@@ -341,6 +414,11 @@ select option { background: var(--surface-2); color: var(--text); }
     cursor: pointer;
   }
   .view-toggle button[aria-pressed='true'] { background: var(--accent); color: var(--bg); }
+
+  /* Narrow screens: names wrap rather than get cut off; the Map button slims down. */
+  .card h2 { white-space: normal; overflow-wrap: anywhere; }
+  .card { column-gap: 8px; padding-right: 8px; }
+  .card .locate { min-width: 52px; padding: 4px 10px; }
 
   .explorer { grid-template-areas: none; margin-top: 12px; }
   .explorer > * { grid-area: auto; }

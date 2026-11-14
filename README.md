@@ -33,7 +33,7 @@ All places live in [`src/data/places.json`](src/data/places.json). Each entry's 
 {
   "id": "url-slug",
   "name": "Display Name",
-  "type": "restaurant",
+  "type": "food",
   "cuisine": ["korean", "bbq"],
   "area": "Buford Highway",
   "address": "123 Street, Atlanta, GA 30000",
@@ -48,6 +48,7 @@ All places live in [`src/data/places.json`](src/data/places.json). Each entry's 
 ```
 
 - **hours**: 24-hour `"HH:MM"`, Atlanta time. A close at or before the open time means it closes after midnight (`["18:00", "02:00"]`). A missing day means closed that day. Open 24 hours is `["00:00", "24:00"]`.
+- **type** is one value, or a list when a place is several things (`["grocery", "pharmacy"]` for a CVS).
 - **type** and **area** must be values from [`src/data/taxonomy.ts`](src/data/taxonomy.ts). Add new ones there.
 - **cuisine** is free text, lowercase. The cuisine filter lists whatever values the data contains.
 - **lat/lng**: right-click the spot in Google Maps or OpenStreetMap to copy them.

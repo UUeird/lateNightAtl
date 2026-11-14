@@ -5,8 +5,10 @@ import { url } from '../lib/url';
 interface Props {
   title?: string;
   description?: string;
+  /** Desktop: fit the page to the window; the page's own panes scroll instead. */
+  fitScreen?: boolean;
 }
-const { title, description = 'Where to eat, drink and get things done late at night in Atlanta.' } = Astro.props;
+const { title, description = 'Where to eat, drink and get things done late at night in Atlanta.', fitScreen = false } = Astro.props;
 const fullTitle = title ? `${title} · Late Night ATL` : 'Late Night ATL';
 ---
 <!doctype html>
@@ -23,7 +25,7 @@ const fullTitle = title ? `${title} · Late Night ATL` : 'Late Night ATL';
     <meta property="og:description" content={description} />
     <slot name="head" />
   </head>
-  <body>
+  <body class:list={{ 'fit-screen': fitScreen }}>
     <header class="site-header">
       <a class="brand" href={url()}>Late Night <span>ATL</span></a>
     </header>

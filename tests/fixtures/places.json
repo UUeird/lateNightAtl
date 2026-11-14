@@ -2,8 +2,8 @@
   {
     "id": "night-owl-diner",
     "name": "Night Owl Diner (sample)",
-    "type": "diner",
-    "cuisine": ["american", "breakfast"],
+    "type": "food",
+    "cuisine": ["american", "breakfast", "diner"],
     "area": "Midtown",
     "address": "100 Example St NE, Atlanta, GA 30308",
     "lat": 33.7815, "lng": -84.3835,
@@ -31,7 +31,7 @@
   {
     "id": "buford-hwy-noodle-house",
     "name": "Buford Hwy Noodle House (sample)",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": ["chinese", "noodles"],
     "area": "Buford Highway",
     "address": "300 Example Hwy NE, Atlanta, GA 30341",
@@ -46,7 +46,7 @@
   {
     "id": "little-five-slice",
     "name": "Little Five Slice (sample)",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": ["pizza"],
     "area": "Little Five Points",
     "address": "400 Example St NE, Atlanta, GA 30307",
@@ -61,7 +61,7 @@
   {
     "id": "eav-taqueria-tardia",
     "name": "Taqueria Tardía (sample)",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": ["mexican", "tacos"],
     "area": "East Atlanta Village",
     "address": "500 Example Ave SE, Atlanta, GA 30316",
@@ -87,7 +87,7 @@
   {
     "id": "westside-pho",
     "name": "Westside Phở & Bánh Mì (sample)",
-    "type": "restaurant",
+    "type": "food",
     "cuisine": ["vietnamese"],
     "area": "West Midtown",
     "address": "700 Example Blvd NW, Atlanta, GA 30318",
@@ -102,7 +102,7 @@
   {
     "id": "poncey-24-pharmacy",
     "name": "Poncey 24 Pharmacy (sample)",
-    "type": "pharmacy",
+    "type": ["grocery", "pharmacy"],
     "area": "Poncey-Highland",
     "address": "800 Example Ave NE, Atlanta, GA 30306",
     "lat": 33.7728, "lng": -84.3572,

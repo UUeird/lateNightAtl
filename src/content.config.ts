@@ -11,12 +11,17 @@ const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$|^24:00$/, 'Use 24-hour 
 const span = z.tuple([time, time]);
 const day = z.array(span).optional(); // missing or [] = closed that day
 
+const typeKey = z.enum(Object.keys(TYPES) as [keyof typeof TYPES, ...(keyof typeof TYPES)[]]);
+
 const places = defineCollection({
   // PLACES_FILE lets tests build against fixed fixture data.
   loader: file(process.env.PLACES_FILE ?? 'src/data/places.json'),
   schema: z.object({
     name: z.string(),
-    type: z.enum(Object.keys(TYPES) as [keyof typeof TYPES, ...(keyof typeof TYPES)[]]),
+    // One type, or a list for places that are several things (a CVS is a grocery and a pharmacy).
+    type: z
+      .union([typeKey, z.array(typeKey).min(1)])
+      .transform((t) => (Array.isArray(t) ? t : [t])),
     cuisine: z.array(z.string().toLowerCase()).default([]),
     area: z.enum(AREAS),
     address: z.string(),

@@ -1,7 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { TYPES } from '../../data/taxonomy';
+import { typeLabel } from '../../data/taxonomy';
 import { DAYS, DAY_NAMES, formatDay, is24h } from '../../lib/hours';
 import { url } from '../../lib/url';
 import { directionsUrl } from '../../lib/directions';
@@ -18,11 +18,13 @@ const { place } = Astro.props;
 const p = place.data;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const directions = directionsUrl(p.address);
+// The state and ZIP add little on a button: "229 Peachtree St NE, Atlanta".
+const shortAddress = p.address.replace(/,\s*GA\s+\d{5}(-\d{4})?$/, '');
 const schemaDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': p.type === 'bar' || p.type === 'club' ? 'BarOrPub' : ['restaurant', 'diner', 'cafe'].includes(p.type) ? 'Restaurant' : 'LocalBusiness',
+  '@type': p.type.some((t) => t === 'bar' || t === 'club') ? 'BarOrPub' : p.type.some((t) => t === 'food' || t === 'cafe') ? 'Restaurant' : 'LocalBusiness',
   name: p.name,
   address: p.address,
   geo: { '@type': 'GeoCoordinates', latitude: p.lat, longitude: p.lng },
@@ -40,16 +42,22 @@ const jsonLd = {
 };
 const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 ---
-<Base title={p.name} description={`${p.name}: ${TYPES[p.type].toLowerCase()} in ${p.area}, Atlanta. Late-night hours, map and directions.`}>
+<Base title={p.name} description={`${p.name}: ${typeLabel(p.type).toLowerCase()} in ${p.area}, Atlanta. Late-night hours, map and directions.`}>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <article class="place">
     <p class="back"><a href={url()}>← All places</a></p>
     <h1>{p.name}</h1>
-    <p class="meta">{[TYPES[p.type], ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
+    <p class="meta">{[typeLabel(p.type), ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
     <p class="status big" id="status" data-hours={JSON.stringify(p.hours)}></p>
     <div class="actions">
-      <a class="btn btn-primary" href={directions}>Directions</a>
-      {p.phone && <a class="btn" href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>Call</a>}
+      <a class="btn btn-primary btn-detail" href={directions}>
+        <span>Directions</span><span class="btn-sub">{shortAddress}</span>
+      </a>
+      {p.phone && (
+        <a class="btn btn-detail" href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>
+          <span>Call</span><span class="btn-sub">{p.phone}</span>
+        </a>
+      )}
       {p.url && <a class="btn" href={p.url} rel="noopener">Website</a>}
     </div>
 
@@ -67,10 +75,7 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
         )}
         <p class="verified">Hours last checked {verified}{p.hoursSource && <> against <a href={p.hoursSource} rel="noopener">this source</a></>}.</p>
 
-        <h2>Details</h2>
-        <p>{p.address}</p>
-        {p.phone && <p>{p.phone}</p>}
-        {p.notes && <p class="notes">{p.notes}</p>}
+        {p.notes && <><h2>Notes</h2><p class="notes">{p.notes}</p></>}
       </section>
       <div class="map map-small" id="map" data-lat={p.lat} data-lng={p.lng}></div>
     </div>

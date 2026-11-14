@@ -1,11 +1,12 @@
 import L from 'leaflet';
 import { createMap, markerStyle } from './map';
+import { TYPE_ALIASES } from '../data/taxonomy';
 import { atlantaNow, closesLabel, openSpanAt, tonight, type Hours } from '../lib/hours';
 
 interface Place {
   id: string;
   name: string;
-  type: string;
+  types: string[];
   typeLabel: string;
   cuisine: string[];
   area: string;
@@ -38,7 +39,9 @@ function locationErrorMessage(code: number): string {
   return `Your device couldn’t find your location. ${locationSettingsHint()}`;
 }
 
-const DEFAULTS: Record<string, string> = { night: 'tonight', at: '1260', area: '', type: '', cuisine: '', q: '' };
+const DEFAULTS: Record<string, string> = { night: 'tonight', at: '1260', q: '' };
+/** Multi-select filters behind the "Filters" button. Several values in one filter match any of them. */
+const EXTRA_KEYS = ['area', 'type', 'cuisine'] as const;
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -156,7 +159,13 @@ export function initExplorer() {
 
   // Restore filters from the URL so filtered views can be shared.
   const params = new URLSearchParams(location.search);
+  const checkboxes = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[type=checkbox][name="${name}"]`)];
   for (const [name, value] of params) {
+    if ((EXTRA_KEYS as readonly string[]).includes(name)) {
+      const v = name === 'type' ? (TYPE_ALIASES[value] ?? value) : value;
+      for (const box of checkboxes(name)) if (box.value === v) box.checked = true;
+      continue;
+    }
     const el = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
     if (el) el.value = value;
   }
@@ -166,7 +175,7 @@ export function initExplorer() {
   const extraFilters = document.getElementById('extra-filters')!;
   const moreBtn = document.getElementById('more-filters') as HTMLButtonElement;
   const clearBtn = document.getElementById('clear-filters') as HTMLButtonElement;
-  const EXTRA_KEYS = ['area', 'type', 'cuisine'];
+  const menus = [...form.querySelectorAll<HTMLDetailsElement>('.chip-menu')];
   const showExtras = (open: boolean) => {
     extraFilters.hidden = !open;
     moreBtn.setAttribute('aria-expanded', String(open));
@@ -184,7 +193,10 @@ export function initExplorer() {
     `</div>`;
 
   function update(fit: boolean) {
-    const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const data = new FormData(form);
+    const f = Object.fromEntries(data) as Record<string, string>;
+    const picked = Object.fromEntries(EXTRA_KEYS.map((k) => [k, new Set(data.getAll(k) as string[])]));
+    const { area, type, cuisine } = picked;
     const live = f.night === 'now';
     atSelect.disabled = live;
     const now = atlantaNow();
@@ -201,9 +213,9 @@ export function initExplorer() {
       const ok =
         span &&
         !(miles > within) &&
-        (!f.area || p.area === f.area) &&
-        (!f.type || p.type === f.type) &&
-        (!f.cuisine || p.cuisine.includes(f.cuisine)) &&
+        (!area.size || area.has(p.area)) &&
+        (!type.size || p.types.some((t) => type.has(t))) &&
+        (!cuisine.size || p.cuisine.some((c) => cuisine.has(c))) &&
         (!q || [p.name, p.area, p.typeLabel, ...p.cuisine].join(' ').toLowerCase().includes(q));
       cards.get(p.id)!.hidden = !ok;
       if (ok) results.push({ p, end: span[1], label: closesLabel(span[1], span[0]), miles });
@@ -229,7 +241,13 @@ export function initExplorer() {
     if (fit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
 
     // Show how many of the tucked-away filters are active.
-    const extras = EXTRA_KEYS.filter((k) => f[k]).length;
+    const extras = EXTRA_KEYS.reduce((n, k) => n + picked[k].size, 0);
+    for (const menu of menus) {
+      const on = checkboxes(menu.dataset.filter!).filter((b) => b.checked);
+      menu.querySelector('.menu-text')!.textContent =
+        on.length === 0 ? menu.dataset.all! : on.length === 1 ? on[0].parentElement!.textContent! : `${on.length} ${menu.dataset.plural}`;
+      menu.classList.toggle('is-active', on.length > 0);
+    }
     badge.textContent = String(extras);
     badge.hidden = !extras;
     clearBtn.hidden = !extras;
@@ -238,6 +256,7 @@ export function initExplorer() {
     const out = new URLSearchParams();
     // Location-based settings stay out of shared links.
     for (const [k, v] of Object.entries(f)) if (k in DEFAULTS && v !== DEFAULTS[k] && !(k === 'at' && live)) out.set(k, v);
+    for (const k of EXTRA_KEYS) for (const v of picked[k]) out.append(k, v);
     const qs = out.toString();
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
   }
@@ -272,8 +291,25 @@ export function initExplorer() {
 
   moreBtn.addEventListener('click', () => showExtras(moreBtn.getAttribute('aria-expanded') !== 'true'));
   clearBtn.addEventListener('click', () => {
-    for (const k of EXTRA_KEYS) (form.elements.namedItem(k) as HTMLSelectElement).value = '';
+    for (const k of EXTRA_KEYS) for (const box of checkboxes(k)) box.checked = false;
     update(true);
+  });
+
+  // Filter menus: one open at a time; close on an outside click or Escape.
+  for (const menu of menus) {
+    menu.addEventListener('toggle', () => {
+      if (menu.open) for (const other of menus) if (other !== menu) other.open = false;
+    });
+  }
+  document.addEventListener('click', (e) => {
+    for (const menu of menus) if (menu.open && !menu.contains(e.target as Node)) menu.open = false;
+  });
+  form.addEventListener('keydown', (e) => {
+    const menu = (e.target as HTMLElement).closest<HTMLDetailsElement>('.chip-menu');
+    if (e.key === 'Escape' && menu?.open) {
+      menu.open = false;
+      menu.querySelector('summary')!.focus();
+    }
   });
 
   let timer: number | undefined;

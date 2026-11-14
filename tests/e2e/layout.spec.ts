@@ -15,10 +15,14 @@ test('tap targets are at least 40px tall on phones', async ({ page, isMobile }) 
   test.skip(!isMobile, 'phone-only');
   for (const path of ['/', '/places/castleberry-late-lounge/']) {
     await page.goto(path);
-    if (path === '/') await openMoreFilters(page); // reveal the extra filters too
+    if (path === '/') {
+      await openMoreFilters(page); // reveal the extra filters too
+      await page.locator('.chip-menu[data-filter=area] summary').click(); // and a menu's options
+    }
     const small = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>('button, select, input, .btn, .leaflet-bar a')]
-        .filter((el) => el.offsetParent !== null)
+        .filter((el) => el.offsetParent !== null && el.checkVisibility())
+        .map((el) => el.closest<HTMLElement>('.menu-option') ?? el) // a checkbox's tap target is its whole row
         .map((el) => ({ el: el.id || el.className || el.tagName, h: el.getBoundingClientRect().height }))
         .filter(({ h }) => h < 40),
     );

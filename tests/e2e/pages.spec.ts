@@ -19,6 +19,14 @@ test('place page highlights today and shows live status', async ({ page }) => {
   await expect(page.locator('#status')).toHaveText('Open now · closes 4 AM');
 });
 
+test('Directions and Call buttons show the address and number', async ({ page }) => {
+  await page.goto('/places/night-owl-diner/');
+  const directions = page.getByRole('link', { name: /^Directions/ });
+  await expect(directions).toContainText('100 Example St NE, Atlanta');
+  await expect(directions).not.toContainText('GA 30308');
+  await expect(page.locator('.place-grid')).not.toContainText('100 Example St'); // not repeated below
+});
+
 test('unknown URLs get the 404 page', async ({ page, consoleErrors }) => {
   const res = await page.goto('/nope/');
   expect(res?.status()).toBe(404);
