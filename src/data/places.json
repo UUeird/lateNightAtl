@@ -1331,5 +1331,126 @@
     "notes": "The store is open 24 hours; the pharmacy counter closes earlier, so call ahead for prescriptions.",
     "hoursSource": "https://www.cvs.com/store-locator/decatur-ga-pharmacies/225-west-ponce-deleon-avenue-decatur-ga-30030/storeid=2367",
     "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "trackside-tavern",
+    "name": "Trackside Tavern",
+    "type": "bar",
+    "cuisine": [
+      "american"
+    ],
+    "area": "Decatur",
+    "address": "313 E College Ave, Decatur, GA 30030",
+    "lat": 33.77109,
+    "lng": -84.29226,
+    "hours": {
+      "mon": [
+        [
+          "15:00",
+          "04:00"
+        ]
+      ],
+      "tue": [
+        [
+          "15:00",
+          "04:00"
+        ]
+      ],
+      "wed": [
+        [
+          "15:00",
+          "04:00"
+        ]
+      ],
+      "thu": [
+        [
+          "15:00",
+          "04:00"
+        ]
+      ],
+      "fri": [
+        [
+          "15:00",
+          "04:00"
+        ]
+      ],
+      "sat": [
+        [
+          "13:00",
+          "03:00"
+        ]
+      ],
+      "sun": [
+        [
+          "13:00",
+          "03:00"
+        ]
+      ]
+    },
+    "phone": "(404) 378-0504",
+    "notes": "Dive bar by the train tracks with a late kitchen. No official website; these hours come from listings, so call ahead.",
+    "hoursSource": "https://creativeloafing.com/business-2780-trackside-tavern",
+    "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "waffle-house-avondale",
+    "name": "Waffle House (Avondale Estates)",
+    "type": "diner",
+    "cuisine": [
+      "american",
+      "breakfast"
+    ],
+    "area": "Avondale Estates",
+    "address": "2840 E College Ave, Decatur, GA 30030",
+    "lat": 33.77556,
+    "lng": -84.27381,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "phone": "(404) 294-8758",
+    "notes": "Open 24 hours, every day.",
+    "hoursSource": "https://locations.wafflehouse.com/decatur-ga-1000/",
+    "lastVerified": "2026-11-13"
   }
 ]

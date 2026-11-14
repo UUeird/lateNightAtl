@@ -2,6 +2,7 @@
 // Adding a value here makes it valid in the data and shows it in the filters.
 
 export const AREAS = [
+  'Avondale Estates',
   'Buckhead',
   'Buford Highway',
   'Cabbagetown',
