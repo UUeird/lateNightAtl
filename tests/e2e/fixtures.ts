@@ -32,10 +32,10 @@ export { expect };
 
 export const visibleNames = (page: Page) => page.locator('.card:not([hidden]) h2').allTextContents();
 
-/** On phones, Area/Type/Cuisine/Within sit behind "More filters". */
+/** Area/Type/Cuisine sit behind the "Filters" button. */
 export async function openMoreFilters(page: Page) {
   const btn = page.locator('#more-filters');
-  if ((await btn.isVisible()) && (await btn.getAttribute('aria-expanded')) !== 'true') await btn.click();
+  if ((await btn.getAttribute('aria-expanded')) !== 'true') await btn.click();
 }
 
 export async function waitForMap(page: Page) {

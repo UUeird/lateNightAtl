@@ -30,55 +30,61 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 ---
 <Base>
   <form class="filters" id="filters" role="search" aria-label="Filter places">
-    <label>When
-      <select name="night">
+    <div class="filter-row">
+      <div class="filter-main">
+      <label class="search">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+        <span class="sr-only">Search</span>
+        <input type="search" name="q" placeholder="Search places or food" autocomplete="off" />
+      </label>
+      <button type="button" class="chip near-btn" id="near-me" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3L13.5 21z" /></svg>
+        <span class="near-text">Near me</span>
+      </button>
+      <button type="button" class="chip more-btn" id="more-filters" aria-expanded="false" aria-controls="extra-filters">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
+        <span class="more-text">Filters</span><span class="badge" id="filter-badge" hidden></span>
+      </button>
+      </div>
+      <div class="filter-when">
+      <select class="chip when-chip night-chip" name="night" aria-label="Which night">
         <option value="now">Right now</option>
         <option value="tonight" selected>Tonight</option>
-        {DAY_NAMES.map((d, i) => <option value={i}>{d} night</option>)}
+        {DAY_NAMES.map((d, i) => <option value={i}>{d.slice(0, 3)} night</option>)}
       </select>
-    </label>
-    <label>Still open at
-      <select name="at">
-        {times.map((t) => <option value={t} selected={t === 1260}>{formatTime(t)}</option>)}
-      </select>
-    </label>
-    <div class="field near-field">
-      <span class="field-label">Location</span>
-      <button type="button" class="near-btn" id="near-me" aria-pressed="false">Near me</button>
+      <label class="chip when-chip at-chip">
+        <span class="chip-label">Open at</span>
+        <select name="at">
+          {times.map((t) => <option value={t} selected={t === 1260}>{t === 1440 ? '12 AM' : formatTime(t)}</option>)}
+        </select>
+      </label>
+      <label class="chip when-chip within-chip" id="within-chip" hidden>
+        <span class="chip-label">Within</span>
+        <select name="within" disabled>
+          <option value="">any distance</option>
+          <option value="1">1 mile</option>
+          <option value="3">3 miles</option>
+          <option value="5">5 miles</option>
+          <option value="10">10 miles</option>
+        </select>
+      </label>
+      </div>
     </div>
-    <button type="button" class="more-btn" id="more-filters" aria-expanded="false" aria-controls="filters">
-      More filters<span class="badge" id="filter-badge" hidden></span>
-    </button>
-    <label class="extra">Area
-      <select name="area">
+    <div class="filter-row extra-filters" id="extra-filters" hidden>
+      <select class="chip" name="area" aria-label="Area">
         <option value="">All areas</option>
         {areas.map((a) => <option value={a}>{a}</option>)}
       </select>
-    </label>
-    <label class="extra">Type
-      <select name="type">
+      <select class="chip" name="type" aria-label="Type">
         <option value="">All types</option>
         {types.map(([k, label]) => <option value={k}>{label}</option>)}
       </select>
-    </label>
-    <label class="extra">Cuisine
-      <select name="cuisine">
+      <select class="chip" name="cuisine" aria-label="Cuisine">
         <option value="">Any cuisine</option>
         {cuisines.map((c) => <option value={c}>{cap(c)}</option>)}
       </select>
-    </label>
-    <label class="extra">Within
-      <select name="within" disabled>
-        <option value="">Any distance</option>
-        <option value="1">1 mile</option>
-        <option value="3">3 miles</option>
-        <option value="5">5 miles</option>
-        <option value="10">10 miles</option>
-      </select>
-    </label>
-    <label class="search">Search
-      <input type="search" name="q" placeholder="Name, food, area…" autocomplete="off" />
-    </label>
+      <button type="button" class="clear-btn" id="clear-filters" hidden>Clear filters</button>
+    </div>
   </form>
 
   <p class="geo-msg" id="geo-msg" role="status" hidden></p>

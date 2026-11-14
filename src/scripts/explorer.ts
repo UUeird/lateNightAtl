@@ -71,11 +71,14 @@ export function initExplorer() {
     geoMsg.textContent = text;
     geoMsg.hidden = !text;
   };
+  const nearText = nearBtn.querySelector('.near-text')!;
+  const withinChip = document.getElementById('within-chip')!;
   const setNear = (on: boolean) => {
     nearBtn.setAttribute('aria-pressed', String(on));
-    nearBtn.textContent = on ? 'Near me ✓' : 'Near me';
+    nearText.textContent = 'Near me';
     nearBtn.disabled = false;
     withinSel.disabled = !on;
+    withinChip.hidden = !on;
     if (!on) withinSel.value = '';
   };
 
@@ -93,7 +96,7 @@ export function initExplorer() {
       return;
     }
     nearBtn.disabled = true;
-    nearBtn.textContent = 'Locating…';
+    nearText.textContent = 'Locating…';
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         here = L.latLng(pos.coords.latitude, pos.coords.longitude);
@@ -120,11 +123,16 @@ export function initExplorer() {
 
   let fitTo: L.LatLngBounds | null = null;
   const badge = document.getElementById('filter-badge')!;
+  const extraFilters = document.getElementById('extra-filters')!;
+  const moreBtn = document.getElementById('more-filters') as HTMLButtonElement;
+  const clearBtn = document.getElementById('clear-filters') as HTMLButtonElement;
+  const EXTRA_KEYS = ['area', 'type', 'cuisine'];
+  const showExtras = (open: boolean) => {
+    extraFilters.hidden = !open;
+    moreBtn.setAttribute('aria-expanded', String(open));
+  };
   // Open the extra filters if a shared link uses them.
-  if (['area', 'type', 'cuisine'].some((k) => params.get(k))) {
-    form.classList.add('expanded');
-    document.getElementById('more-filters')!.setAttribute('aria-expanded', 'true');
-  }
+  if (EXTRA_KEYS.some((k) => params.get(k))) showExtras(true);
 
   const popupHtml = (p: Place, status: string) =>
     `<a href="${p.url}"><strong>${escapeHtml(p.name)}</strong></a><br>${escapeHtml(p.typeLabel)} · ${escapeHtml(p.area)}<br>${escapeHtml(status)}`;
@@ -175,9 +183,10 @@ export function initExplorer() {
     if (fit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
 
     // Show how many of the tucked-away filters are active.
-    const extras = ['area', 'type', 'cuisine', 'within'].filter((k) => f[k]).length;
+    const extras = EXTRA_KEYS.filter((k) => f[k]).length;
     badge.textContent = String(extras);
     badge.hidden = !extras;
+    clearBtn.hidden = !extras;
 
     // Keep the URL in sync, omitting defaults.
     const out = new URLSearchParams();
@@ -213,10 +222,10 @@ export function initExplorer() {
     if (!isPhone()) document.getElementById('map')!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
-  const moreBtn = document.getElementById('more-filters') as HTMLButtonElement;
-  moreBtn.addEventListener('click', () => {
-    const open = form.classList.toggle('expanded');
-    moreBtn.setAttribute('aria-expanded', String(open));
+  moreBtn.addEventListener('click', () => showExtras(moreBtn.getAttribute('aria-expanded') !== 'true'));
+  clearBtn.addEventListener('click', () => {
+    for (const k of EXTRA_KEYS) (form.elements.namedItem(k) as HTMLSelectElement).value = '';
+    update(true);
   });
 
   let timer: number | undefined;

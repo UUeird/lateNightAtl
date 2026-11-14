@@ -66,13 +66,14 @@ test.describe('near me', () => {
     );
     expect(miles).toEqual([...miles].sort((a, b) => a - b));
 
-    await openMoreFilters(page);
+    await expect(page.locator('#within-chip')).toBeVisible(); // appears once Near me is on
     await page.selectOption('select[name=within]', '1');
     await expect(page.locator('#count')).toHaveText('2 places');
     expect(page.url()).not.toContain('within'); // location stays out of shared links
 
     await page.click('#near-me'); // toggle off
     await expect(page.locator('select[name=within]')).toBeDisabled();
+    await expect(page.locator('#within-chip')).toBeHidden();
     await expect(page.locator('#count')).toHaveText('8 places');
   });
 });
@@ -96,6 +97,27 @@ test('near me explains when the device can’t find a location', async ({ page }
   await expect(page.locator('#geo-msg')).toContainText('couldn’t find your location');
   await expect(page.locator('#geo-msg')).toContainText('Settings'); // device-specific hint (desktop project reports Windows)
   await expect(page.locator('#near-me')).toHaveText('Near me');
+});
+
+test('Filters panel: badge count and Clear', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#extra-filters')).toBeHidden();
+  await openMoreFilters(page);
+  await page.selectOption('select[name=type]', 'restaurant');
+  await page.selectOption('select[name=cuisine]', 'pizza');
+  await expect(page.locator('#filter-badge')).toHaveText('2');
+  await expect(page.locator('#count')).toHaveText('1 place');
+  await page.click('#clear-filters');
+  await expect(page.locator('#filter-badge')).toBeHidden();
+  await expect(page.locator('#count')).toHaveText('8 places');
+  await expect(page).not.toHaveURL(/type=|cuisine=/);
+});
+
+test('filters fit in a compact space', async ({ page, isMobile }) => {
+  await page.goto('/');
+  const h = (await page.locator('#filters').boundingBox())!.height;
+  // Desktop: one row. Phones: two rows (search + icons, then night + time).
+  expect(h).toBeLessThanOrEqual(isMobile ? 90 : 40);
 });
 
 test.describe('phones', () => {
