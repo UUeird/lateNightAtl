@@ -187,8 +187,9 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
         say();
         locate.setState('on');
         if (miles <= FRAME_BOTH_MILES) {
-          // Extra room on the left keeps both dots clear of the map's buttons.
-          const padding = { top: 60, bottom: 60, right: 60, left: 90 };
+          // Extra room on the buttons' side (right on phones, left on desktop) keeps both dots clear of them.
+          const phone = matchMedia('(max-width: 800px)').matches;
+          const padding = { top: 60, bottom: 60, right: phone ? 90 : 60, left: phone ? 60 : 90 };
           map.fitBounds(new maplibregl.LngLatBounds(at, at).extend(here), { padding, maxZoom: 15, duration: asked ? 500 : 0 });
         }
       } catch (err) {

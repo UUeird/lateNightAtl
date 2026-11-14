@@ -181,6 +181,8 @@ test('E14 near me explains a denied permission', async ({ page, isMobile }) => {
   await expect(page.locator('#geo-msg')).toContainText('Location is blocked for this site');
   // iPhones (the phone projects) get Safari's own setting, since Safari never prompts when it's Deny.
   await expect(page.locator('#geo-msg')).toContainText(isMobile ? 'Settings → Apps → Safari → Location' : 'site settings');
+  // …and the system-wide Safari Websites switch, which refuses every site without asking.
+  if (isMobile) await expect(page.locator('#geo-msg')).toContainText('Location Services → Safari Websites');
   await expect(page.locator('#count')).toHaveText('8 places');
 });
 
