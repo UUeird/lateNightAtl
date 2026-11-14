@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import { TYPES } from '../../data/taxonomy';
 import { DAYS, DAY_NAMES, formatDay, is24h } from '../../lib/hours';
 import { url } from '../../lib/url';
+import { directionsUrl } from '../../lib/directions';
 
 export async function getStaticPaths() {
   const places = await getCollection('places');
@@ -16,7 +17,7 @@ interface Props {
 const { place } = Astro.props;
 const p = place.data;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.address)}`;
+const directions = directionsUrl(p.address);
 const schemaDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const jsonLd = {

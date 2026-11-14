@@ -99,6 +99,18 @@ test('near me explains when the device can’t find a location', async ({ page }
   await expect(page.locator('#near-me')).toHaveText('Near me');
 });
 
+test('map popup has Directions and Details buttons', async ({ page, isMobile }) => {
+  await page.goto('/');
+  await page.locator('.card:not([hidden]) .locate').first().click(); // Night Owl Diner
+  const popup = page.locator('.leaflet-popup');
+  await expect(popup).toBeVisible();
+  await expect(popup.locator('.popup-status')).toHaveText('Open 24 hours');
+  const directions = popup.getByRole('link', { name: 'Directions' });
+  await expect(directions).toHaveAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=100%20Example%20St%20NE%2C%20Atlanta%2C%20GA%2030308');
+  await expect(popup.getByRole('link', { name: 'Details' })).toHaveAttribute('href', '/places/night-owl-diner/');
+  if (isMobile) expect((await directions.boundingBox())!.height).toBeGreaterThanOrEqual(40);
+});
+
 test('Filters panel: badge count and Clear', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#extra-filters')).toBeHidden();

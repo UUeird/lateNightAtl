@@ -13,6 +13,7 @@ interface Place {
   lng: number;
   hours: Hours;
   url: string;
+  directions: string;
 }
 
 const METERS_PER_MILE = 1609.344;
@@ -135,7 +136,13 @@ export function initExplorer() {
   if (EXTRA_KEYS.some((k) => params.get(k))) showExtras(true);
 
   const popupHtml = (p: Place, status: string) =>
-    `<a href="${p.url}"><strong>${escapeHtml(p.name)}</strong></a><br>${escapeHtml(p.typeLabel)} · ${escapeHtml(p.area)}<br>${escapeHtml(status)}`;
+    `<a class="popup-name" href="${p.url}">${escapeHtml(p.name)}</a>` +
+    `<div class="popup-meta">${escapeHtml(p.typeLabel)} · ${escapeHtml(p.area)}</div>` +
+    `<div class="popup-status">${escapeHtml(status)}</div>` +
+    `<div class="popup-actions">` +
+    `<a class="btn btn-primary" href="${p.directions}">Directions</a>` +
+    `<a class="btn" href="${p.url}">Details</a>` +
+    `</div>`;
 
   function update(fit: boolean) {
     const f = Object.fromEntries(new FormData(form)) as Record<string, string>;

@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import { TYPES } from '../data/taxonomy';
 import { DAY_NAMES, formatTime } from '../lib/hours';
 import { url } from '../lib/url';
+import { directionsUrl } from '../lib/directions';
 
 const places = (await getCollection('places')).sort((a, b) => a.data.name.localeCompare(b.data.name));
 
@@ -24,6 +25,7 @@ const clientData = places.map(({ id, data }) => ({
   lng: data.lng,
   hours: data.hours,
   url: url(`places/${id}/`),
+  directions: directionsUrl(data.address),
 }));
 const json = JSON.stringify(clientData).replace(/</g, '\\u003c');
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

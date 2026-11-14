@@ -245,11 +245,20 @@ select option { background: var(--surface-2); color: var(--text); }
 .verified, .notes { color: var(--muted); font-size: 0.9rem; }
 
 /* Leaflet popups in the dark theme */
-.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface-2); color: var(--text); }
-.leaflet-popup-content a { color: var(--accent); }
-.leaflet-container { font: inherit; font-size: 0.9rem; background: var(--surface); }
-.leaflet-control-attribution { background: rgba(11, 12, 24, 0.8) !important; color: var(--muted); }
-.leaflet-control-attribution a { color: var(--muted); }
+/* Prefixed with .map so these win over Leaflet's own stylesheet whatever order they load in. */
+.map .leaflet-popup-content-wrapper, .map .leaflet-popup-tip { background: var(--surface-2); color: var(--text); }
+.map .leaflet-popup-content a { color: var(--accent); }
+.map .leaflet-popup-content { margin: 14px 16px; min-width: 200px; }
+.map .leaflet-popup-close-button { color: var(--muted); }
+.popup-name { display: block; font-weight: 700; font-size: 1rem; text-decoration: none; }
+.popup-meta { color: var(--muted); margin-top: 2px; }
+.popup-status { color: var(--open); font-weight: 600; margin-top: 4px; }
+.popup-actions { display: flex; gap: 8px; margin-top: 12px; }
+.map .leaflet-popup-content .popup-actions .btn { flex: 1; min-height: 40px; padding: 0 12px; font-size: 0.9rem; color: var(--text); }
+.map .leaflet-popup-content .popup-actions .btn-primary { color: var(--bg); }
+.map.leaflet-container { font: inherit; font-size: 0.9rem; background: var(--surface); }
+.map .leaflet-control-attribution { background: rgba(11, 12, 24, 0.8) !important; color: var(--muted); }
+.map .leaflet-control-attribution a { color: var(--muted); }
 
 .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6); }
 
@@ -337,4 +346,4 @@ select option { background: var(--surface-2); color: var(--text); }
 }
 
 /* Thumb-sized map zoom buttons on touch screens */
-.leaflet-touch .leaflet-bar a { width: 40px; height: 40px; line-height: 40px; }
+.map.leaflet-touch .leaflet-bar a { width: 40px; height: 40px; line-height: 40px; }
