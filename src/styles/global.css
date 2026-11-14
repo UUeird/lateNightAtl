@@ -166,7 +166,21 @@ select option { background: var(--surface-2); color: var(--text); }
   font-size: 0.9rem;
 }
 
-.results-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0 8px; }
+.results-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0 0; }
+
+/* Search, filters and the results bar stay pinned while scrolling. On phones the filter
+   rows slide away while scrolling down and return on scroll up (see initStickyToolbar). */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 600;
+  margin: 0 -16px 12px;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) { .toolbar { transition: none; } }
 .count { color: var(--muted); margin: 0; }
 .view-toggle { display: none; }
 
@@ -184,8 +198,8 @@ select option { background: var(--surface-2); color: var(--text); }
 .map {
   grid-area: map;
   position: sticky;
-  top: 16px;
-  height: calc(100vh - 32px);
+  top: calc(var(--toolbar-h, 0px) + 12px);
+  height: calc(100vh - var(--toolbar-h, 0px) - 24px);
   min-height: 360px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -313,15 +327,8 @@ select option { background: var(--surface-2); color: var(--text); }
   label.chip { padding-left: 12px; }
   select.chip, .chip select { padding-right: 28px; background-position: right 10px center; }
 
-  .results-bar {
-    position: sticky;
-    top: 0;
-    z-index: 500;
-    margin: 0 -16px;
-    padding: 10px 16px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-  }
+  .results-bar { margin-top: 10px; }
+  .toolbar.is-collapsed { transform: translateY(calc(-1 * var(--collapse-by, 0px))); }
   .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
   .view-toggle button {
     font: inherit;
@@ -340,7 +347,7 @@ select option { background: var(--surface-2); color: var(--text); }
   .explorer[data-view='list'] .map { display: none; }
   .explorer[data-view='map'] .list,
   .explorer[data-view='map'] .empty { display: none; }
-  .map:not(.map-small) { height: calc(100dvh - 90px); min-height: 360px; }
+  .map:not(.map-small) { height: calc(100dvh - var(--toolbar-h, 150px) - 24px); min-height: 320px; }
 
   .site-footer { margin-top: 32px; }
 }

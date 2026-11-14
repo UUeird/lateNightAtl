@@ -43,6 +43,45 @@ const DEFAULTS: Record<string, string> = { night: 'tonight', at: '1260', area: '
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
+const isPhoneQuery = matchMedia('(max-width: 800px)');
+
+/**
+ * Pinned toolbar. Publishes its height as --toolbar-h (the desktop map sits below it).
+ * On phones, scrolling down slides the filter rows away, leaving only the results bar;
+ * scrolling up, or focusing a filter, brings them back.
+ */
+function initStickyToolbar(phone: MediaQueryList) {
+  const toolbar = document.getElementById('toolbar')!;
+  const resultsBar = toolbar.querySelector<HTMLElement>('.results-bar')!;
+  const root = document.documentElement;
+
+  const measure = () => {
+    root.style.setProperty('--toolbar-h', `${toolbar.offsetHeight}px`);
+    toolbar.style.setProperty('--collapse-by', `${resultsBar.offsetTop - 6}px`);
+  };
+  new ResizeObserver(measure).observe(toolbar);
+  measure();
+
+  let lastY = window.scrollY;
+  const setCollapsed = (on: boolean) => toolbar.classList.toggle('is-collapsed', on && phone.matches);
+  window.addEventListener(
+    'scroll',
+    () => {
+      const y = window.scrollY;
+      const dy = y - lastY;
+      if (Math.abs(dy) < 8) return;
+      lastY = y;
+      const pastTop = y > toolbar.offsetHeight;
+      if (dy > 0 && pastTop && !toolbar.contains(document.activeElement)) setCollapsed(true);
+      else if (dy < 0 || !pastTop) setCollapsed(false);
+    },
+    { passive: true },
+  );
+  toolbar.addEventListener('focusin', () => setCollapsed(false));
+  phone.addEventListener('change', () => setCollapsed(false));
+  return toolbar;
+}
+
 export function initExplorer() {
   const places: Place[] = JSON.parse(document.getElementById('places-data')!.textContent!);
   const form = document.getElementById('filters') as HTMLFormElement;
@@ -203,10 +242,12 @@ export function initExplorer() {
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
   }
 
+  const toolbar = initStickyToolbar(isPhoneQuery);
+
   // Phones show either the list or the map (see .explorer[data-view] in CSS).
   const explorer = document.getElementById('explorer')!;
   const viewBtns = document.querySelectorAll<HTMLButtonElement>('.view-toggle [data-view]');
-  const isPhone = () => matchMedia('(max-width: 800px)').matches;
+  const isPhone = () => isPhoneQuery.matches;
   function showView(view: 'list' | 'map', refit = true) {
     explorer.dataset.view = view;
     viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
@@ -215,7 +256,7 @@ export function initExplorer() {
       map.invalidateSize();
       if (refit && fitTo) map.fitBounds(fitTo, FIT_OPTS);
     }
-    window.scrollTo({ top: Math.min(window.scrollY, explorer.offsetTop - 80) });
+    window.scrollTo({ top: Math.min(window.scrollY, explorer.offsetTop - toolbar.offsetHeight - 12) });
   }
   viewBtns.forEach((b) => b.addEventListener('click', () => showView(b.dataset.view as 'list' | 'map')));
 

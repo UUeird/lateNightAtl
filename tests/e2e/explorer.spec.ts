@@ -132,8 +132,31 @@ test('filters fit in a compact space', async ({ page, isMobile }) => {
   expect(h).toBeLessThanOrEqual(isMobile ? 90 : 40);
 });
 
+test('toolbar stays pinned on desktop while scrolling', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'phones collapse it; see below');
+  await page.goto('/');
+  await page.mouse.wheel(0, 600);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+  const box = (await page.locator('#filters').boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeLessThan(20);
+});
+
 test.describe('phones', () => {
   test.skip(({ isMobile }) => !isMobile, 'phone-only behavior');
+
+  test('filters slide away on scroll down and return on scroll up', async ({ page }) => {
+    await page.goto('/');
+    const filters = page.locator('#filters');
+    const bar = page.locator('.results-bar');
+    await page.mouse.wheel(0, 500);
+    await expect(page.locator('#toolbar')).toHaveClass(/is-collapsed/);
+    await expect.poll(async () => (await filters.boundingBox())!.y + (await filters.boundingBox())!.height).toBeLessThanOrEqual(0);
+    await expect.poll(async () => (await bar.boundingBox())!.y).toBeLessThan(20); // count + List/Map still pinned
+    await page.mouse.wheel(0, -100);
+    await expect(page.locator('#toolbar')).not.toHaveClass(/is-collapsed/);
+    await expect.poll(async () => (await filters.boundingBox())!.y).toBeGreaterThanOrEqual(0);
+  });
 
   test('first result is visible without scrolling', async ({ page }) => {
     await page.goto('/');

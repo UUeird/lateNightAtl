@@ -31,6 +31,7 @@ const json = JSON.stringify(clientData).replace(/</g, '\\u003c');
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 ---
 <Base>
+  <div class="toolbar" id="toolbar">
   <form class="filters" id="filters" role="search" aria-label="Filter places">
     <div class="filter-row">
       <div class="filter-main">
@@ -96,6 +97,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
       <button type="button" data-view="list" aria-pressed="true">List</button>
       <button type="button" data-view="map" aria-pressed="false">Map</button>
     </div>
+  </div>
   </div>
 
   <div class="explorer" id="explorer" data-view="list">
