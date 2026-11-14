@@ -84,6 +84,20 @@ test('near me explains a denied permission', async ({ page }) => {
   await expect(page.locator('#count')).toHaveText('8 places');
 });
 
+test('near me explains when the device can’t find a location', async ({ page }) => {
+  // Simulate location being off at the OS level (POSITION_UNAVAILABLE).
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'geolocation', {
+      value: { getCurrentPosition: (_ok: unknown, fail: (e: { code: number }) => void) => setTimeout(() => fail({ code: 2 }), 50) },
+    });
+  });
+  await page.goto('/');
+  await page.click('#near-me');
+  await expect(page.locator('#geo-msg')).toContainText('couldn’t find your location');
+  await expect(page.locator('#geo-msg')).toContainText('Settings'); // device-specific hint (desktop project reports Windows)
+  await expect(page.locator('#near-me')).toHaveText('Near me');
+});
+
 test.describe('phones', () => {
   test.skip(({ isMobile }) => !isMobile, 'phone-only behavior');
 

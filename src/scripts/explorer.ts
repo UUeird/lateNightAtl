@@ -21,6 +21,22 @@ const formatMiles = (mi: number) => (mi < 0.1 ? '< 0.1 mi' : `${mi < 10 ? mi.toF
 
 const FIT_OPTS: L.FitBoundsOptions = { padding: [40, 40], maxZoom: 15 };
 
+/** Where to turn location on, for the visitor's device. */
+function locationSettingsHint(): string {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) return 'On iPhone: Settings → Privacy & Security → Location Services → turn it on, and set your browser to “While Using”.';
+  if (/Android/.test(ua)) return 'On Android: turn on Location in Quick Settings, and allow it for your browser.';
+  if (/Mac/.test(ua)) return 'On a Mac: System Settings → Privacy & Security → Location Services → turn it on for your browser, then restart the browser.';
+  if (/Windows/.test(ua)) return 'On Windows: Settings → Privacy & security → Location → turn it on, and allow apps to use it.';
+  return 'Check that location is turned on for your browser in your device settings.';
+}
+
+function locationErrorMessage(code: number): string {
+  if (code === 1) return 'Location permission was denied. To use Near me, allow location for this site in your browser’s site settings.';
+  if (code === 3) return 'Finding your location took too long. Try again, ideally with Wi-Fi on.';
+  return `Your device couldn’t find your location. ${locationSettingsHint()}`;
+}
+
 const DEFAULTS: Record<string, string> = { night: 'tonight', at: '1260', area: '', type: '', cuisine: '', q: '' };
 
 const escapeHtml = (s: string) =>
@@ -89,13 +105,9 @@ export function initExplorer() {
       },
       (err) => {
         setNear(false);
-        say(
-          err.code === err.PERMISSION_DENIED
-            ? 'Location permission was denied. You can allow it in your browser’s site settings.'
-            : 'Couldn’t get your location. Try again in a moment.',
-        );
+        say(locationErrorMessage(err.code));
       },
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
+      { enableHighAccuracy: false, timeout: 15_000, maximumAge: 300_000 },
     );
   });
 
