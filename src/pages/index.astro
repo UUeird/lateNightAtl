@@ -42,8 +42,8 @@ const titleCase = (s: string) => s.replace(/\b\w/g, (ch) => ch.toUpperCase());
   <form class="filters" id="filters" role="search" aria-label="Filter places">
     {/* One bar of controls. Desktop: a row of labeled chips. Phones: a row of icons, each
         menu opening as a sheet below; the search box floats at the bottom of the screen. */}
-    <div class="filter-bar" id="filter-bar">
-      <label class="search" id="search-box" data-map-overlay>
+    <div class="filter-bar" id="filter-bar" data-map-overlay>
+      <label class="search" id="search-box">
         <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
         <span class="sr-only">Search</span>
         <input type="search" name="q" placeholder="Search places or food" autocomplete="off" />

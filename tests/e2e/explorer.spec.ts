@@ -438,7 +438,7 @@ test.describe('desktop fits the window', () => {
 test.describe('phones', () => {
   test.skip(({ isMobile }) => !isMobile, 'phone-only behavior');
 
-  test('E22 the map runs edge to edge, and search floats over its bottom, staying put in the list', async ({ page }) => {
+  test('E22 the map runs edge to edge, and the filters float over its bottom: chips just above search', async ({ page }) => {
     await page.goto('/');
     const input = page.locator('input[name=q]');
     await expect(input).toBeVisible();
@@ -455,6 +455,10 @@ test.describe('phones', () => {
     expect(box.x + box.width).toBeLessThanOrEqual(map.x + map.width - 8);
     expect(box.y + box.height).toBeLessThanOrEqual(map.y + map.height - 8);
     expect(await page.evaluate(() => document.scrollingElement!.scrollHeight <= innerHeight)).toBe(true); // no page scroll
+    const when = (await page.locator('#when-menu summary').boundingBox())!;
+    expect(when.y + when.height).toBeLessThanOrEqual(box.y); // the chips sit just above search…
+    expect(box.y - (when.y + when.height)).toBeLessThan(16);
+    expect(when.height).toBeCloseTo(box.height, 0); // …as tall as it
     await input.fill('pizza');
     await expect(page.locator('#count')).toHaveText('1 place');
     await showList(page);
@@ -548,7 +552,7 @@ test.describe('phones', () => {
     await expect(explorer).not.toHaveClass(/is-dimmed/);
   });
 
-  test('E24e a popup always fits on screen, clear of the chips and the search box', async ({ page }) => {
+  test('E24e a popup always fits on screen, clear of the header, the filters and the map buttons', async ({ page }) => {
     await page.goto('/?type=all');
     await waitForMap(page);
     const vw = page.viewportSize()!.width;
@@ -561,14 +565,14 @@ test.describe('phones', () => {
       const name = await dot.getAttribute('aria-label');
       const inView = async () => {
         const p = (await popup.boundingBox())!;
-        const chips = (await page.locator('#toolbar').boundingBox())!;
-        const search = (await page.locator('#search-box').boundingBox())!;
+        const header = (await page.locator('#toolbar').boundingBox())!;
+        const filters = (await page.locator('#filter-bar').boundingBox())!; // the chips and search, at the bottom
         const btns = await page.locator('.maplibregl-ctrl-top-left > .maplibregl-ctrl').evaluateAll((els) => {
           const rs = els.map((e) => e.getBoundingClientRect());
           return { left: Math.min(...rs.map((r) => r.left)), bottom: Math.max(...rs.map((r) => r.bottom)) };
         });
         const clearOfButtons = p.x + p.width <= btns.left || p.y >= btns.bottom; // +, − and Near me
-        return p.x >= 0 && p.x + p.width <= vw && p.y >= chips.y + chips.height && p.y + p.height <= search.y && clearOfButtons;
+        return p.x >= 0 && p.x + p.width <= vw && p.y >= header.y + header.height && p.y + p.height <= filters.y && clearOfButtons;
       };
       await expect.poll(inView, { message: `${name}'s popup, on screen` }).toBe(true);
       await page.locator('.maplibregl-popup-close-button').click();

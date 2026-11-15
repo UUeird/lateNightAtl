@@ -238,7 +238,7 @@ select option { background: var(--surface-2); color: var(--text); }
 label.within-chip { padding-left: 12px; gap: 4px; }
 .when-menu > summary { padding-left: 12px; }
 
-@keyframes pill-in { from { opacity: 0; transform: translateY(-6px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes pill-in { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .explorer::after { transition: none !important; }
@@ -554,24 +554,26 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   .filter-bar .chip-menu > summary.icon-chip { width: 100%; }
   .icon-chip .chip-label, .icon-chip .menu-text { display: none; }
   /* An icon over a one-word label, so each filter says what it is. */
-  .filter-bar .icon-chip { flex-direction: column; gap: 2px; height: 50px; }
+  .filter-bar .icon-chip { flex-direction: column; gap: 2px; height: 48px; } /* as tall as the search box */
   .icon-chip .chip-short { display: block; max-width: 100%; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; font-size: 0.72rem; font-weight: 600; line-height: 1.1; color: var(--muted); white-space: nowrap; }
   .icon-chip.is-set .chip-short, .chip-menu.is-active .chip-short { color: inherit; }
   /* inset -1px: over the chip's border too, so the tap target is the full 40px. */
   .icon-chip select { position: absolute; inset: -1px; width: auto; height: auto; margin: 0; opacity: 0; padding: 0; }
-  /* Search floats at the bottom of the screen, over the map (and the list), within thumb
-     reach. */
-  .search {
+  /* The filters float at the bottom of the screen, within thumb reach: When and Type
+     (and Within) in a row, the search box under them. Menus open upward from the row. */
+  .filter-bar {
     position: fixed;
     left: 16px; right: 16px;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     z-index: 650;
+    gap: 8px;
+  }
+  .search {
+    order: 2; flex-basis: 100%;
     min-width: 0;
     border-radius: 999px;
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(0 0 0 / 0.3);
   }
-  /* Out of the way while a filter menu is open over the map. */
-  .filter-bar:has(.chip-menu[open]) .search { visibility: hidden; }
   .search input { height: 48px; background: var(--surface-2); padding-left: 42px; }
   .search input:not(:placeholder-shown) { border-color: var(--accent); }
   .search-icon { left: 15px; width: 19px; height: 19px; }
@@ -579,22 +581,21 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   .map .maplibregl-ctrl-top-left { left: auto; right: 0; align-items: flex-end; }
   .fit-screen .map .maplibregl-ctrl-top-left { top: var(--overlay-h, 0px); } /* below the header and chips */
   .map .maplibregl-ctrl-top-left .maplibregl-ctrl { float: right; clear: both; margin: 10px 10px 0 0; }
-  /* Keep the map's attribution clear of the floating search. */
+  /* Keep the map's attribution clear of the floating filters. */
   .map:not(.map-small) .maplibregl-ctrl-bottom-right,
-  .map:not(.map-small) .maplibregl-ctrl-bottom-left { bottom: 72px; }
+  .map:not(.map-small) .maplibregl-ctrl-bottom-left { bottom: calc(var(--bottom-h, 128px) + 8px); }
   /* Menus: the map stays put and dims, and the choices float over it as separate pills
-     with shadows, not inside a panel (see initFilterSheet). They hang from the toolbar. */
-  .filter-bar { position: static; }
+     with shadows, not inside a panel (see initFilterSheet). They rise from the chips. */
   .menu-panel {
-    top: 100%; left: 0; right: 0; min-width: 0; width: auto;
-    max-height: calc(100dvh - var(--overlay-h, 200px) - 96px);
-    padding: 4px 16px 16px;
+    top: auto; bottom: 100%; left: 0; right: 0; min-width: 0; width: auto;
+    max-height: calc(100dvh - var(--overlay-h, 80px) - var(--bottom-h, 128px) - 8px);
+    padding: 12px 0 10px;
     background: none; border: 0; border-radius: 0; box-shadow: none;
     overscroll-behavior: contain;
     pointer-events: none !important; /* taps between the pills reach the map (and close) */
   }
   .menu-panel > * { pointer-events: auto; }
-  .when-panel { padding: 4px 16px 16px; }
+  .when-panel { padding: 12px 0 10px; }
   .explorer::after {
     content: ''; position: absolute; inset: 0; z-index: 9;
     background: rgb(5 6 14 / 0.5);
@@ -711,7 +712,7 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   .list-head-title { font-weight: 700; }
   .list-close { display: grid; place-items: center; width: 44px; height: 44px; background: none; border: 0; color: var(--muted); cursor: pointer; border-radius: 8px; }
   .list-close svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-  .list { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; align-content: start; padding: 10px 10px calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .list { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; align-content: start; padding: 10px 10px calc(var(--bottom-h, 128px) + 12px); }
   /* Dims the map while the list is over it; a tap closes the list. */
   .list-scrim {
     display: block; position: absolute; inset: 0; z-index: 7;

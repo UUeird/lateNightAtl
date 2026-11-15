@@ -28,9 +28,9 @@ interface Place {
 const ATL_CENTER: LngLat = [-84.388, 33.749];
 
 const FIT_OPTS = { padding: 40, maxZoom: 14, duration: 400 };
-/** Phones: keep dots out from under the map buttons (top right) and the search box
-    (bottom); the chips at the top, which the map runs behind, are added on top of this. */
-const PHONE_FIT_PADDING = { top: 24, right: 64, bottom: 92, left: 32 };
+/** Phones: keep dots clear of the map buttons (top right). The header (top) and the
+    floating filters (bottom), which the map runs behind, are measured and added to this. */
+const PHONE_FIT_PADDING = { top: 24, right: 64, bottom: 24, left: 32 };
 const PLACE_ZOOM = 14;
 
 /**
@@ -61,14 +61,19 @@ const isPhoneQuery = matchMedia('(max-width: 800px)');
 function measureToolbar() {
   const toolbar = document.getElementById('toolbar')!;
   const header = document.querySelector<HTMLElement>('.site-header')!;
+  const filterBar = document.getElementById('filter-bar')!;
   const measure = () => {
     const root = document.documentElement.style;
     root.setProperty('--toolbar-h', `${toolbar.offsetHeight}px`);
     root.setProperty('--overlay-h', `${toolbar.getBoundingClientRect().bottom + window.scrollY}px`);
+    // Phones: how much of the screen's foot the floating filters take.
+    root.setProperty('--bottom-h', `${Math.max(0, window.innerHeight - filterBar.getBoundingClientRect().top)}px`);
   };
   const observer = new ResizeObserver(measure);
   observer.observe(toolbar);
   observer.observe(header);
+  observer.observe(filterBar);
+  addEventListener('resize', measure);
   measure();
 }
 
@@ -269,7 +274,7 @@ export function initExplorer() {
     );
     // An opened popup that runs off the visible map (or under the chips or the search box,
     // which float over it on phones) pans the map just enough to show all of it.
-    const keepInView = (popup: Popup) => {
+    const keepInView = (popup: Popup, passes = 3) => {
       const el = popup.getElement();
       if (!el) return;
       const r = el.getBoundingClientRect();
@@ -280,7 +285,7 @@ export function initExplorer() {
         left: m.left + margin,
         right: m.right - margin,
         top: Math.max(m.top, phone ? document.getElementById('toolbar')!.getBoundingClientRect().bottom : 0) + margin,
-        bottom: (phone ? document.getElementById('search-box')!.getBoundingClientRect().top : m.bottom) - margin,
+        bottom: (phone ? document.getElementById('filter-bar')!.getBoundingClientRect().top : m.bottom) - margin,
       };
       let dx = r.left < area.left || r.width > area.right - area.left ? r.left - area.left : Math.max(0, r.right - area.right);
       let dy = r.top < area.top || r.height > area.bottom - area.top ? r.top - area.top : Math.max(0, r.bottom - area.bottom);
@@ -301,7 +306,12 @@ export function initExplorer() {
           else dy -= c.bottom - p.top; // below them (the map moves down)
         }
       }
-      if (Math.abs(dx) >= 1 || Math.abs(dy) >= 1) map.panBy([dx, dy], { duration: 300 });
+      if (Math.abs(dx) >= 1 || Math.abs(dy) >= 1) {
+        map.panBy([dx, dy], { duration: 300 });
+        // Moving can change which side of its dot the popup hangs on: check again once
+        // it settles, a couple of times at most.
+        if (passes > 1) map.once('moveend', () => popup.isOpen() && keepInView(popup, passes - 1));
+      }
     };
     for (const m of markers.values()) {
       const popup = m.getPopup()!;
@@ -494,7 +504,10 @@ export function initExplorer() {
     if (!mv || !fitTo || !mv.map.getContainer().offsetWidth) return;
     // Phones: the header and chips float over the top of the map.
     const overlayH = document.getElementById('toolbar')!.getBoundingClientRect().bottom - mv.map.getContainer().getBoundingClientRect().top;
-    const padding = isPhoneQuery.matches ? { ...PHONE_FIT_PADDING, top: PHONE_FIT_PADDING.top + Math.max(0, overlayH) } : FIT_OPTS.padding;
+    const bottomH = mv.map.getContainer().getBoundingClientRect().bottom - document.getElementById('filter-bar')!.getBoundingClientRect().top;
+    const padding = isPhoneQuery.matches
+      ? { ...PHONE_FIT_PADDING, top: PHONE_FIT_PADDING.top + Math.max(0, overlayH), bottom: 24 + Math.max(0, bottomH) }
+      : FIT_OPTS.padding;
     mv.map.fitBounds(fitTo, { ...FIT_OPTS, padding, duration: framed ? FIT_OPTS.duration : 0 }); // no fly-in on first view
     framed = true;
   }
