@@ -899,9 +899,7 @@
     "name": "Waffle House (5th St)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "Midtown",
     "address": "66 5th St NW, Atlanta, GA 30308",
@@ -963,9 +961,7 @@
     "name": "Waffle House (Downtown)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "Downtown",
     "address": "135 Andrew Young International Blvd NW, Atlanta, GA 30303",
@@ -1027,9 +1023,7 @@
     "name": "Waffle House (Glenwood Ave)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "Glenwood Park",
     "address": "860 Glenwood Ave SE, Atlanta, GA 30316",
@@ -1091,9 +1085,7 @@
     "name": "Waffle House (Howell Mill)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "West Midtown",
     "address": "1700 Howell Mill Rd NW, Atlanta, GA 30318",
@@ -1155,9 +1147,7 @@
     "name": "Waffle House (Cheshire Bridge)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "Lindbergh",
     "address": "2264 Cheshire Bridge Rd NE, Atlanta, GA 30324",
@@ -1219,9 +1209,7 @@
     "name": "Waffle House (Piedmont Rd)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "Buckhead",
     "address": "3016 Piedmont Rd NE, Atlanta, GA 30305",
@@ -1468,9 +1456,7 @@
     "name": "Waffle House (Avondale Estates)",
     "type": "food",
     "cuisine": [
-      "american",
-      "breakfast",
-      "diner"
+      "breakfast"
     ],
     "area": "Avondale Estates",
     "address": "2840 E College Ave, Decatur, GA 30030",
@@ -1581,5 +1567,253 @@
       "https://www.ajc.com/food-and-dining/2026/07/12-essential-atlanta-cocktail-bars-you-need-to-try/"
     ],
     "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "fellinis-ponce",
+    "name": "Fellini's Pizza (Ponce)",
+    "type": "food",
+    "cuisine": [
+      "pizza"
+    ],
+    "area": "Poncey-Highland",
+    "address": "909 Ponce de Leon Ave NE, Atlanta, GA 30306",
+    "lat": 33.77351,
+    "lng": -84.35767,
+    "hours": {
+      "sun": [
+        [
+          "12:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://fellinisatlanta.com/ponce-de-leon/",
+    "phone": "(404) 873-3088",
+    "sources": [
+      "https://fellinisatlanta.com/ponce-de-leon/"
+    ],
+    "lastVerified": "2026-11-15"
+  },
+  {
+    "id": "fellinis-buckhead",
+    "name": "Fellini's Pizza (Buckhead)",
+    "type": "food",
+    "cuisine": [
+      "pizza"
+    ],
+    "area": "Buckhead",
+    "address": "2809 Peachtree Rd NE, Atlanta, GA 30305",
+    "lat": 33.83156,
+    "lng": -84.38498,
+    "hours": {
+      "sun": [
+        [
+          "12:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ]
+    },
+    "url": "https://fellinisatlanta.com/buckhead/",
+    "phone": "(404) 266-0082",
+    "sources": [
+      "https://fellinisatlanta.com/buckhead/"
+    ],
+    "lastVerified": "2026-11-15"
+  },
+  {
+    "id": "fellinis-howell-mill",
+    "name": "Fellini's Pizza (Howell Mill)",
+    "type": "food",
+    "cuisine": [
+      "pizza"
+    ],
+    "area": "West Midtown",
+    "address": "1991 Howell Mill Rd NW, Atlanta, GA 30318",
+    "lat": 33.80914,
+    "lng": -84.41262,
+    "hours": {
+      "sun": [
+        [
+          "12:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ]
+    },
+    "url": "https://fellinisatlanta.com/howell-mill/",
+    "phone": "(404) 352-0799",
+    "sources": [
+      "https://fellinisatlanta.com/howell-mill/"
+    ],
+    "lastVerified": "2026-11-15"
+  },
+  {
+    "id": "fellinis-chastain",
+    "name": "Fellini's Pizza (Chastain)",
+    "type": "food",
+    "cuisine": [
+      "pizza"
+    ],
+    "area": "Buckhead",
+    "address": "4429 Roswell Rd NE, Atlanta, GA 30342",
+    "lat": 33.87605,
+    "lng": -84.38,
+    "hours": {
+      "sun": [
+        [
+          "12:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ]
+    },
+    "url": "https://fellinisatlanta.com/roswell-rd/",
+    "phone": "(404) 303-8248",
+    "sources": [
+      "https://fellinisatlanta.com/roswell-rd/"
+    ],
+    "lastVerified": "2026-11-15"
   }
 ]
