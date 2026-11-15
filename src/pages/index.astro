@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { TAGS, TAG_SHORT, TYPES, typeLabel } from '../data/taxonomy';
-import { DAY_NAMES, formatTime } from '../lib/hours';
+import { DEFAULT_OFF_TYPES, TAGS, TAG_SHORT, TYPES, cuisineGroup, typeLabel, type TypeKey } from '../data/taxonomy';
+import { DAY_NAMES, OPEN_UNTIL_TIMES, formatTime } from '../lib/hours';
 import { url } from '../lib/url';
 
 
@@ -10,8 +10,12 @@ const places = (await getCollection('places')).sort((a, b) => a.data.name.locale
 
 // Only offer filter values that some place actually has.
 const types = Object.entries(TYPES).filter(([k]) => places.some((p) => p.data.type.includes(k as keyof typeof TYPES)));
-const cuisines = [...new Set(places.flatMap((p) => p.data.cuisine))].sort();
-const times = [21, 22, 23, 24, 25, 26, 27, 28].map((h) => h * 60);
+// In the Type menu: the night-out types, then Food with its cuisines, then errands.
+const typeRank = (k: string) => (DEFAULT_OFF_TYPES.includes(k as TypeKey) ? 2 : k === 'food' ? 1 : 0);
+types.sort((a, b) => typeRank(a[0]) - typeRank(b[0]));
+// The Food list: food places' cuisines, by group (e.g. Diner and American are both
+// Euromerican). Bars and cafés list cuisines too, but those aren't what Food filters.
+const cuisines = [...new Set(places.filter((p) => p.data.type.includes('food')).flatMap((p) => p.data.cuisine.map(cuisineGroup)))].sort();
 
 const clientData = places.map(({ id, data }) => ({
   id,
@@ -20,6 +24,7 @@ const clientData = places.map(({ id, data }) => ({
   typeLabel: typeLabel(data.type),
   tags: data.tags.map((t) => TAGS[t]),
   cuisine: data.cuisine,
+  cuisineGroups: [...new Set(data.cuisine.map(cuisineGroup))],
   area: data.area,
   lat: data.lat,
   lng: data.lng,
@@ -29,6 +34,8 @@ const clientData = places.map(({ id, data }) => ({
 }));
 const json = JSON.stringify(clientData).replace(/</g, '\\u003c');
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/** "southeast asian" → "Southeast Asian" */
+const titleCase = (s: string) => s.replace(/\b\w/g, (ch) => ch.toUpperCase());
 ---
 <Base fitScreen hasMap>
   <div class="toolbar" id="toolbar">
@@ -41,26 +48,35 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
         <span class="sr-only">Search</span>
         <input type="search" name="q" placeholder="Search places or food" autocomplete="off" />
       </label>
-      {/* Which night, and open at what time: icons on phones, whose selects lie invisibly
-          over them so a tap opens the native picker. */}
-      <label class="chip icon-chip when-chip night-chip" id="night-chip" title="Which night">
-        <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" /><path d="M3.5 10h17M8 3v4M16 3v4" /></svg>
-        <select name="night" aria-label="Which night">
-          <option value="now">Right now</option>
-          <option value="tonight" selected>Tonight</option>
-          {DAY_NAMES.map((d, i) => <option value={i}>{d.slice(0, 3)} night</option>)}
-        </select>
-      </label>
-      <label class="chip icon-chip when-chip at-chip" id="at-chip" title="Open at">
-        <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
-        <span class="chip-label">Open at</span>
-        <select name="at" aria-label="Open at">
-          {times.map((t) => <option value={t} selected={t === 1260}>{t === 1440 ? '12 AM' : formatTime(t)}</option>)}
-        </select>
-      </label>
+      {/* When: which night, and open until what time, in one menu of styled choices. */}
+      <details class="chip-menu when-menu" id="when-menu">
+        <summary class="chip icon-chip when-chip" title="When">
+          <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
+          <span class="chip-short when-short" aria-hidden="true">Tonight, 9 PM</span>
+          <span class="sr-only">When: </span><span class="menu-text when-text">Tonight · till 9 PM</span>
+        </summary>
+        <div class="menu-panel when-panel">
+          <fieldset class="pick-group">
+            <legend class="pick-legend">Night</legend>
+            <div class="pills">
+              {[['now', 'Right now'], ['tonight', 'Tonight'], ...DAY_NAMES.map((d, i) => [String(i), d.slice(0, 3)])].map(([v, text]) => (
+                <label class="pill"><input type="radio" name="night" value={v} checked={v === 'tonight'} /><span>{text}</span></label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset class="pick-group" id="when-times">
+            <legend class="pick-legend">Open until</legend>
+            <div class="pills pills-times">
+              {OPEN_UNTIL_TIMES.map((t) => (
+                <label class="pill"><input type="radio" name="at" value={t} checked={t === 1260} /><span>{formatTime(t).replace('midnight', '12 AM')}</span></label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+      </details>
       <label class="chip icon-chip when-chip within-chip" id="within-chip" title="Within" hidden>
         <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3 3" /><circle cx="12" cy="12" r="2" /></svg>
-        <span class="chip-label">Within</span>
+        <span class="chip-label">Within</span><span class="chip-short" aria-hidden="true">Within</span>
         <select name="within" aria-label="Within" disabled>
           <option value="">any</option>
           <option value="1">1 mile</option>
@@ -69,43 +85,54 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
           <option value="10">10 miles</option>
         </select>
       </label>
-      {[
-        { name: 'type', label: 'Type', all: 'All types', plural: 'types', options: types,
-          icon: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />' },
-        { name: 'cuisine', label: 'Cuisine', all: 'Any cuisine', plural: 'cuisines', options: cuisines.map((c) => [c, cap(c)]),
-          icon: '<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16.5 21V3c-2 1.5-3 4-3 7v4h3" />' },
-      ].map((m) => (
-        <details class="chip-menu" data-filter={m.name} data-all={m.all} data-plural={m.plural}>
-          <summary class="chip icon-chip" title={m.label}>
-            <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true" set:html={m.icon} />
-            <span class="sr-only">{m.label}: </span><span class="menu-text">{m.all}</span>
-          </summary>
-          <fieldset class="menu-panel">
-            <legend class="sr-only">{m.label}</legend>
-            {m.options.map(([value, text]) => (
-              <label class="menu-option"><input type="checkbox" name={m.name} value={value} /><span>{text}</span></label>
-            ))}
-            <button type="button" class="menu-clear">Clear {m.label.toLowerCase()}</button>
-          </fieldset>
-        </details>
-      ))}
-      <button type="button" class="clear-btn" id="clear-filters" title="Clear type and cuisine" hidden>Clear</button>
+      {/* What kind of place. Food is one of the types, with its cuisines under it. */}
+      <details class="chip-menu" data-filter="type" data-all="All types" data-plural="picked">
+        <summary class="chip icon-chip" title="Type">
+          <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" /></svg>
+          <span class="chip-short" aria-hidden="true">Type</span>
+          <span class="sr-only">Type: </span><span class="menu-text">All types</span>
+        </summary>
+        <fieldset class="menu-panel">
+          <legend class="sr-only">Type</legend>
+          {types.map(([value, text]) => (
+            <>
+              <label class="menu-option"><input type="checkbox" name="type" value={value} /><span>{text}</span></label>
+              {value === 'food' && cuisines.length > 0 && (
+                <fieldset class="menu-sub">
+                  <legend class="sr-only">Cuisine (any if none picked)</legend>
+                  {cuisines.map((c) => (
+                    <label class="menu-option"><input type="checkbox" name="cuisine" value={c} /><span>{titleCase(c)}</span></label>
+                  ))}
+                </fieldset>
+              )}
+            </>
+          ))}
+          <button type="button" class="menu-clear">Clear type</button>
+        </fieldset>
+      </details>
+      <button type="button" class="clear-btn" id="clear-filters" title="Clear type" hidden>Clear</button>
     </div>
   </form>
 
   <p class="geo-msg" id="geo-msg" role="status" hidden></p>
   <div class="results-bar">
     <p class="count" id="count" aria-live="polite">{places.length} places</p>
-    <div class="view-toggle" role="group" aria-label="View">
-      <button type="button" data-view="list" aria-pressed="false">List</button>
-      <button type="button" data-view="map" aria-pressed="true">Map</button>
-    </div>
   </div>
   </div>
 
-  <!-- Phones open on the map; the List button switches. (Desktop shows both side by side.) -->
-  <div class="explorer" id="explorer" data-view="map">
-    <div class="list-panel" id="list-panel">
+  <!-- Phones show the map; the list slides over it from the right (tap or drag the tab on
+       the map's right edge) and is swiped or tapped away.
+       Desktop shows both side by side. -->
+  <div class="explorer" id="explorer" data-list="closed">
+    <div class="list-scrim" id="list-scrim" aria-hidden="true"></div>
+    <button type="button" class="list-tab" id="list-tab" data-map-overlay aria-label="Show the list" aria-expanded="false" aria-controls="list-panel"></button>
+    <div class="list-panel" id="list-panel" aria-label="Results">
+    <div class="list-head">
+      <span class="list-head-title" id="list-count"></span>
+      <button type="button" class="list-close" id="list-close" aria-label="Close the list">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+      </button>
+    </div>
     <ol class="list" id="list">
       {places.map(({ id, data }) => (
         <li class="card" data-id={id}>

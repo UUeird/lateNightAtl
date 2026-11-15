@@ -61,8 +61,8 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
       </p>
       <div class="route" id="route" hidden>
         <div class="route-modes" role="group" aria-label="Route from you">
-          <button type="button" data-mode="auto" aria-pressed="false">Drive</button>
-          <button type="button" data-mode="pedestrian" aria-pressed="false">Walk</button>
+          <button type="button" data-mode="auto" aria-pressed="false">Drive<span class="mode-time" data-time></span></button>
+          <button type="button" data-mode="pedestrian" aria-pressed="false">Walk<span class="mode-time" data-time></span></button>
         </div>
         <span class="route-summary" id="route-summary" aria-live="polite"></span>
       </div>
@@ -116,7 +116,7 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
 
   <script>
     import { createMap, locateControl, maplibregl, placeMarker, routeLine, youMarker, type LngLat } from '../../scripts/map';
-    import { fetchRoute, formatDuration, type Route, type RouteMode } from '../../lib/route';
+    import { WALK_MAX_MILES, estimateSeconds, fetchRoute, formatDuration, type Route, type RouteMode } from '../../lib/route';
     import { directionsFor } from '../../lib/directions';
 
     // Directions in your platform's maps app (Apple Maps on iPhone and Mac), with the other
@@ -127,7 +127,7 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
     directionsLink.href = main.url;
     otherMaps.href = other.url;
     otherMaps.textContent = other.name;
-    import { atlantaNow, formatTime, openSpanAt } from '../../lib/hours';
+    import { atlantaNow, formatTime, openSpanAt, opensLaterTonight, tonight, tonightMinutes } from '../../lib/hours';
     import { milesBetween } from '../../lib/geo';
     import { formatMiles, getPosition, locationAlreadyAllowed, locationAvailable, locationErrorMessage } from '../../lib/location';
 
@@ -181,6 +181,13 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
         routes.clear();
         clearRoute();
         routeBox.hidden = miles > FRAME_BOTH_MILES; // too far to be worth a route here
+        // Each mode's time: an estimate from the distance until its route is fetched.
+        // Walk only within walking distance.
+        for (const b of modeBtns) {
+          const m = b.dataset.mode as RouteMode;
+          b.hidden = m === 'pedestrian' && miles > WALK_MAX_MILES;
+          setTime(m, `~${formatDuration(estimateSeconds(miles, m))}`);
+        }
         you.setLngLat(here).addTo(map);
         away.textContent = ` · ${formatMiles(miles)} away`;
         away.hidden = false;
@@ -207,6 +214,9 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
     const line = routeLine(map);
     const routes = new Map<RouteMode, Route>();
     let mode: RouteMode | null = null;
+    const setTime = (m: RouteMode, text: string) => {
+      routeBox.querySelector(`[data-mode="${m}"] [data-time]`)!.textContent = ` · ${text}`;
+    };
 
     function clearRoute() {
       mode = null;
@@ -230,6 +240,7 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
         try {
           route = await fetchRoute(here, at, next);
           routes.set(next, route);
+          setTime(next, formatDuration(route.seconds)); // the real time replaces the estimate
         } catch {
           if (mode === next) routeSummary.textContent = 'Couldn’t get a route right now. Directions still works.';
           return;
@@ -250,9 +261,16 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
 
     const status = document.getElementById('status')!;
     const { day, minutes } = atlantaNow();
-    const span = openSpanAt(JSON.parse(status.dataset.hours!), day, minutes);
-    status.textContent = !span ? 'Closed now' : span[1] - span[0] >= 7 * 1440 ? 'Open 24 hours' : `Open now · closes ${formatTime(span[1])}`;
-    document.getElementById('status-line')!.classList.toggle('closed', !span);
+    const hours = JSON.parse(status.dataset.hours!);
+    const span = openSpanAt(hours, day, minutes);
+    // Closed now but opening later tonight: say when, rather than just "Closed".
+    const opens = span ? null : opensLaterTonight(hours, tonight(), tonightMinutes());
+    status.textContent = span
+      ? span[1] - span[0] >= 7 * 1440 ? 'Open 24 hours' : `Open now · closes ${formatTime(span[1])}`
+      : opens !== null ? `Not open yet · opens ${formatTime(opens)}` : 'Closed now';
+    const statusLine = document.getElementById('status-line')!;
+    statusLine.classList.toggle('closed', !span && opens === null);
+    statusLine.classList.toggle('not-yet', opens !== null);
     document.querySelector(`tr[data-day="${day}"]`)?.classList.add('today');
   </script>
 </Base>

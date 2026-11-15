@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decodePolyline6, formatDuration } from '../../src/lib/route.ts';
+import { WALK_MAX_MILES, decodePolyline6, estimateSeconds, formatDuration } from '../../src/lib/route.ts';
 
 test('R01 decodes a Valhalla (6-digit) polyline into [lng, lat] points', () => {
   // Little Five Points toward Ponce City Market, from a real Valhalla response (first points).
@@ -25,4 +25,11 @@ test('R03 partialLine grows a path along its length', async () => {
   assert.deepEqual(partialLine(L, 0.25), [[0, 0], [0.5, 0]]); // halfway along the first leg
   assert.deepEqual(partialLine(L, 0.75), [[0, 0], [1, 0], [1, 0.5]]); // halfway up the second
   assert.deepEqual(partialLine(L, 1), L);
+});
+
+test('R04 estimates travel time from the straight-line distance', () => {
+  assert.equal(formatDuration(estimateSeconds(1, 'pedestrian')), '26 min'); // 1.3 mi of road at 3 mph
+  assert.equal(formatDuration(estimateSeconds(5, 'auto')), '18 min'); // 6.5 mi at 22 mph
+  assert.equal(WALK_MAX_MILES, 1.5);
+  assert.equal(formatDuration(estimateSeconds(WALK_MAX_MILES, 'pedestrian')), '39 min'); // the longest walk offered
 });

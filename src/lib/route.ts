@@ -98,3 +98,16 @@ export function partialLine(line: LngLat[], fraction: number): LngLat[] {
   }
   return line;
 }
+
+/** Beyond this straight-line distance, in miles, Walk isn't offered: about a 40-minute walk. */
+export const WALK_MAX_MILES = 1.5;
+
+/** Roads wind: a route runs about this much longer than the straight line. */
+const DETOUR = 1.3;
+/** Average speeds for an estimate, in miles per hour: city driving, and walking. */
+const MPH: Record<RouteMode, number> = { auto: 22, pedestrian: 3 };
+
+/** A rough travel time from the straight-line distance, before any route is fetched. */
+export function estimateSeconds(miles: number, mode: RouteMode): number {
+  return ((miles * DETOUR) / MPH[mode]) * 3600;
+}

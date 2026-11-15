@@ -38,8 +38,9 @@ main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 }
 /* GitHub corner (top right of every page); the Octocat waves on hover. */
 .github-corner { position: absolute; top: 0; right: 0; z-index: 700; }
-.github-corner svg { display: block; width: 72px; height: 72px; fill: var(--text); color: var(--bg); }
-.github-corner:hover svg { fill: var(--accent); }
+/* Quiet until hovered: a dark corner with a muted cat, lighting up in the accent color. */
+.github-corner svg { display: block; width: 72px; height: 72px; fill: var(--surface-2); color: var(--muted); transition: fill 0.15s, color 0.15s; }
+.github-corner:hover svg, .github-corner:focus-visible svg { fill: var(--accent); color: var(--bg); }
 .github-corner .octo-arm { transform-origin: 130px 106px; }
 .github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
 @keyframes octocat-wave { 0%, 100% { transform: rotate(0); } 20%, 60% { transform: rotate(-25deg); } 40%, 80% { transform: rotate(10deg); } }
@@ -204,6 +205,7 @@ label.chip { padding: 0 0 0 14px; }
 .chip-menu[open] > summary, .chip-menu.is-active > summary { border-color: var(--accent); }
 .chip-menu.is-active > summary { color: var(--accent); }
 .menu-text { overflow: hidden; text-overflow: ellipsis; }
+.chip-short { display: none; }
 .menu-panel {
   position: absolute;
   top: calc(100% + 6px);
@@ -233,14 +235,42 @@ label.chip { padding: 0 0 0 14px; }
 .menu-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 select option { background: var(--surface-2); color: var(--text); }
 .cal-icon { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-label.night-chip { padding-left: 12px; gap: 4px; }
-/* A night other than tonight is a choice worth showing, even as just the icon. */
-.night-chip.is-set, .at-chip.is-set { border-color: var(--accent); color: var(--accent); }
+label.within-chip { padding-left: 12px; gap: 4px; }
+.when-menu > summary { padding-left: 12px; }
+
+@keyframes pill-in { from { opacity: 0; transform: translateY(-6px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .explorer::after { transition: none !important; }
+  .chip-menu .menu-panel, .chip-menu .menu-panel * { animation: none !important; transition: none !important; }
+}
+
+/* Cuisines, under Food in the Type menu. */
+.menu-sub { margin: 0 0 4px 28px; padding: 0 0 0 8px; border: 0; border-left: 2px solid var(--border); }
+.menu-sub .menu-option { min-height: 32px; font-size: 0.92rem; }
+
+/* When: pills for the night, then for the time. */
+.when-panel { width: 340px; padding: 10px 12px 12px; }
+.pick-group { margin: 0; padding: 0; border: 0; min-width: 0; }
+.pick-group + .pick-group { margin-top: 12px; }
+.pick-legend { padding: 0; margin-bottom: 6px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pills-times { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pill { position: relative; display: block; cursor: pointer; }
+.pill input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pill span {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 36px; padding: 0 12px;
+  font-size: 0.9rem; font-weight: 600; white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+}
+.pill:hover span { border-color: var(--accent); }
+.pill input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.pill input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pills-times .pill span { padding: 0 2px; font-size: 0.85rem; }
 /* "Right now" makes the time moot. */
-.at-chip:has(select:disabled) { opacity: 0.5; }
-label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
-/* The clock says "open at"; the time alone keeps the desktop row to one line. */
-.at-chip .chip-label { display: none; }
+.pick-group:disabled { opacity: 0.4; }
+.pick-group:disabled .pill { cursor: default; }
 .within-chip.is-set { border-color: var(--accent); color: var(--accent); }
 /* Each menu's own Clear, at the foot of its list, once something in it is ticked. */
 .menu-clear {
@@ -276,8 +306,7 @@ label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
 
 .results-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0 0; }
 
-/* Search, filters and the results bar stay pinned while scrolling. On phones the filter
-   rows slide away while scrolling down and return on scroll up (see initStickyToolbar). */
+/* Search, filters and the results bar stay pinned while scrolling. */
 .toolbar {
   position: sticky;
   top: 0;
@@ -290,7 +319,7 @@ label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
 }
 @media (prefers-reduced-motion: reduce) { .toolbar { transition: none; } }
 .count { color: var(--muted); margin: 0; }
-.view-toggle { display: none; }
+.list-tab, .list-scrim, .list-head { display: none; }
 
 /* List + map */
 .explorer {
@@ -365,6 +394,9 @@ label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
 .area::before { content: ' — '; }
 .status { margin: 0; color: var(--open); font-weight: 600; font-size: 0.9rem; }
 .status.closed { color: var(--closed); }
+/* Tonight's places that haven't opened yet: still listed, but dimmed and marked. */
+.card.not-yet { opacity: 0.55; }
+.card.not-yet .status, .status.not-yet, .popup-status.not-yet { color: var(--muted); }
 .distance { color: var(--muted); font-weight: 500; }
 .distance:not(:empty)::before { content: ' · '; }
 .status.big { font-size: 1.05rem; margin: 8px 0 0; }
@@ -456,7 +488,10 @@ label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
 .map-dot::after { content: ''; display: block; border-radius: 50%; box-sizing: border-box; }
 .map-dot-place::after { width: 18px; height: 18px; background: var(--accent); border: 2px solid #0f1020; }
 .map-dot-place:hover::after, .map-dot-place:focus-visible::after { transform: scale(1.2); }
+/* Lit with its name: the dot or the name is under the mouse. */
+.map-dot-place.is-hover::after { transform: scale(1.3); box-shadow: 0 0 0 3px rgb(255 200 87 / 0.35); }
 .map-dot-place:focus-visible { outline: none; }
+.map-dot-place.not-yet::after { opacity: 0.45; }
 .map-dot-place:focus-visible::after { box-shadow: 0 0 0 3px #fff; }
 /* The map's "show my location" button (place pages). */
 .map .map-locate { display: grid; place-items: center; }
@@ -474,6 +509,7 @@ label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
   color: var(--text); background: var(--surface); border: 0; cursor: pointer;
 }
 .route-modes button + button { border-left: 1px solid var(--border); }
+.mode-time { font-weight: 500; opacity: 0.8; }
 .route-modes button[aria-pressed='true'] { background: #4ea1ff; color: #0b0c18; }
 .route-summary { color: var(--text); font-weight: 600; font-size: 0.95rem; }
 .route-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
@@ -509,85 +545,199 @@ label.at-chip, label.within-chip { padding-left: 12px; gap: 4px; }
   .brand { font-size: 1.3rem; }
 
   :root { --control-h: 40px; }
-  /* One row of icons sharing the width equally: night, time, (Within),
-     type, cuisine. Their words are hidden; selects lie invisibly over their icons so
-     a tap opens the native picker; menus open as a full-width sheet under the row. */
+  /* One row of chips sharing the width equally: night, time, (Within), type, cuisine.
+     Each is an icon over a one-word label; selects lie invisibly over them so a tap
+     opens the native picker; menus open as a full-width sheet under the row. */
   .filter-bar { gap: 6px; }
   .filter-bar .icon-chip { position: relative; flex: 1 1 0; min-width: 0; padding: 0; justify-content: center; background-image: none; }
   .filter-bar .chip-menu { position: static; flex: 1 1 0; min-width: 0; display: flex; }
   .filter-bar .chip-menu > summary.icon-chip { width: 100%; }
   .icon-chip .chip-label, .icon-chip .menu-text { display: none; }
+  /* An icon over a one-word label, so each filter says what it is. */
+  .filter-bar .icon-chip { flex-direction: column; gap: 2px; height: 50px; }
+  .icon-chip .chip-short { display: block; max-width: 100%; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; font-size: 0.72rem; font-weight: 600; line-height: 1.1; color: var(--muted); white-space: nowrap; }
+  .icon-chip.is-set .chip-short, .chip-menu.is-active .chip-short { color: inherit; }
   /* inset -1px: over the chip's border too, so the tap target is the full 40px. */
   .icon-chip select { position: absolute; inset: -1px; width: auto; height: auto; margin: 0; opacity: 0; padding: 0; }
-  /* Search floats at the bottom of the screen, over the map (or the list), within thumb
-     reach. Fixed inside the toolbar, which therefore collapses by its sticky top rather
-     than a transform (a transform would pin the box to the toolbar instead). */
+  /* Search floats at the bottom of the screen, over the map (and the list), within thumb
+     reach. */
   .search {
     position: fixed;
-    /* Inset 12px inside the map's frame (which has a 16px gutter), clear of its edges. */
-    left: 28px; right: 28px;
-    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    left: 16px; right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     z-index: 650;
     min-width: 0;
     border-radius: 999px;
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(0 0 0 / 0.3);
   }
+  /* Out of the way while a filter menu is open over the map. */
+  .filter-bar:has(.chip-menu[open]) .search { visibility: hidden; }
   .search input { height: 48px; background: var(--surface-2); padding-left: 42px; }
   .search input:not(:placeholder-shown) { border-color: var(--accent); }
   .search-icon { left: 15px; width: 19px; height: 19px; }
   /* Map buttons (+, −, location) in the top right, nearer the thumb. */
   .map .maplibregl-ctrl-top-left { left: auto; right: 0; align-items: flex-end; }
+  .fit-screen .map .maplibregl-ctrl-top-left { top: var(--overlay-h, 0px); } /* below the header and chips */
   .map .maplibregl-ctrl-top-left .maplibregl-ctrl { float: right; clear: both; margin: 10px 10px 0 0; }
   /* Keep the map's attribution clear of the floating search. */
   .map:not(.map-small) .maplibregl-ctrl-bottom-right,
   .map:not(.map-small) .maplibregl-ctrl-bottom-left { bottom: 72px; }
-  .menu-panel { left: 0; right: 0; top: calc(100% + 6px); min-width: 0; }
-  .menu-option { min-height: 44px; }
+  /* Menus: the map stays put and dims, and the choices float over it as separate pills
+     with shadows, not inside a panel (see initFilterSheet). They hang from the toolbar. */
+  .filter-bar { position: static; }
+  .menu-panel {
+    top: 100%; left: 0; right: 0; min-width: 0; width: auto;
+    max-height: calc(100dvh - var(--overlay-h, 200px) - 96px);
+    padding: 4px 16px 16px;
+    background: none; border: 0; border-radius: 0; box-shadow: none;
+    overscroll-behavior: contain;
+    pointer-events: none !important; /* taps between the pills reach the map (and close) */
+  }
+  .menu-panel > * { pointer-events: auto; }
+  .when-panel { padding: 4px 16px 16px; }
+  .explorer::after {
+    content: ''; position: absolute; inset: 0; z-index: 9;
+    background: rgb(5 6 14 / 0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .explorer.is-dimmed::after { opacity: 1; }
+  .pick-legend { color: var(--text); text-shadow: 0 1px 6px rgb(0 0 0 / 0.9); }
+  .pill span, .menu-panel .menu-option, .menu-panel .menu-clear { box-shadow: 0 4px 14px rgb(0 0 0 / 0.55); }
+  .pill span { background: var(--surface-2); }
+  /* "Right now": the times stay solid over the map, just greyed out. */
+  .pick-group:disabled { opacity: 1; }
+  .pick-group:disabled .pill span { color: rgb(155 156 181 / 0.55); background: var(--surface); box-shadow: 0 2px 8px rgb(0 0 0 / 0.4); }
+  .pick-group:disabled .pill input:checked + span { background: #5a4a2a; border-color: #5a4a2a; color: rgb(11 12 24 / 0.8); }
+  /* Type, laid out like When: a "Type" section of pills (Food among them), then a
+     "Food" section of its cuisines. Ticked is filled; Food with only some cuisines
+     (its minus) is outlined. The checkboxes lie invisibly over their pills. */
+  fieldset.menu-panel { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; }
+  fieldset.menu-panel::before, .menu-sub::before {
+    flex-basis: 100%;
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text); text-shadow: 0 1px 6px rgb(0 0 0 / 0.9);
+  }
+  fieldset.menu-panel::before { content: 'Type'; margin-bottom: -2px; }
+  .menu-sub::before { content: 'Food'; margin: 6px 0 -2px; }
+  .menu-sub { order: 1; flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; border: 0; }
+  .menu-panel .menu-clear { order: 2; }
+  .menu-panel .menu-option {
+    position: relative; min-height: 44px; padding: 0 16px; gap: 0;
+    font-size: 0.9rem; font-weight: 600;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .menu-panel .menu-option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
+  .menu-panel .menu-option:hover { background: var(--surface-2); border-color: var(--accent); }
+  .menu-panel .menu-option:has(input:checked) { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .menu-panel .menu-option:has(input:indeterminate) { background: var(--surface-2); color: var(--accent); }
+  .menu-panel .menu-option:has(input:indeterminate) span::after { content: ' · some'; font-weight: 500; }
+  .menu-panel .menu-option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .menu-panel .menu-clear { width: auto; min-height: 44px; margin: 0; padding: 0 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); }
+  /* Popping in: each pill rises into place; swapping menus just fades. */
+  .chip-menu[open] > .menu-panel > *, .chip-menu[open] .menu-sub > *, .chip-menu[open] .pills > * { animation: pill-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+  .chip-menu.is-switching[open] > .menu-panel > *, .chip-menu.is-switching[open] .menu-sub > *, .chip-menu.is-switching[open] .pills > * { animation: sheet-fade 0.16s ease-out backwards; }
+  .chip-menu.is-closing > .menu-panel { opacity: 0; transition: opacity 0.16s ease; }
+  .chip-menu.is-closing > summary { border-color: var(--border); }
+  .pill span { min-height: 44px; } /* thumb-sized, with room to spare while popping in */
   /* Each menu has its own Clear on phones. */
   .clear-btn { display: none !important; }
 
-  .results-bar { margin-top: 10px; }
-  .toolbar { transition: top 0.2s ease; }
-  .toolbar.is-collapsed { top: calc(-1 * var(--collapse-by, 0px)); }
-  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .view-toggle button {
-    font: inherit;
-    font-weight: 600;
-    color: var(--muted);
-    background: var(--surface);
-    border: 0;
-    min-height: 40px;
-    padding: 0 18px;
-    cursor: pointer;
-  }
-  .view-toggle button[aria-pressed='true'] { background: var(--accent); color: var(--bg); }
+  /* The count lives in the list's tray on phones (see .list-head). */
+  .results-bar { display: none; }
 
   /* Narrow screens: names wrap rather than get cut off; the Map button slims down. */
   .card h2 { white-space: normal; overflow-wrap: anywhere; }
   .card { column-gap: 8px; padding-right: 8px; }
   .card .locate { min-width: 52px; padding: 4px 10px; }
 
-  .explorer { grid-template-areas: none; margin-top: 12px; }
-  .explorer > * { grid-area: auto; }
-  .explorer[data-view='list'] .map { display: none; }
-  .explorer[data-view='map'] .list-panel,
-  .explorer[data-view='map'] .empty { display: none; }
-  .map:not(.map-small) { height: calc(100dvh - var(--toolbar-h, 150px) - 24px); min-height: 320px; }
-
-  /* Room under the last card for the floating search. */
   main { padding-bottom: 32px; }
-  .fit-screen main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-  /* Map view: the page fits the screen, like desktop, and the map fills what's left in
-     its own rounded frame instead of running off the bottom. */
-  body.fit-screen:has(.explorer[data-view='map']) { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
-  .fit-screen:has(.explorer[data-view='map']) .site-header { width: 100%; }
-  .fit-screen:has(.explorer[data-view='map']) main {
-    flex: 1; min-height: 0; width: 100%;
-    display: flex; flex-direction: column;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  /* The page fits the screen and the map fills what's left, edge to edge and down to
+     the bottom of the screen. */
+  body.fit-screen { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+  .fit-screen .site-header { width: 100%; }
+  .fit-screen main { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; padding-bottom: 0; }
+  .fit-screen .toolbar { margin-bottom: 0; }
+  .explorer { display: block; position: relative; flex: 1; min-height: 0; margin: 0 -16px; overflow: hidden; }
+  /* The map runs to the top of the screen, behind the header and the chips. Only two
+     things darken it: a short fade along the top edge (for the phone's status bar) and a
+     soft glow behind the logo. The chips carry their own backgrounds. */
+  .fit-screen .explorer { margin-top: calc(-1 * var(--overlay-h, 0px)); }
+  .fit-screen .site-header {
+    position: relative; z-index: 601;
+    background: linear-gradient(rgb(11 12 24 / 0.7), rgb(11 12 24 / 0) calc(env(safe-area-inset-top, 0px) + 40px));
+    pointer-events: none;
   }
-  .explorer[data-view='map'] { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); }
-  .explorer[data-view='map'] .map { height: 100%; min-height: 0; }
+  .fit-screen .site-header a { pointer-events: auto; }
+  .fit-screen .brand { position: relative; display: inline-block; text-shadow: 0 1px 8px rgb(11 12 24 / 0.9), 0 0 2px rgb(11 12 24 / 0.8); }
+  .fit-screen .brand::before {
+    content: ''; position: absolute; inset: -16px -32px; z-index: -1;
+    background: radial-gradient(closest-side, rgb(11 12 24 / 0.8), rgb(11 12 24 / 0.5) 55%, rgb(11 12 24 / 0));
+  }
+  .fit-screen .toolbar {
+    position: relative;
+    background: none;
+    border-bottom: 0;
+    pointer-events: none; /* taps between the chips reach the map */
+  }
+  .fit-screen .toolbar .chip, .fit-screen .toolbar .chip-menu, .fit-screen .toolbar .search,
+  .fit-screen .toolbar .geo-msg, .fit-screen .toolbar .menu-panel { pointer-events: auto; }
+  .fit-screen .toolbar .chip { box-shadow: 0 2px 10px rgb(0 0 0 / 0.45); }
+
+  .map:not(.map-small) { height: 100%; min-height: 0; border: 0; border-radius: 0; }
+  /* Nothing matches: say so over the map. */
+  .empty {
+    position: absolute; top: calc(var(--overlay-h, 0px) + 12px); left: 12px; right: 64px; z-index: 5;
+    padding: 10px 14px; border-radius: var(--radius);
+    background: var(--surface-2); color: var(--text); box-shadow: 0 4px 16px rgb(0 0 0 / 0.4);
+  }
+
+  /* The list: a panel that slides over the map from the right. */
+  .list-panel {
+    position: absolute; top: var(--overlay-h, 0px); right: 0; bottom: 0; z-index: 8;
+    width: min(88%, 420px);
+    display: flex; flex-direction: column;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    box-shadow: -12px 0 32px rgb(0 0 0 / 0.5);
+    transform: translateX(calc(100% + 40px));
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s 0.25s;
+    touch-action: pan-y; /* vertical scrolls the list; sideways drags it */
+  }
+  .explorer[data-list='open'] .list-panel { transform: none; visibility: visible; transition: transform 0.25s ease; }
+  .list-panel.is-dragging, .list-scrim.is-dragging { transition: none !important; visibility: visible; }
+  .list-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 6px 6px 14px; border-bottom: 1px solid var(--border); }
+  .list-head-title { font-weight: 700; }
+  .list-close { display: grid; place-items: center; width: 44px; height: 44px; background: none; border: 0; color: var(--muted); cursor: pointer; border-radius: 8px; }
+  .list-close svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .list { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; align-content: start; padding: 10px 10px calc(84px + env(safe-area-inset-bottom, 0px)); }
+  /* Dims the map while the list is over it; a tap closes the list. */
+  .list-scrim {
+    display: block; position: absolute; inset: 0; z-index: 7;
+    background: rgb(0 0 0 / 0.35);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .explorer[data-list='open'] .list-scrim { opacity: 1; pointer-events: auto; }
+  /* A grip on the map's right edge: drag it left (or tap it) to bring the list over. */
+  .list-tab {
+    display: block; position: absolute; right: 0; z-index: 6;
+    top: calc(var(--overlay-h, 0px) + (100% - var(--overlay-h, 0px)) / 2); /* the middle of the map you can see */
+    width: 44px; height: 80px; margin-top: -40px; padding: 0; /* thumb-sized; the grip drawn inside is slimmer */
+    background: none; border: 0; cursor: pointer; touch-action: none;
+  }
+  .list-tab::before {
+    content: ''; position: absolute; right: 0; top: 4px; bottom: 4px; width: 24px;
+    background: var(--surface-2); border: 1px solid var(--border); border-right: 0;
+    border-radius: 10px 0 0 10px; box-shadow: -4px 0 12px rgb(0 0 0 / 0.35);
+  }
+  .list-tab::after { content: ''; position: absolute; right: 9px; top: 26px; width: 4px; height: 28px; border-radius: 2px; background: var(--muted); }
+  /* Out of the way of a place's popup, which may reach the map's edge. */
+  .explorer:has(.maplibregl-popup) .list-tab { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .list-panel, .explorer[data-list='open'] .list-panel, .list-scrim { transition: none; }
+  }
 }
 
 /* Thumb-sized map buttons and popup close on touch screens */

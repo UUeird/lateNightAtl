@@ -5,7 +5,7 @@ for (const place of places) {
     const res = await page.goto(`/places/${place.id}/`);
     expect(res?.status()).toBe(200);
     await expect(page.locator('h1')).toHaveText(place.name);
-    await expect(page.locator('#status')).toHaveText(/Open|Closed/);
+    await expect(page.locator('#status')).toHaveText(/Open|Closed|Not open yet/);
     await expect(page.getByRole('link', { name: /^Directions/ })).toHaveAttribute('href', /google\.com\/maps|maps\.apple\.com/);
     const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!);
     expect(ld.name).toBe(place.name);
@@ -13,7 +13,14 @@ for (const place of places) {
   });
 }
 
+test('P02b a place that opens later tonight says when', { tag: ANY }, async ({ page }) => {
+  await page.goto('/places/castleberry-late-lounge/'); // 8:30 PM Friday
+  await expect(page.locator('#status')).toHaveText('Not open yet · opens 10 PM');
+  await expect(page.locator('#status-line')).toHaveClass(/not-yet/);
+});
+
 test('P02 place page highlights today and shows live status', { tag: ANY }, async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-14T03:30:00Z')); // Friday, 10:30 PM: the lounge is open
   await page.goto('/places/castleberry-late-lounge/');
   await expect(page.locator('tr.today th')).toHaveText('Friday');
   await expect(page.locator('#status')).toHaveText('Open now · closes 4 AM');
@@ -72,27 +79,40 @@ test.describe('your location on a place page', { tag: ANY }, () => {
     test('P08 Drive / Walk fetch a route only when asked', async ({ page }) => {
       const requests: string[] = [];
       page.on('request', (r) => r.url().includes('valhalla1') && requests.push(decodeURIComponent(r.url())));
-      await page.goto('/places/castleberry-late-lounge/');
+      await page.goto('/places/poncey-24-pharmacy/'); // 0.7 mi away: walkable
       await expect(page.locator('#route')).toBeVisible(); // offered once your location shows…
       expect(requests).toEqual([]); // …but nothing is sent until you pick one
-      await page.getByRole('button', { name: 'Drive' }).click();
+      const drive = page.getByRole('button', { name: /^Drive/ });
+      const walk = page.getByRole('button', { name: /^Walk/ });
+      // Times straight away: estimates from the distance (no request needed).
+      await expect(drive).toHaveText(/^Drive · ~\d+ min$/);
+      await expect(walk).toHaveText(/^Walk · ~\d+ min$/);
+      await drive.click();
       await expect(page.locator('#route-summary')).toHaveText('About 2 min · 0.9 mi');
+      await expect(drive).toHaveText('Drive · 2 min'); // the route's own time replaces the estimate
+      await expect(walk).toHaveText(/~/); // still an estimate
       await expect(page.locator('#route-note')).toContainText('receives your location');
       expect(requests).toHaveLength(1);
       expect(requests[0]).toContain('"costing":"auto"');
-      await page.getByRole('button', { name: 'Walk' }).click();
+      await walk.click();
       await expect.poll(() => requests.length).toBe(2);
       expect(requests[1]).toContain('"costing":"pedestrian"');
-      await page.getByRole('button', { name: 'Drive' }).click(); // cached: no new request
-      await page.getByRole('button', { name: 'Drive' }).click(); // again: hides it
+      await drive.click(); // cached: no new request
+      await drive.click(); // again: hides it
       await expect(page.locator('#route-summary')).toHaveText('');
       expect(requests).toHaveLength(2);
+    });
+
+    test('P08b Walk is only offered within 1.5 miles', async ({ page }) => {
+      await page.goto('/places/edgewood-hi-fi/'); // 1.6 mi away: just too far
+      await expect(page.getByRole('button', { name: /^Drive/ })).toHaveText(/^Drive · ~\d+ min$/);
+      await expect(page.getByRole('button', { name: /^Walk/ })).toBeHidden();
     });
 
     test('P09 a failed route says so and points to Directions', async ({ page, consoleErrors }) => {
       await page.route(/valhalla1/, (r) => r.fulfill({ status: 500, body: '' }));
       await page.goto('/places/castleberry-late-lounge/');
-      await page.getByRole('button', { name: 'Drive' }).click();
+      await page.getByRole('button', { name: /^Drive/ }).click();
       await expect(page.locator('#route-summary')).toContainText('Couldn’t get a route');
       consoleErrors.length = 0; // the browser logs the simulated server error itself
     });

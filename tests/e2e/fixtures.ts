@@ -1,8 +1,8 @@
 import { test as base, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
-/** Friday, Nov 13 2026, 10:30 PM in Atlanta. "Tonight" is Friday night. */
-export const NOW = new Date('2026-11-14T03:30:00Z');
+/** Friday, Nov 13 2026, 8:30 PM in Atlanta. "Tonight" is Friday night; "Open until" starts at 9 PM. */
+export const NOW = new Date('2026-11-14T01:30:00Z');
 
 export const places: { id: string; name: string }[] = JSON.parse(readFileSync('tests/fixtures/places.json', 'utf8'));
 
@@ -62,17 +62,41 @@ export async function searchFor(page: Page, text: string) {
   await page.locator('input[name=q]').fill(text);
 }
 
-/** Tick one option in a Type/Cuisine menu (opening the menu as needed). */
-export async function pick(page: Page, name: string, value: string) {
-  const menu = page.locator(`.chip-menu[data-filter="${name}"]`);
+/** Tick a type, or a cuisine (under Food), in the Type menu (opening it as needed). */
+export async function pick(page: Page, name: 'type' | 'cuisine', value: string) {
+  const menu = page.locator('.chip-menu[data-filter=type]');
   if (!(await menu.evaluate((d: HTMLDetailsElement) => d.open))) await menu.locator('summary').click();
-  await menu.locator(`input[value="${value}"]`).check();
+  await menu.locator(`input[name=${name}][value="${value}"]`).check();
 }
 
-/** Phones open on the map; switch to the list (no-op on desktop, which shows both). */
+/** Choose a night and/or a time in the When menu (opening it as needed). */
+export async function setWhen(page: Page, choice: { night?: string; at?: string }) {
+  const menu = page.locator('#when-menu');
+  for (const [name, value] of Object.entries(choice)) {
+    if (!(await menu.evaluate((d: HTMLDetailsElement) => d.open))) await menu.locator('summary').click();
+    await menu.locator(`input[name=${name}][value="${value}"]`).check();
+  }
+}
+
+/** The When menu's current night and time. */
+export const whenValue = (page: Page, name: 'night' | 'at') => page.locator(`#when-menu input[name=${name}]:checked`);
+
+/** Phones open on the map; bring the list over it (no-op on desktop, which shows both). */
 export async function showList(page: Page) {
-  const listBtn = page.locator('.view-toggle [data-view=list]');
-  if (await listBtn.isVisible()) await listBtn.click();
+  const tab = page.locator('#list-tab');
+  if (!(await tab.isVisible())) return;
+  if ((await tab.getAttribute('aria-expanded')) !== 'true') await tab.click();
+  await expect(page.locator('#list-panel')).toHaveCSS('transform', 'none'); // slid all the way in
+}
+
+/** A one-finger swipe (phones), in `steps` moves, as touch events. */
+export async function swipe(page: Page, from: { x: number; y: number }, to: { x: number; y: number }, steps = 8) {
+  const cdp = await page.context().newCDPSession(page);
+  const at = (i: number) => [{ x: from.x + ((to.x - from.x) * i) / steps, y: from.y + ((to.y - from.y) * i) / steps }];
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(0) });
+  for (let i = 1; i <= steps; i++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: at(i) });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
 }
 
 export async function waitForMap(page: Page) {

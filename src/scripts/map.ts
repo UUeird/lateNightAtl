@@ -129,20 +129,29 @@ const OVERLAYS = 'place-overlay-space';
 const OVERLAY_PAD_PX = 4;
 
 export interface LabelPoint {
+  /** The place's id: what a click or hover on its name reports. */
+  id: string;
   name: string;
   at: LngLat;
 }
+
+/** Name highlight (hover): the accent color. */
+const LABEL_HOVER_COLOR = '#ffc857';
 
 /**
  * Place names beside the dots, once zoomed in. Drawn by MapLibre as a label
  * layer rather than as HTML, for its collision handling: each name tries the right of its
  * dot, then the left, above and below, and is left out if none is free until you zoom in
  * further. Every dot reserves an invisible square so names steer around other dots too.
- * (The dots themselves stay HTML markers, which are what you click.)
+ * The dots themselves stay HTML markers; a name is clickable too, and can be highlighted
+ * (on hover) to match its dot.
  * Earlier points win a contested spot, so pass them in list order.
- * Returns a setter for the points to label.
  */
-export function placeLabels(map: maplibregl.Map, phone?: MediaQueryList) {
+export function placeLabels(
+  map: maplibregl.Map,
+  phone: MediaQueryList | undefined,
+  on: { click: (id: string) => void; hover: (id: string | null) => void },
+) {
   let points: LabelPoint[] = [];
   const minZoom = () => (phone?.matches ? PHONE_LABEL_ZOOM : LABEL_ZOOM);
   phone?.addEventListener('change', () => {
@@ -152,7 +161,7 @@ export function placeLabels(map: maplibregl.Map, phone?: MediaQueryList) {
     type: 'FeatureCollection' as const,
     features: points.map((p, i) => ({
       type: 'Feature' as const,
-      properties: { name: p.name, rank: i },
+      properties: { id: p.id, name: p.name, rank: i },
       geometry: { type: 'Point' as const, coordinates: p.at },
     })),
   });
@@ -220,7 +229,7 @@ export function placeLabels(map: maplibregl.Map, phone?: MediaQueryList) {
     if (!map.hasImage('dot-space')) {
       map.addImage('dot-space', { width: DOT_SPACE_PX, height: DOT_SPACE_PX, data: new Uint8Array(DOT_SPACE_PX * DOT_SPACE_PX * 4) });
     }
-    map.addSource(LABELS, { type: 'geojson', data: data() });
+    map.addSource(LABELS, { type: 'geojson', data: data(), promoteId: 'id' });
     map.addLayer({
       id: LABELS,
       type: 'symbol',
@@ -239,7 +248,7 @@ export function placeLabels(map: maplibregl.Map, phone?: MediaQueryList) {
         'text-padding': 3,
       },
       paint: {
-        'text-color': '#ecebf4',
+        'text-color': ['case', ['boolean', ['feature-state', 'hover'], false], LABEL_HOVER_COLOR, '#ecebf4'],
         'text-halo-color': '#14162a',
         'text-halo-width': 1.8,
         'text-halo-blur': 0.4,
@@ -273,10 +282,42 @@ export function placeLabels(map: maplibregl.Map, phone?: MediaQueryList) {
   map.on('style.load', add);
   if (map.isStyleLoaded()) add();
 
-  return (next: LabelPoint[]) => {
-    points = next;
-    (map.getSource(LABELS) as maplibregl.GeoJSONSource | undefined)?.setData(data());
-    map.getContainer().dataset.labels = next.map((p) => p.name).join('|'); // for tests
+  // A name works like its dot: click to open the place, hover to highlight both.
+  const idAt = (e: maplibregl.MapLayerMouseEvent) => e.features?.[0]?.properties?.id as string | undefined;
+  map.on('click', LABELS, (e) => {
+    const id = idAt(e);
+    if (id) on.click(id);
+  });
+  let hovered: string | null = null;
+  map.on('mousemove', LABELS, (e) => {
+    const id = idAt(e) ?? null;
+    if (id === hovered) return;
+    hovered = id;
+    map.getCanvas().style.cursor = id ? 'pointer' : '';
+    on.hover(id);
+  });
+  map.on('mouseleave', LABELS, () => {
+    hovered = null;
+    map.getCanvas().style.cursor = '';
+    on.hover(null);
+  });
+
+  let lit: string | null = null;
+  return {
+    set(next: LabelPoint[]) {
+      points = next;
+      lit = null;
+      (map.getSource(LABELS) as maplibregl.GeoJSONSource | undefined)?.setData(data());
+      map.getContainer().dataset.labels = next.map((p) => p.name).join('|'); // for tests
+    },
+    /** Highlight one place's name (or none). */
+    highlight(id: string | null) {
+      if (!map.getSource(LABELS)) return;
+      if (lit) map.setFeatureState({ source: LABELS, id: lit }, { hover: false });
+      lit = id;
+      if (id) map.setFeatureState({ source: LABELS, id }, { hover: true });
+      map.getContainer().dataset.highlight = id ?? ''; // for tests
+    },
   };
 }
 

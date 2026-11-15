@@ -46,6 +46,15 @@ export function openSpanAt(hours: Hours, d: number, t: number): [number, number]
     if (!next) break;
     found = [found[0], next[1] + endDay * 1440];
   }
+  // …and back through spans that end exactly when it starts, so the start is when it really opened.
+  for (let i = 0; i < 8; i++) {
+    const startDay = Math.floor(found[0] / 1440);
+    const prev = [startDay - 1, startDay]
+      .flatMap((k) => spansFor(hours, d + k).map(([s, e]) => [s + k * 1440, e + k * 1440]))
+      .find(([, e]) => e === found![0]);
+    if (!prev) break;
+    found = [prev[0], found[1]];
+  }
   return found;
 }
 
@@ -105,4 +114,41 @@ export function atlantaNow(date = new Date()): { day: number; minutes: number } 
 export function tonight(date = new Date()): number {
   const { day, minutes } = atlantaNow(date);
   return minutes < NIGHT_ROLLOVER ? (day + 6) % 7 : day;
+}
+
+/** The "Open until" choices: 9 PM through 4 AM every half hour, as minutes past the night's midnight-before. */
+export const OPEN_UNTIL_TIMES = Array.from({ length: 15 }, (_, i) => 21 * 60 + i * 30);
+
+/** Minutes into tonight in Atlanta, counted from tonight's midnight-before (1:15 AM → 1515). */
+export function tonightMinutes(date = new Date()): number {
+  const { minutes } = atlantaNow(date);
+  return minutes < NIGHT_ROLLOVER ? minutes + 1440 : minutes;
+}
+
+/**
+ * Where "Open until" starts: half an hour from now, rounded up to the half hour
+ * (11:40 PM → 12:30 AM, 10 PM → 10:30 PM). Daytime starts at 9 PM; late enough, at 4 AM.
+ */
+export function defaultOpenUntil(date = new Date()): number {
+  const t = Math.ceil((tonightMinutes(date) + 30) / 30) * 30;
+  return Math.min(Math.max(t, OPEN_UNTIL_TIMES[0]), OPEN_UNTIL_TIMES[OPEN_UNTIL_TIMES.length - 1]);
+}
+
+/** When a place closed at minute `t` next opens on night `d` (before the night ends), or null. */
+export function opensLaterTonight(hours: Hours, d: number, t: number): number | null {
+  const starts = [0, 1]
+    .flatMap((off) => spansFor(hours, d + off).map(([s]) => s + off * 1440))
+    .filter((s) => s > t && s < 1440 + NIGHT_ROLLOVER);
+  return starts.length ? Math.min(...starts) : null;
+}
+
+/** From this time of night (9 PM), the explorer starts on "Right now" rather than "Tonight". */
+export const RIGHT_NOW_FROM = 21 * 60;
+
+/**
+ * Which night the explorer starts on: "Right now" once the night is under way (9 PM until
+ * the 5 AM rollover), "Tonight" earlier in the day, when what's open now is lunch spots.
+ */
+export function defaultNight(date = new Date()): 'now' | 'tonight' {
+  return tonightMinutes(date) >= RIGHT_NOW_FROM ? 'now' : 'tonight';
 }

@@ -45,13 +45,16 @@ test.describe('tap targets are at least 40×40px on phones', () => {
     await expect(page.locator('#within-chip')).toBeVisible();
     expect(await smallTargets(page), 'Near me on, with Within').toEqual([]);
 
-    for (const name of ['type', 'cuisine']) {
-      const menu = page.locator(`.chip-menu[data-filter=${name}]`);
-      await menu.locator('summary').click();
-      await menu.locator('input').first().setChecked(true); // so its Clear shows too
-      expect(await smallTargets(page), `the ${name} menu, open`).toEqual([]);
-      await menu.locator('summary').click(); // close it
-    }
+    const when = page.locator('#when-menu');
+    await when.locator('summary').click();
+    expect(await smallTargets(page), 'the When menu, open').toEqual([]);
+    await when.locator('summary').click(); // close it
+
+    const type = page.locator('.chip-menu[data-filter=type]');
+    await type.locator('summary').click();
+    await type.locator('input[name=cuisine]').first().setChecked(true); // so its Clear shows too
+    expect(await smallTargets(page), 'the Type menu, open').toEqual([]);
+    await type.locator('summary').click(); // close it
   });
 
   test('L03 home: the list', async ({ page }) => {

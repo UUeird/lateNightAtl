@@ -62,5 +62,25 @@ export const TAG_SHORT: Record<TagKey, string> = { cover: 'Cover', 'cash-only': 
 /** Display label for a place's types, e.g. "Grocery & Pharmacy". */
 export const typeLabel = (types: readonly TypeKey[]) => types.map((t) => TYPES[t]).join(' & ');
 
+/**
+ * Cuisines that share one entry in the Type menu's Food list. A place keeps its own
+ * cuisine (on its card, in search, on its page); the filter goes by the group.
+ * Also maps old cuisine values in shared links and saved choices.
+ */
+export const CUISINE_GROUPS: Record<string, string> = {
+  cheesesteaks: 'sandwiches',
+  vietnamese: 'southeast asian',
+  american: 'euromerican',
+  diner: 'euromerican',
+  greek: 'mediterranean',
+  lebanese: 'mediterranean',
+  syrian: 'mediterranean',
+};
+export const cuisineGroup = (c: string) => CUISINE_GROUPS[c] ?? c;
+
+/** Fast food: under Food like a cuisine, but left out until someone ticks it. */
+export const FAST_FOOD = 'fast food';
+export const DEFAULT_OFF_CUISINES: readonly string[] = [FAST_FOOD];
+
 /** Old type values in shared links, mapped to what replaced them. */
 export const TYPE_ALIASES: Record<string, TypeKey> = { restaurant: 'food', diner: 'food' };
