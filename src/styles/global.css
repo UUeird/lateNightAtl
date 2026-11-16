@@ -209,7 +209,7 @@ label.chip { padding: 0 0 0 14px; }
 .menu-panel {
   position: absolute;
   top: calc(100% + 6px);
-  left: 0;
+  right: 0; /* the menus sit at the right end of the row, so they open leftward */
   z-index: 10;
   min-width: max(100%, 200px);
   max-height: min(60vh, 360px);
@@ -235,8 +235,36 @@ label.chip { padding: 0 0 0 14px; }
 .menu-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 select option { background: var(--surface-2); color: var(--text); }
 .cal-icon { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-label.within-chip { padding-left: 12px; gap: 4px; }
-.when-menu > summary { padding-left: 12px; }
+.when-menu > summary, .within-menu > summary { padding-left: 12px; }
+/* Within: a slider with five stops (1, 3, 5, 10 miles, any), each stop a clickable label
+   under it. The track's ends line up with the first and last labels' middles. */
+.within-panel { width: 320px; }
+.within-range {
+  --thumb: 22px;
+  display: block; width: calc(80% + var(--thumb)); margin: 6px calc(10% - var(--thumb) / 2) 2px;
+  height: 32px; background: none; appearance: none; -webkit-appearance: none; cursor: pointer;
+}
+.within-range::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px;
+  background: linear-gradient(to right, var(--accent) var(--fill, 100%), var(--border) var(--fill, 100%));
+}
+.within-range::-moz-range-track { height: 6px; border-radius: 3px; background: var(--border); }
+.within-range::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--accent); }
+.within-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: var(--thumb); height: var(--thumb); margin-top: calc(3px - var(--thumb) / 2);
+  border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--accent);
+}
+.within-range::-moz-range-thumb { width: var(--thumb); height: var(--thumb); border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); }
+.within-range:focus-visible { outline: none; }
+.within-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px #fff; }
+.within-stops { display: grid; grid-template-columns: repeat(5, 1fr); }
+.within-stop {
+  min-height: 36px; padding: 0; font: inherit; font-size: 0.82rem; font-weight: 600;
+  color: var(--muted); background: none; border: 0; border-radius: 8px; cursor: pointer;
+}
+.within-stop:hover { color: var(--text); }
+.within-stop.is-on { color: var(--accent); }
 
 @keyframes pill-in { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -245,12 +273,49 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   .chip-menu .menu-panel, .chip-menu .menu-panel * { animation: none !important; transition: none !important; }
 }
 
-/* Cuisines, under Food in the Type menu. */
-.menu-sub { margin: 0 0 4px 28px; padding: 0 0 0 8px; border: 0; border-left: 2px solid var(--border); }
-.menu-sub .menu-option { min-height: 32px; font-size: 0.92rem; }
+/* Each type and cuisine's emoji, before its name. */
+.opt-emoji { flex: none; margin-right: 6px; font-size: 1.05em; line-height: 1; }
+.menu-option > .opt-emoji { margin-left: -2px; }
+
+/* The Type menu, on every screen: "Filter" over it all; the types as pills, each as wide
+   as its name; then Food, a heading with its own checkbox (ticks or unticks every cuisine;
+   a minus when only some are), over its cuisines as pills. A pill's checkbox lies
+   invisibly over it; ticked is filled. */
+fieldset.menu-panel { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; }
+fieldset.menu-panel::before {
+  content: 'Filter'; flex-basis: 100%; text-align: center;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+}
+.type-pills, .menu-sub { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.menu-sub { margin: 4px 0 0; padding: 0; border: 0; }
+/* Food's heading: floated, so it lays out with the pills rather than in the fieldset's border. */
+.sub-head { float: left; flex-basis: 100%; padding: 0; margin: 0 0 2px; }
+.sub-head-option {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+}
+.sub-head-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.sub-head-option .opt-emoji { margin: 0; letter-spacing: 0; }
+.sub-head-option:has(input:checked, input:indeterminate) { color: var(--text); }
+.sub-head-option:hover { color: var(--accent); }
+.menu-panel .menu-option {
+  position: relative; flex: none; justify-content: center;
+  min-height: 34px; padding: 0 12px; gap: 0;
+  font-size: 0.88rem; font-weight: 600; white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+}
+.menu-panel .menu-option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
+.menu-panel .menu-option:hover { border-color: var(--accent); }
+.menu-panel .menu-option:has(input:checked) { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.menu-panel .menu-option:has(input:focus-visible), .sub-head-option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.menu-panel .menu-clear { order: 2; margin-top: 4px; }
+@media (min-width: 801px) {
+  fieldset.menu-panel { width: 400px; max-height: min(75vh, 560px); padding: 10px 12px 12px; }
+}
 
 /* When: pills for the night, then for the time. */
 .when-panel { width: 340px; padding: 10px 12px 12px; }
+@media (min-width: 801px) { .when-panel { max-height: none; overflow: visible; } } /* short enough to need no scrolling */
 .pick-group { margin: 0; padding: 0; border: 0; min-width: 0; }
 .pick-group + .pick-group { margin-top: 12px; }
 .pick-legend { padding: 0; margin-bottom: 6px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
@@ -268,10 +333,10 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 .pill input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .pill input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pills-times .pill span { padding: 0 2px; font-size: 0.85rem; }
+.pills-times .pill:last-child { grid-column: 1 / -1; } /* All night: its own row */
 /* "Right now" makes the time moot. */
 .pick-group:disabled { opacity: 0.4; }
 .pick-group:disabled .pill { cursor: default; }
-.within-chip.is-set { border-color: var(--accent); color: var(--accent); }
 /* Each menu's own Clear, at the foot of its list, once something in it is ticked. */
 .menu-clear {
   display: block; width: 100%; min-height: 40px; margin-top: 4px;
@@ -304,7 +369,22 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   font-size: 0.9rem;
 }
 
-.results-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0 0; }
+/* The count: a pill floating over the top middle of the map, clear of its buttons. */
+.results-bar {
+  grid-area: map; align-self: start; justify-self: center;
+  position: relative; z-index: 4;
+  margin-top: 12px;
+  pointer-events: none;
+}
+.results-bar .count {
+  padding: 4px 14px;
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--text);
+  background: rgb(29 32 56 / 0.92);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.4);
+}
 
 /* Search, filters and the results bar stay pinned while scrolling. */
 .toolbar {
@@ -324,7 +404,8 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 /* List + map */
 .explorer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  /* The list as narrow as a card reads well; the map gets the rest. */
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   grid-template-areas: 'list map' 'empty map';
   grid-template-rows: auto 1fr;
   gap: 16px;
@@ -364,7 +445,6 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 .card-sub { margin: 0; font-size: 0.85rem; line-height: 1.4; }
 .card-sub .status { font-size: inherit; }
 .card-sub .meta { font-size: inherit; }
-.card-sub .meta::before { content: ' · '; color: var(--muted); }
 /* "Good to know" tags (cover charge, cash only, 21+): small amber outline pills. */
 .tag {
   display: inline-block;
@@ -382,6 +462,47 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 8px 0 0; padding: 0; }
 .tags .tag { font-size: 0.85rem; padding: 1px 10px; }
 .card .locate { grid-column: 2; grid-row: 1 / span 2; }
+/* Status: a compact pill, "’til 2am" or "24h"; amber within an hour of closing. */
+.status-pill {
+  display: inline-block;
+  padding: 0 7px;
+  margin-right: 6px;
+  border-radius: 999px;
+  font-size: 0.78rem; font-weight: 700; line-height: 1.55;
+  white-space: nowrap; vertical-align: 1px;
+  color: var(--open);
+  background: rgb(110 231 168 / 0.13);
+}
+.status-pill.soon { color: var(--accent); background: rgb(255 200 87 / 0.15); }
+.card.not-yet .status-pill { color: var(--muted); background: rgb(155 156 181 / 0.14); }
+.card-sub .distance { margin-right: 6px; }
+.card-sub .distance:not(:empty)::before { content: none; }
+.card-sub .meta { color: var(--muted); }
+.card-sub .tag { margin: 0 6px 0 0; }
+/* Tags on cards: just their emoji (the name shows on hover, see .tooltip). */
+.tag-emoji { position: relative; z-index: 1; margin-right: 4px; font-size: 0.95em; cursor: default; } /* above the card's link, to be hovered */
+/* Hover tooltips (tooltip.ts): one floating label, after a short pause. */
+.tooltip {
+  position: fixed; z-index: 1000; pointer-events: none;
+  max-width: 240px; padding: 4px 10px;
+  font-size: 0.8rem; font-weight: 600; color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.45);
+  animation: sheet-fade 0.12s ease-out;
+}
+/* The Map button: where the place is in town, on a little map of the interstates. */
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.locate.mini-map {
+  display: grid; place-items: center;
+  width: 44px; min-width: 44px; height: 52px; min-height: 52px; padding: 4px;
+  background: #101122;
+}
+.mini-map svg { width: 100%; height: 100%; overflow: visible; }
+.mini-roads, .mini-loop { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.mini-roads { stroke: #3a3e5a; stroke-width: 3; }
+.mini-loop { stroke: #5b5f80; stroke-width: 3.5; }
+.mini-pin { fill: var(--accent); stroke: #0f1020; stroke-width: 3; }
+.locate.mini-map:hover .mini-loop, .locate.mini-map:hover .mini-roads { stroke: #7d82a8; }
 .card { position: relative; }
 .card h2 a { color: var(--text); text-decoration: none; }
 /* Whole card opens the place page; the Map button sits above the link. */
@@ -461,6 +582,15 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   border-radius: 8px;
 }
 .map .maplibregl-popup-close-button:hover { color: var(--accent); background: var(--surface); }
+/* A bubble's list, for places sharing one spot (stalls in a food hall). */
+.group-list { display: grid; gap: 4px; }
+.group-list .popup-meta { margin: 0 0 4px; }
+.group-item {
+  display: block; width: 100%; min-height: 40px; padding: 0 12px;
+  font: inherit; font-weight: 600; text-align: left; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+}
+.group-item:hover { border-color: var(--accent); color: var(--accent); }
 .popup-name { display: block; font-weight: 700; font-size: 1rem; text-decoration: none; }
 .popup-meta { color: var(--muted); margin-top: 2px; }
 .popup-status { color: var(--open); font-weight: 600; margin-top: 4px; }
@@ -479,6 +609,10 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 .map .maplibregl-ctrl.maplibregl-ctrl-attrib.maplibregl-compact { background: rgb(29 32 56 / 0.9); }
 .map .maplibregl-ctrl-attrib a { color: var(--muted); }
 .map .maplibregl-ctrl-attrib-button { filter: invert(1); }
+/* The (i) stays put when it opens: pinned to the box's bottom, which stays put, rather than
+   its top, which rises as the credits (taller than the button, or wrapped) open. */
+.map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib-button,
+.map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib-button { top: auto; bottom: 0; }
 
 /* Map dots: a fixed-size dot centered in a larger, invisible tap target. */
 .map-dot { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: none; border: 0; cursor: pointer; }
@@ -493,6 +627,29 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 .map-dot-place:focus-visible { outline: none; }
 .map-dot-place.not-yet::after { opacity: 0.45; }
 .map-dot-place:focus-visible::after { box-shadow: 0 0 0 3px #fff; }
+/* Dots too close together to name: hidden, and shown as one count bubble instead. */
+.map-dot-place.is-grouped { visibility: hidden; pointer-events: none; }
+.map-cluster {
+  display: grid; place-items: center;
+  min-width: 30px; height: 30px; padding: 0 8px;
+  font: 700 0.85rem/1 system-ui, -apple-system, sans-serif;
+  color: var(--bg);
+  background: var(--accent);
+  border: 2px solid #0f1020;
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px rgb(255 200 87 / 0.25);
+  cursor: pointer;
+}
+.map-cluster:hover { box-shadow: 0 0 0 6px rgb(255 200 87 / 0.35); }
+.map-cluster:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff; }
+/* Thumb-sized tap target on touch screens: a clear border around the same-sized bubble. */
+@media (pointer: coarse) {
+  .map-cluster {
+    min-width: 40px; height: 40px; padding: 0 10px;
+    border: 5px solid transparent; background-clip: padding-box;
+    box-shadow: inset 0 0 0 2px #0f1020;
+  }
+}
 /* The map's "show my location" button (place pages). */
 .map .map-locate { display: grid; place-items: center; }
 .map .map-locate svg { width: 16px; height: 16px; fill: var(--text); }
@@ -513,7 +670,28 @@ label.within-chip { padding-left: 12px; gap: 4px; }
 .route-modes button[aria-pressed='true'] { background: #4ea1ff; color: #0b0c18; }
 .route-summary { color: var(--text); font-weight: 600; font-size: 0.95rem; }
 .route-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
-@media (max-width: 800px) { .route-modes button { min-height: 40px; } }
+.route-summary:empty { display: none; }
+.map-wrap { position: relative; }
+@media (max-width: 800px) {
+  .route-modes button { min-height: 40px; }
+  .map-wrap .route { margin: 0 0 10px; }
+}
+/* Desktop: Drive / Walk and the route's time float over the map's top left corner (the
+   map's buttons are on the right), growing rightward as the route's time comes in. */
+@media (min-width: 801px) {
+  .map-wrap { margin-top: 12px; }
+  .map-wrap .map-small { margin-top: 0; }
+  .map-wrap .route {
+    position: absolute; top: 12px; left: 12px; z-index: 3;
+    max-width: calc(100% - 80px); /* clear of the map's buttons on the right */
+    margin: 0; padding: 6px;
+    background: rgb(29 32 56 / 0.94);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.45);
+  }
+  .map-wrap .route-summary { padding-right: 8px; }
+}
 .map-col .geo-msg { margin-top: 10px; }
 .map-dot-you::after { width: 16px; height: 16px; background: #4ea1ff; border: 3px solid #fff; box-shadow: 0 0 0 1px #0f1020; }
 
@@ -578,9 +756,7 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   .search input:not(:placeholder-shown) { border-color: var(--accent); }
   .search-icon { left: 15px; width: 19px; height: 19px; }
   /* Map buttons (+, −, location) in the top right, nearer the thumb. */
-  .map .maplibregl-ctrl-top-left { left: auto; right: 0; align-items: flex-end; }
-  .fit-screen .map .maplibregl-ctrl-top-left { top: var(--overlay-h, 0px); } /* below the header and chips */
-  .map .maplibregl-ctrl-top-left .maplibregl-ctrl { float: right; clear: both; margin: 10px 10px 0 0; }
+  .fit-screen .map .maplibregl-ctrl-top-right { top: var(--overlay-h, 0px); } /* below the header and chips */
   /* Keep the map's attribution clear of the floating filters. */
   .map:not(.map-small) .maplibregl-ctrl-bottom-right,
   .map:not(.map-small) .maplibregl-ctrl-bottom-left { bottom: calc(var(--bottom-h, 128px) + 8px); }
@@ -596,6 +772,10 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   }
   .menu-panel > * { pointer-events: auto; }
   .when-panel { padding: 12px 0 10px; }
+  /* A slider can't float as loose pills: it sits on its own card over the map. */
+  .within-panel .pick-group { padding: 10px 12px 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 4px 14px rgb(0 0 0 / 0.55); }
+  .within-panel .pick-legend { text-shadow: none; color: var(--muted); }
+  .within-stop { min-height: 44px; }
   .explorer::after {
     content: ''; position: absolute; inset: 0; z-index: 9;
     background: rgb(5 6 14 / 0.5);
@@ -610,34 +790,16 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   .pick-group:disabled { opacity: 1; }
   .pick-group:disabled .pill span { color: rgb(155 156 181 / 0.55); background: var(--surface); box-shadow: 0 2px 8px rgb(0 0 0 / 0.4); }
   .pick-group:disabled .pill input:checked + span { background: #5a4a2a; border-color: #5a4a2a; color: rgb(11 12 24 / 0.8); }
-  /* Type, laid out like When: a "Type" section of pills (Food among them), then a
-     "Food" section of its cuisines. Ticked is filled; Food with only some cuisines
-     (its minus) is outlined. The checkboxes lie invisibly over their pills. */
-  fieldset.menu-panel { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; }
-  fieldset.menu-panel::before, .menu-sub::before {
-    flex-basis: 100%;
-    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-    color: var(--text); text-shadow: 0 1px 6px rgb(0 0 0 / 0.9);
-  }
-  fieldset.menu-panel::before { content: 'Type'; margin-bottom: -2px; }
-  .menu-sub::before { content: 'Food'; margin: 6px 0 -2px; }
-  .menu-sub { order: 1; flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; border: 0; }
-  .menu-panel .menu-clear { order: 2; }
-  .menu-panel .menu-option {
-    position: relative; min-height: 44px; padding: 0 16px; gap: 0;
-    font-size: 0.9rem; font-weight: 600;
-    background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px;
-  }
-  .menu-panel .menu-option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
-  .menu-panel .menu-option:hover { background: var(--surface-2); border-color: var(--accent); }
-  .menu-panel .menu-option:has(input:checked) { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-  .menu-panel .menu-option:has(input:indeterminate) { background: var(--surface-2); color: var(--accent); }
-  .menu-panel .menu-option:has(input:indeterminate) span::after { content: ' · some'; font-weight: 500; }
-  .menu-panel .menu-option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  /* Type: as everywhere (see "The Type menu" above), but thumb-sized and floating over the
+     dimmed map, so its headings carry a shadow. */
+  fieldset.menu-panel::before, .sub-head-option { color: var(--text); text-shadow: 0 1px 6px rgb(0 0 0 / 0.9); }
+  .type-pills, .menu-sub { gap: 8px; }
+  .sub-head-option { min-height: 44px; }
+  .menu-panel .menu-option { min-height: 44px; padding: 0 16px; font-size: 0.9rem; background: var(--surface-2); }
   .menu-panel .menu-clear { width: auto; min-height: 44px; margin: 0; padding: 0 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); }
   /* Popping in: each pill rises into place; swapping menus just fades. */
-  .chip-menu[open] > .menu-panel > *, .chip-menu[open] .menu-sub > *, .chip-menu[open] .pills > * { animation: pill-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-  .chip-menu.is-switching[open] > .menu-panel > *, .chip-menu.is-switching[open] .menu-sub > *, .chip-menu.is-switching[open] .pills > * { animation: sheet-fade 0.16s ease-out backwards; }
+  .chip-menu[open] > .menu-panel > *, .chip-menu[open] .menu-sub > *, .chip-menu[open] .type-pills > *, .chip-menu[open] .pills > * { animation: pill-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+  .chip-menu.is-switching[open] > .menu-panel > *, .chip-menu.is-switching[open] .menu-sub > *, .chip-menu.is-switching[open] .type-pills > *, .chip-menu.is-switching[open] .pills > * { animation: sheet-fade 0.16s ease-out backwards; }
   .chip-menu.is-closing > .menu-panel { opacity: 0; transition: opacity 0.16s ease; }
   .chip-menu.is-closing > summary { border-color: var(--border); }
   .pill span { min-height: 44px; } /* thumb-sized, with room to spare while popping in */
@@ -650,7 +812,7 @@ label.within-chip { padding-left: 12px; gap: 4px; }
   /* Narrow screens: names wrap rather than get cut off; the Map button slims down. */
   .card h2 { white-space: normal; overflow-wrap: anywhere; }
   .card { column-gap: 8px; padding-right: 8px; }
-  .card .locate { min-width: 52px; padding: 4px 10px; }
+  .card .locate:not(.mini-map) { min-width: 52px; padding: 4px 10px; }
 
   main { padding-bottom: 32px; }
   /* The page fits the screen and the map fills what's left, edge to edge and down to

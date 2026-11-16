@@ -18,7 +18,7 @@ const places = defineCollection({
   loader: file(process.env.PLACES_FILE ?? 'src/data/places.json'),
   schema: z.object({
     name: z.string(),
-    // One type, or a list for places that are several things (a CVS is a grocery and a pharmacy).
+    // One type, or a list for places that are several things (a bar that is also a venue).
     type: z
       .union([typeKey, z.array(typeKey).min(1)])
       .transform((t) => (Array.isArray(t) ? t : [t])),

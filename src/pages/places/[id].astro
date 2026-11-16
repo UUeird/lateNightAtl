@@ -1,7 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { TAGS, typeLabel } from '../../data/taxonomy';
+import { TAGS, TAG_EMOJI, typeLabel } from '../../data/taxonomy';
 import { DAYS, DAY_NAMES, formatDay, is24h } from '../../lib/hours';
 import { url } from '../../lib/url';
 import { appleDirectionsUrl, googleDirectionsUrl } from '../../lib/directions';
@@ -53,19 +53,12 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
       <p class="meta">{[typeLabel(p.type), ...p.cuisine.map(cap)].join(' · ')} <span class="area">{p.area}</span></p>
       {p.tags.length > 0 && (
         <ul class="tags" aria-label="Good to know">
-          {p.tags.map((t) => <li class="tag">{TAGS[t]}</li>)}
+          {p.tags.map((t) => <li class="tag"><span aria-hidden="true">{TAG_EMOJI[t]}</span> {TAGS[t]}</li>)}
         </ul>
       )}
       <p class="status big" id="status-line">
         <span id="status" data-hours={JSON.stringify(p.hours)}></span><span class="away" id="away" hidden></span>
       </p>
-      <div class="route" id="route" hidden>
-        <div class="route-modes" role="group" aria-label="Route from you">
-          <button type="button" data-mode="auto" aria-pressed="false">Drive<span class="mode-time" data-time></span></button>
-          <button type="button" data-mode="pedestrian" aria-pressed="false">Walk<span class="mode-time" data-time></span></button>
-        </div>
-        <span class="route-summary" id="route-summary" aria-live="polite"></span>
-      </div>
       <div class="actions">
         <a class="btn btn-primary btn-detail" id="directions" href={directions} data-address={p.address}>
           <span>Directions</span><span class="btn-sub">{shortAddress}</span>
@@ -105,7 +98,17 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
       </section>
     </div>
     <div class="map-col">
-      <div class="map map-small" id="map" data-lat={p.lat} data-lng={p.lng}></div>
+      {/* Drive / Walk: floats over the map on desktop; just above it on phones. */}
+      <div class="map-wrap">
+        <div class="route" id="route" hidden>
+          <div class="route-modes" role="group" aria-label="Route from you">
+            <button type="button" data-mode="auto" aria-pressed="false">Drive<span class="mode-time" data-time></span></button>
+            <button type="button" data-mode="pedestrian" aria-pressed="false">Walk<span class="mode-time" data-time></span></button>
+          </div>
+          <span class="route-summary" id="route-summary" aria-live="polite"></span>
+        </div>
+        <div class="map map-small" id="map" data-lat={p.lat} data-lng={p.lng}></div>
+      </div>
       <p class="geo-msg" id="geo-msg" role="status" hidden></p>
       <p class="route-note" id="route-note" hidden>
         Routes come from OpenStreetMap’s routing service (<a href="https://fossgis.de/" rel="noopener">FOSSGIS</a>), which receives your
@@ -152,7 +155,7 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
     let shown = false;
     let here: LngLat | null = null;
     const locate = locateControl(() => (shown ? hideMe() : showMe(true)));
-    map.addControl(locate.control, 'top-left');
+    map.addControl(locate.control, 'top-right');
     locate.setState('idle');
 
     function hideMe() {
@@ -194,9 +197,10 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
         say();
         locate.setState('on');
         if (miles <= FRAME_BOTH_MILES) {
-          // Extra room on the buttons' side (right on phones, left on desktop) keeps both dots clear of them.
+          // Extra room on the buttons' side (right) keeps both dots clear of them, and on
+          // desktop at the top for the Drive / Walk box.
           const phone = matchMedia('(max-width: 800px)').matches;
-          const padding = { top: 60, bottom: 60, right: phone ? 90 : 60, left: phone ? 60 : 90 };
+          const padding = { top: phone ? 60 : 90, bottom: 60, right: 90, left: 60 };
           map.fitBounds(new maplibregl.LngLatBounds(at, at).extend(here), { padding, maxZoom: 15, duration: asked ? 500 : 0 });
         }
       } catch (err) {
@@ -250,7 +254,9 @@ const verified = new Date(`${p.lastVerified}T12:00:00`).toLocaleDateString('en-U
       routeSummary.textContent = `About ${formatDuration(route.seconds)} · ${formatMiles(route.miles)}`;
       // Fit the route first; the line then draws itself from you to the place.
       const bounds = route.line.reduce((b, pt) => b.extend(pt), new maplibregl.LngLatBounds(at, at));
-      map.fitBounds(bounds, { padding: { top: 60, bottom: 60, right: 60, left: 90 }, maxZoom: 16, duration: 500 });
+      // Desktop: extra room at the top for the Drive / Walk box over the map.
+      const top = matchMedia('(max-width: 800px)').matches ? 60 : 90;
+      map.fitBounds(bounds, { padding: { top, bottom: 60, right: 90, left: 60 }, maxZoom: 16, duration: 500 });
       line.show(route.line);
     }
     modeBtns.forEach((b) => b.addEventListener('click', () => showRoute(b.dataset.mode as RouteMode)));

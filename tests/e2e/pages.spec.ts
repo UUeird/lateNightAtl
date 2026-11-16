@@ -47,7 +47,7 @@ test('P04 Directions and Call buttons show the address and number', { tag: ANY }
 
 test('P05 place page shows "good to know" tags', { tag: ANY }, async ({ page }) => {
   await page.goto('/places/castleberry-late-lounge/');
-  await expect(page.getByRole('list', { name: 'Good to know' }).getByRole('listitem')).toHaveText(['Cover charge', '21+']);
+  await expect(page.getByRole('list', { name: 'Good to know' }).getByRole('listitem')).toHaveText(['🎟️ Cover charge', '🔞 21+']);
   await page.goto('/places/night-owl-diner/'); // untagged: no empty row
   await expect(page.locator('.tags')).toHaveCount(0);
 });

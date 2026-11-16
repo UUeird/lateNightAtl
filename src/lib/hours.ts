@@ -82,6 +82,27 @@ export function formatTime(min: number): string {
   return `${h12}${mm ? `:${String(mm).padStart(2, '0')}` : ''} ${h < 12 ? 'AM' : 'PM'}`;
 }
 
+/** A time in as few characters as reads clearly: "2am", "12:30am", "10pm". */
+export function formatShort(min: number): string {
+  const m = ((min % 1440) + 1440) % 1440;
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return `${h % 12 || 12}${mm ? `:${String(mm).padStart(2, '0')}` : ''}${h < 12 ? 'am' : 'pm'}`;
+}
+
+/** Within this many minutes of closing, a place is "closing soon". */
+export const CLOSING_SOON_MIN = 60;
+
+/**
+ * The list cards' status pill: "’til 2am", "24h", or "opens 10pm" for a place not open yet.
+ * `t` is the time asked about; `soon` when it closes within CLOSING_SOON_MIN of it.
+ */
+export function shortStatus(span: [number, number], t: number, notYet: boolean): { text: string; soon: boolean } {
+  if (notYet) return { text: `opens ${formatShort(span[0])}`, soon: false };
+  if (span[1] - span[0] >= 7 * 1440) return { text: '24h', soon: false };
+  return { text: `’til ${formatShort(span[1])}`, soon: span[1] - t <= CLOSING_SOON_MIN };
+}
+
 /** Human description of the closing time of a span end. */
 export function closesLabel(end: number, start: number): string {
   if (end - start >= 7 * 1440) return 'Open 24 hours';
@@ -116,8 +137,12 @@ export function tonight(date = new Date()): number {
   return minutes < NIGHT_ROLLOVER ? (day + 6) % 7 : day;
 }
 
-/** The "Open until" choices: 9 PM through 4 AM every half hour, as minutes past the night's midnight-before. */
-export const OPEN_UNTIL_TIMES = Array.from({ length: 15 }, (_, i) => 21 * 60 + i * 30);
+/** "All night": open at 5 AM, when the night ends. In practice, places open around the clock. */
+export const ALL_NIGHT = 24 * 60 + NIGHT_ROLLOVER;
+/** The "Open until" choices: 9 PM through 4 AM every half hour, then All night, as minutes past the night's midnight-before. */
+export const OPEN_UNTIL_TIMES = [...Array.from({ length: 15 }, (_, i) => 21 * 60 + i * 30), ALL_NIGHT];
+/** "Open until" in words: "2 AM", "12 AM", or "All night". */
+export const openUntilLabel = (t: number) => (t === ALL_NIGHT ? 'All night' : formatTime(t).replace('midnight', '12 AM'));
 
 /** Minutes into tonight in Atlanta, counted from tonight's midnight-before (1:15 AM → 1515). */
 export function tonightMinutes(date = new Date()): number {
@@ -131,7 +156,7 @@ export function tonightMinutes(date = new Date()): number {
  */
 export function defaultOpenUntil(date = new Date()): number {
   const t = Math.ceil((tonightMinutes(date) + 30) / 30) * 30;
-  return Math.min(Math.max(t, OPEN_UNTIL_TIMES[0]), OPEN_UNTIL_TIMES[OPEN_UNTIL_TIMES.length - 1]);
+  return Math.min(Math.max(t, OPEN_UNTIL_TIMES[0]), 28 * 60); // never All night on its own
 }
 
 /** When a place closed at minute `t` next opens on night `d` (before the night ends), or null. */
@@ -152,3 +177,6 @@ export const RIGHT_NOW_FROM = 21 * 60;
 export function defaultNight(date = new Date()): 'now' | 'tonight' {
   return tonightMinutes(date) >= RIGHT_NOW_FROM ? 'now' : 'tonight';
 }
+
+/** The Within slider's stops, in miles, nearest first; 0 is any distance. */
+export const WITHIN_STOPS = [1, 3, 5, 10, 0];

@@ -35,7 +35,7 @@ export function createMap(container: HTMLElement | string, options: Partial<mapl
   map.setStyle(STYLE_URL, { transformStyle: (_prev, next) => restyle(next) });
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
   // Start with the attribution folded into its (i) button rather than spread over the map.
   map.once('load', () => {
     const attrib = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
@@ -115,11 +115,17 @@ export function dot(variant: 'place' | 'you', label?: string, clickable = false)
   return el;
 }
 
-/** Zoom level from which place names show beside their dots (about a neighborhood's width). */
-export const LABEL_ZOOM = 13;
-/** Phones show names from further out (a few neighborhoods). Collision handling keeps the
-    best-ranked names that fit and drops the rest, so a wide view stays readable. */
-export const PHONE_LABEL_ZOOM = 10;
+/** Zoom level from which place names show beside their dots (the whole city in view).
+    Dots too close to name are grouped into a count first (see CLUSTER_PX), and collision
+    handling drops any name that still doesn't fit, so a wide view stays readable. */
+export const LABEL_ZOOM = 10;
+/** Dots closer than this on screen, in px, are grouped into one count bubble: only dots
+    that would overlap (a dot is 18px). Names find room on any side of their dot, and any
+    that still don't fit are left out instead. */
+export const CLUSTER_PX = 18;
+/** Places closer than this, in metres, are in effect one spot (stalls in a food hall):
+    zooming won't part them, so their bubble lists them instead. */
+const SAME_SPOT_M = 25;
 const LABELS = 'place-labels';
 const DOTS = 'place-dot-space';
 /** Room each dot reserves so no name is drawn over it, in px (the dot is 18px). */
@@ -150,20 +156,131 @@ const LABEL_HOVER_COLOR = '#ffc857';
 export function placeLabels(
   map: maplibregl.Map,
   phone: MediaQueryList | undefined,
-  on: { click: (id: string) => void; hover: (id: string | null) => void },
+  on: {
+    click: (id: string) => void;
+    hover: (id: string | null) => void;
+    /** The places now inside a count bubble, whose own dots should hide. */
+    grouped: (ids: Set<string>) => void;
+  },
 ) {
   let points: LabelPoint[] = [];
-  const minZoom = () => (phone?.matches ? PHONE_LABEL_ZOOM : LABEL_ZOOM);
-  phone?.addEventListener('change', () => {
-    for (const id of [LABELS, DOTS]) if (map.getLayer(id)) map.setLayerZoomRange(id, minZoom(), 24);
-  });
+  /** A place kept out of any group (its popup is open). */
+  let pinned: string | null = null;
+
+  // Grouping: places whose dots sit within CLUSTER_PX of each other become one bubble
+  // with their count, at their middle. Best-ranked places seed the groups. Recomputed as
+  // the zoom changes; panning doesn't change distances on screen.
+  type Group = { ids: string[]; at: LngLat; rank: number };
+  let groups: Group[] = [];
+  const makeGroups = (): Group[] => {
+    const solo = (p: LabelPoint, i: number): Group => ({ ids: [p.id], at: p.at, rank: i });
+    const px = points.map((p) => map.project(p.at));
+    const taken = new Array(points.length).fill(false);
+    const out: Group[] = [];
+    points.forEach((p, i) => {
+      if (taken[i]) return;
+      taken[i] = true;
+      const members = [i];
+      if (p.id !== pinned) {
+        for (let j = i + 1; j < points.length; j++) {
+          if (taken[j] || points[j].id === pinned) continue;
+          if (Math.hypot(px[i].x - px[j].x, px[i].y - px[j].y) < CLUSTER_PX) {
+            taken[j] = true;
+            members.push(j);
+          }
+        }
+      }
+      if (members.length === 1) return out.push(solo(p, i));
+      const at: LngLat = [
+        members.reduce((s, k) => s + points[k].at[0], 0) / members.length,
+        members.reduce((s, k) => s + points[k].at[1], 0) / members.length,
+      ];
+      out.push({ ids: members.map((k) => points[k].id), at, rank: i });
+    });
+    return out;
+  };
+
+  // The bubbles: HTML markers like the dots. Clicking one zooms in to its places.
+  const bubbles: maplibregl.Marker[] = [];
+  const drawBubbles = () => {
+    for (const b of bubbles) b.remove();
+    bubbles.length = 0;
+    const byId = new Map(points.map((p) => [p.id, p]));
+    for (const g of groups) {
+      if (g.ids.length < 2) continue;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'map-cluster';
+      el.textContent = String(g.ids.length);
+      el.setAttribute('aria-label', `${g.ids.length} places here. Zoom in`);
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pts = g.ids.map((id) => byId.get(id)!.at);
+        const bounds = pts.reduce((b, pt) => b.extend(pt), new maplibregl.LngLatBounds(pts[0], pts[0]));
+        const sw = bounds.getSouthWest();
+        if (sw.distanceTo(bounds.getNorthEast()) < SAME_SPOT_M) return listGroup(g);
+        // Far enough in that they come apart.
+        const zoom = map.cameraForBounds(bounds, { padding: 80 })?.zoom ?? map.getMaxZoom();
+        map.easeTo({ center: bounds.getCenter(), zoom: Math.min(map.getMaxZoom(), Math.max(zoom, map.getZoom() + 1)), duration: 400 });
+      });
+      bubbles.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(g.at).addTo(map));
+    }
+  };
+
+  // Places sharing one spot: a small list over the bubble; picking one opens its popup.
+  const listPopup = new maplibregl.Popup({ offset: 18, maxWidth: 'min(280px, calc(100vw - 32px))', focusAfterOpen: false });
+  const listGroup = (g: Group) => {
+    const box = document.createElement('div');
+    box.className = 'group-list';
+    const head = document.createElement('div');
+    head.className = 'popup-meta';
+    head.textContent = `${g.ids.length} places here`;
+    box.append(head);
+    for (const id of g.ids) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'group-item';
+      b.textContent = points.find((p) => p.id === id)!.name;
+      b.addEventListener('click', () => {
+        listPopup.remove();
+        on.click(id);
+      });
+      box.append(b);
+    }
+    listPopup.setLngLat(g.at).setDOMContent(box).addTo(map);
+  };
+
+  let signature = '';
+  const regroup = (force = false) => {
+    const next = makeGroups();
+    const sig = next.map((g) => g.ids.join(',')).join('|');
+    if (sig === signature && !force) return;
+    signature = sig;
+    groups = next;
+    (map.getSource(LABELS) as maplibregl.GeoJSONSource | undefined)?.setData(data());
+    drawBubbles();
+    on.grouped(new Set(groups.filter((g) => g.ids.length > 1).flatMap((g) => g.ids)));
+    map.getContainer().dataset.groups = groups.filter((g) => g.ids.length > 1).map((g) => g.ids.length).join(','); // for tests
+  };
+  let regroupFrame = 0;
+  const scheduleRegroup = () => {
+    if (!regroupFrame) regroupFrame = requestAnimationFrame(() => ((regroupFrame = 0), regroup()));
+  };
+  map.on('zoom', scheduleRegroup);
+  map.on('resize', scheduleRegroup);
+
+  // Names for places on their own; a bubble has no name, but reserves its space so
+  // names keep off it.
   const data = () => ({
     type: 'FeatureCollection' as const,
-    features: points.map((p, i) => ({
-      type: 'Feature' as const,
-      properties: { id: p.id, name: p.name, rank: i },
-      geometry: { type: 'Point' as const, coordinates: p.at },
-    })),
+    features: groups.map((g) => {
+      const p = g.ids.length === 1 ? points.find((q) => q.id === g.ids[0])! : null;
+      return {
+        type: 'Feature' as const,
+        properties: { id: p?.id ?? `group-${g.rank}`, name: p?.name ?? '', rank: g.rank, size: p ? 1 : 1.5 },
+        geometry: { type: 'Point' as const, coordinates: g.at },
+      };
+    }),
   });
   // What sits over the map: its buttons (+, −, location), the attribution, and anything
   // the page floats over it (the phone search box, marked data-map-overlay). Each is an
@@ -234,14 +351,15 @@ export function placeLabels(
       id: LABELS,
       type: 'symbol',
       source: LABELS,
-      minzoom: minZoom(),
+      minzoom: LABEL_ZOOM,
       layout: {
         'symbol-sort-key': ['get', 'rank'],
         'text-field': ['get', 'name'],
         'text-font': ['Noto Sans Bold'],
         'text-size': 12.5,
         'text-max-width': 14,
-        'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
+        // Any side of its dot that's free, corners included.
+        'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
         // Far enough out (in ems) that a name, with its padding, clears its own dot's space.
         'text-radial-offset': 1.3,
         'text-justify': 'auto',
@@ -260,9 +378,10 @@ export function placeLabels(
       id: DOTS,
       type: 'symbol',
       source: LABELS,
-      minzoom: minZoom(),
+      minzoom: LABEL_ZOOM,
       layout: {
         'icon-image': 'dot-space',
+        'icon-size': ['get', 'size'], // a bubble reserves more than a dot
         'icon-allow-overlap': true, // always reserve it…
         'icon-ignore-placement': false, // …so names keep off it
       },
@@ -307,8 +426,15 @@ export function placeLabels(
     set(next: LabelPoint[]) {
       points = next;
       lit = null;
-      (map.getSource(LABELS) as maplibregl.GeoJSONSource | undefined)?.setData(data());
+      if (pinned && !next.some((p) => p.id === pinned)) pinned = null;
+      regroup(true);
       map.getContainer().dataset.labels = next.map((p) => p.name).join('|'); // for tests
+    },
+    /** Keep one place out of any group, e.g. while its popup is open (or none). */
+    pin(id: string | null) {
+      if (id === pinned) return;
+      pinned = id;
+      regroup();
     },
     /** Highlight one place's name (or none). */
     highlight(id: string | null) {

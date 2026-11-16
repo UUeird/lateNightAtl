@@ -4,8 +4,9 @@ import { milesBetween, type LngLat } from '../lib/geo';
 import { directionsFor } from '../lib/directions';
 import { formatMiles, locationErrorMessage } from '../lib/location';
 import { attachScrollUi } from './scroll-ui';
+import { initTooltips } from './tooltip';
 import { matchesType } from '../lib/match';
-import { DAY_NAMES, atlantaNow, closesLabel, defaultNight, defaultOpenUntil, formatTime, openSpanAt, tonight, tonightMinutes, type Hours } from '../lib/hours';
+import { ALL_NIGHT, DAY_NAMES, atlantaNow, openUntilLabel, closesLabel, shortStatus, WITHIN_STOPS, defaultNight, defaultOpenUntil, formatTime, openSpanAt, tonight, tonightMinutes, type Hours } from '../lib/hours';
 
 interface Place {
   id: string;
@@ -246,7 +247,7 @@ export function initExplorer() {
   const cards = new Map(places.map((p) => [p.id, list.querySelector<HTMLElement>(`[data-id="${p.id}"]`)!]));
 
   /** `notYet`: tonight's view, and the place opens later than now. */
-  type Result = { p: Place; end: number; label: string; miles: number; notYet: boolean };
+  type Result = { p: Place; end: number; label: string; short: { text: string; soon: boolean }; miles: number; notYet: boolean };
   /** The latest results, for the map to draw whenever it's ready. */
   let latest: Result[] = [];
 
@@ -260,7 +261,7 @@ export function initExplorer() {
     // "Near me" lives on the map, under + and −, as on place pages.
     const locate = locateControl(toggleNear, 'Near me');
     locate.button.id = 'near-me';
-    map.addControl(locate.control, 'top-left');
+    map.addControl(locate.control, 'top-right');
     setLocateState = locate.setState;
     setLocateState(nearState);
     const markers = new Map(
@@ -290,7 +291,7 @@ export function initExplorer() {
       let dx = r.left < area.left || r.width > area.right - area.left ? r.left - area.left : Math.max(0, r.right - area.right);
       let dy = r.top < area.top || r.height > area.bottom - area.top ? r.top - area.top : Math.max(0, r.bottom - area.bottom);
       // Clear of the map buttons (+, −, Near me) too: beside them if there's room, else below.
-      const btns = [...map.getContainer().querySelectorAll('.maplibregl-ctrl-top-left > .maplibregl-ctrl')].map((b) => b.getBoundingClientRect());
+      const btns = [...map.getContainer().querySelectorAll('.maplibregl-ctrl-top-right > .maplibregl-ctrl')].map((b) => b.getBoundingClientRect());
       if (btns.length) {
         const c = {
           left: Math.min(...btns.map((b) => b.left)) - margin,
@@ -313,9 +314,16 @@ export function initExplorer() {
         if (passes > 1) map.once('moveend', () => popup.isOpen() && keepInView(popup, passes - 1));
       }
     };
-    for (const m of markers.values()) {
+    for (const [id, m] of markers) {
       const popup = m.getPopup()!;
-      popup.on('open', () => requestAnimationFrame(() => keepInView(popup)));
+      popup.on('open', () => {
+        labels.pin(id); // its dot comes out of any group, so the popup points at it
+        requestAnimationFrame(() => keepInView(popup));
+      });
+      popup.on('close', () => {
+        // Only if no other popup has taken over in the meantime.
+        if (![...markers.values()].some((o) => o.getPopup()!.isOpen())) labels.pin(null);
+      });
     }
     // A place's dot and name light up together when either is hovered (mouse only:
     // a tap shouldn't leave one lit), and clicking the name opens it like the dot.
@@ -333,6 +341,10 @@ export function initExplorer() {
         if (!m.getPopup()!.isOpen()) m.togglePopup();
       },
       hover: highlight,
+      // Dots inside a count bubble hide (they stay on the map, ready to come back).
+      grouped: (ids) => {
+        for (const [id, m] of markers) m.getElement().classList.toggle('is-grouped', ids.has(id));
+      },
     });
     for (const [id, m] of markers) {
       const el = m.getElement();
@@ -344,6 +356,7 @@ export function initExplorer() {
     const view = {
       map,
       markers,
+      highlight,
       shown: new Set<Marker>(),
       setLabels: (points: { id: string; name: string; at: LngLat }[]) => {
         lit = null;
@@ -361,7 +374,15 @@ export function initExplorer() {
 
   // "Near me": the browser's geolocation, only on request. The location stays in the page.
   let here: LngLat | null = null;
-  const withinSel = form.elements.namedItem('within') as HTMLSelectElement;
+  const withinGroup = document.getElementById('within-group') as HTMLFieldSetElement;
+  const withinRange = withinGroup.querySelector<HTMLInputElement>('input[name=within]')!;
+  // Its stops are labels you can click, as well as marks along it.
+  for (const stop of withinGroup.querySelectorAll<HTMLButtonElement>('[data-stop]')) {
+    stop.addEventListener('click', () => {
+      withinRange.value = stop.dataset.stop!;
+      withinRange.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
   const geoMsg = document.getElementById('geo-msg')!;
   const say = (text = '') => {
     geoMsg.textContent = text;
@@ -375,9 +396,9 @@ export function initExplorer() {
     nearState = state;
     setLocateState(state);
     const on = state === 'on';
-    withinSel.disabled = !on;
+    withinGroup.disabled = !on;
     withinChip.hidden = !on;
-    if (!on) withinSel.value = '';
+    if (!on) withinRange.value = String(WITHIN_STOPS.length - 1); // back to any distance
   };
 
   function toggleNear() {
@@ -412,7 +433,7 @@ export function initExplorer() {
   // Where the filters start. A link with filters in it (a shared view) shows exactly that.
   // Otherwise right now (from 9 PM) or tonight, open until half an hour out, with the visitor's own last Type and Cuisine choices,
   // remembered in this browser, or by default any cuisine and every type but errands
-  // (grocery, pharmacy).
+  // (pharmacy).
   const params = new URLSearchParams(location.search);
   const checkboxes = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[type=checkbox][name="${name}"]`)];
   const typeBoxes = checkboxes('type');
@@ -500,6 +521,7 @@ export function initExplorer() {
 
   /** Frame the current results. Skipped while the map is hidden (phones, list view). */
   let framed = false;
+  let refitWhenClosed = false;
   function refit() {
     if (!mv || !fitTo || !mv.map.getContainer().offsetWidth) return;
     // Phones: the header and chips float over the top of the map.
@@ -531,7 +553,11 @@ export function initExplorer() {
     fitTo = pts.length ? mv.bounds(pts) : null;
     // Names for the results, best first, so they win when two compete for space.
     mv.setLabels(latest.map(({ p }) => ({ id: p.id, name: p.name, at: [p.lng, p.lat] })));
-    if (fit) refit();
+    if (!fit) return;
+    // While a filter menu is open, the map holds still (it would re-zoom with every tick);
+    // it frames the results once the menu closes.
+    if (form.querySelector('.chip-menu[open]')) refitWhenClosed = true;
+    else refit();
   }
 
   function update(fit: boolean) {
@@ -553,7 +579,9 @@ export function initExplorer() {
     const nowInNight = !live && night === tonight() ? tonightMinutes() : Infinity;
     const q = (f.q ?? '').trim().toLowerCase();
 
-    const within = Number(f.within) || Infinity;
+    // Off (no location) or at its far end: any distance.
+    const withinMiles = f.within === undefined ? 0 : WITHIN_STOPS[Number(f.within)] ?? 0;
+    const within = withinMiles || Infinity;
 
     const results: Result[] = [];
     for (const p of places) {
@@ -568,17 +596,22 @@ export function initExplorer() {
       if (!ok) continue;
       const notYet = span[0] > nowInNight;
       const label = notYet ? `Not open yet · ${formatTime(span[0])} – ${formatTime(span[1])}` : closesLabel(span[1], span[0]);
-      results.push({ p, end: span[1], label, miles, notYet });
+      results.push({ p, end: span[1], label, short: shortStatus(span, t, notYet), miles, notYet });
     }
 
-    // Open now before not open yet; then nearest first when location is on, otherwise latest-closing first.
+    // Open now before not open yet; then nearest first when location is on, otherwise
+    // closing soonest first (the ones to catch before they close), all-night places last.
     results.sort(
-      (a, b) => Number(a.notYet) - Number(b.notYet) || (here ? a.miles - b.miles : b.end - a.end) || a.p.name.localeCompare(b.p.name),
+      (a, b) => Number(a.notYet) - Number(b.notYet) || (here ? a.miles - b.miles : a.end - b.end) || a.p.name.localeCompare(b.p.name),
     );
-    for (const { p, label, miles, notYet } of results) {
+    for (const { p, label, short, miles, notYet } of results) {
       const card = cards.get(p.id)!;
       card.classList.toggle('not-yet', notYet);
       card.querySelector('[data-status]')!.textContent = label;
+      const pill = card.querySelector<HTMLElement>('[data-status-short]')!;
+      pill.textContent = short.text;
+      pill.classList.toggle('soon', short.soon);
+      pill.classList.toggle('all-night', short.text === '24h');
       card.querySelector('[data-distance]')!.textContent = here ? formatMiles(miles) : '';
       list.appendChild(card);
     }
@@ -595,14 +628,20 @@ export function initExplorer() {
 
     // Menu labels and active states; "Clear filters" (desktop) once any is in use.
     const extras = type.size + cuisine.size;
-    withinChip.classList.toggle('is-set', !!f.within);
+    withinChip.classList.toggle('is-active', !!withinMiles);
+    const withinWords = withinMiles ? `Within ${withinMiles} mi` : 'Any distance';
+    withinChip.querySelector('.within-text')!.textContent = withinWords;
+    withinChip.querySelector('.within-short')!.textContent = withinMiles ? `${withinMiles} mi` : 'Within';
+    withinRange.setAttribute('aria-valuetext', withinWords);
+    withinRange.style.setProperty('--fill', `${(Number(withinRange.value) / (WITHIN_STOPS.length - 1)) * 100}%`);
+    for (const stop of withinGroup.querySelectorAll<HTMLElement>('[data-stop]')) stop.classList.toggle('is-on', stop.dataset.stop === withinRange.value);
     for (const menu of filterMenus) {
       // What's picked, in words: "Food" for the usual food or all of it, else the cuisines.
       const boxes = [...menu.querySelectorAll<HTMLInputElement>('input[type=checkbox]:checked')];
       const wholeFood = picks === 'all' || picks === 'default';
       const words = boxes
         .filter((b) => (b === foodBox ? wholeFood : b.name !== 'cuisine' || !wholeFood))
-        .map((b) => b.parentElement!.textContent!);
+        .map((b) => b.parentElement!.querySelector('.opt-text')!.textContent!);
       menu.querySelector('.menu-text')!.textContent =
         words.length === 0 ? menu.dataset.all! : words.length === 1 ? words[0] : `${words.length} ${menu.dataset.plural}`;
       menu.classList.toggle('is-active', boxes.length > 0);
@@ -611,9 +650,10 @@ export function initExplorer() {
     if (foodBox) foodBox.indeterminate = foodWasPartial = picks === 'default' || picks === 'some';
     // When: e.g. "Tonight · till 12:30 AM" (phones: "Tonight, 12:30 AM").
     const nightWord = f.night === 'tonight' ? 'Tonight' : DAY_NAMES[night].slice(0, 3);
-    const time = formatTime(t).replace('midnight', '12 AM');
-    whenMenu.querySelector('.when-text')!.textContent = live ? 'Right now' : `${nightWord}${f.night === 'tonight' ? '' : ' night'} · till ${time}`;
-    whenMenu.querySelector('.when-short')!.textContent = live ? 'Right now' : `${nightWord}, ${time}`;
+    const time = openUntilLabel(t);
+    const till = t === ALL_NIGHT ? 'all night' : `till ${time}`;
+    whenMenu.querySelector('.when-text')!.textContent = live ? 'Right now' : `${nightWord}${f.night === 'tonight' ? '' : ' night'} · ${till}`;
+    whenMenu.querySelector('.when-short')!.textContent = live ? 'Right now' : `${nightWord}, ${t === ALL_NIGHT ? 'all night' : time}`;
     whenMenu.classList.toggle('is-active', f.night !== DEFAULTS.night || (!live && f.at !== DEFAULTS.at));
     clearBtn.hidden = !extras;
 
@@ -645,16 +685,28 @@ export function initExplorer() {
   const isPhone = () => isPhoneQuery.matches;
   const drawer = initListDrawer(isPhoneQuery);
 
+  // A card's little map. Phones: the place on the big map, behind the list. Desktop, where
+  // the big map is beside the list (and hovering the card already lights its dot): the
+  // place's page, like the rest of the card.
   list.addEventListener('click', async (e) => {
     const id = (e.target as HTMLElement).closest<HTMLElement>('[data-locate]')?.dataset.locate;
     if (!id) return;
-    if (isPhone()) drawer.close();
+    if (!isPhone()) {
+      location.href = cards.get(id)!.querySelector<HTMLAnchorElement>('.card-link')!.href;
+      return;
+    }
+    drawer.close();
     const { map, markers } = await mapReady; // usually long since loaded
     const m = markers.get(id)!;
     map.jumpTo({ center: m.getLngLat(), zoom: Math.max(map.getZoom(), PLACE_ZOOM) });
     if (!m.getPopup()!.isOpen()) m.togglePopup();
-    if (!isPhone()) document.getElementById('map')!.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
+  // Desktop: hovering a card lights its dot and name on the map.
+  for (const [id, card] of cards) {
+    card.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && !isPhone() && mv?.highlight(id));
+    card.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && mv?.highlight(null));
+  }
+  initTooltips();
 
   // Each menu's own Clear.
   for (const menu of filterMenus) {
@@ -669,6 +721,15 @@ export function initExplorer() {
     savePrefs();
     update(true);
   });
+
+  for (const menu of menus) {
+    menu.addEventListener('toggle', () => {
+      if (refitWhenClosed && !form.querySelector('.chip-menu[open]')) {
+        refitWhenClosed = false;
+        refit();
+      }
+    });
+  }
 
   // Filter menus: one open at a time; close on an outside click or Escape.
   const sheet = initFilterSheet(isPhoneQuery, menus);

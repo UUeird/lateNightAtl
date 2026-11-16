@@ -1,17 +1,17 @@
 import { test, expect, visibleNames, pick, showList, searchFor, swipe, setWhen, whenValue, waitForMap, ANY } from './fixtures';
 
-test('E01 starts at tonight, 9 PM, latest-closing first', { tag: ANY }, async ({ page }) => {
+test('E01 starts at tonight, 9 PM, closing soonest first', { tag: ANY }, async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#count')).toHaveText('8 places');
   const names = await visibleNames(page);
-  expect(names.slice(0, 2)).toEqual(['Night Owl Diner (sample)', 'Poncey 24 Pharmacy (sample)']);
+  expect(names.slice(-2)).toEqual(['Night Owl Diner (sample)', 'Poncey 24 Pharmacy (sample)']); // open all night: last
   expect(names).not.toContain('Castleberry Late Lounge (sample)'); // opens at 10 PM
 });
 
 test.describe('a new visitor', { tag: ANY }, () => {
   test.use({ freshVisitor: true });
 
-  test('E02 sees everything but errands (no pharmacy or grocery)', async ({ page }) => {
+  test('E02 sees everything but errands (no pharmacy)', async ({ page }) => {
     await page.goto('/');
     await showList(page);
     const names = await visibleNames(page);
@@ -20,7 +20,6 @@ test.describe('a new visitor', { tag: ANY }, () => {
     expect(names).toContain('Night Owl Diner (sample)');
     const ticked = await page.locator('.chip-menu[data-filter=type] input:checked').evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value));
     expect(ticked).not.toContain('pharmacy');
-    expect(ticked).not.toContain('grocery');
     await expect(page.locator('.chip-menu[data-filter=type]')).toHaveClass(/is-active/);
     expect(page.url()).not.toContain('type='); // the default stays out of the URL
     // The map shows the same results as the list.
@@ -72,16 +71,22 @@ test('E05 "open until" counts hours that run past midnight', { tag: ANY }, async
   await page.goto('/?night=5&at=1560&type=all'); // Friday night, 2 AM, every type
   await expect(page.locator('#count')).toHaveText('7 places');
   expect(await visibleNames(page)).toEqual([
-    'Night Owl Diner (sample)',
-    'Poncey 24 Pharmacy (sample)',
-    'Buford Hwy Noodle House (sample)',
-    'Castleberry Late Lounge (sample)',
+    'Taqueria Tardía (sample)',
     'Edgewood Hi-Fi (sample)',
     'Little Five Slice (sample)',
-    'Taqueria Tardía (sample)',
-  ]);
+    'Buford Hwy Noodle House (sample)',
+    'Castleberry Late Lounge (sample)',
+    'Night Owl Diner (sample)',
+    'Poncey 24 Pharmacy (sample)',
+  ]); // closing soonest first
   const statuses = await page.locator('.card:not([hidden]) [data-status]').allTextContents();
-  expect(statuses).toEqual(['Open 24 hours', 'Open 24 hours', 'Open till 4 AM', 'Open till 4 AM', 'Open till 3 AM', 'Open till 3 AM', 'Open till 2:30 AM']);
+  expect(statuses).toEqual(['Open till 2:30 AM', 'Open till 3 AM', 'Open till 3 AM', 'Open till 4 AM', 'Open till 4 AM', 'Open 24 hours', 'Open 24 hours']);
+  // On screen, each is a compact pill; within an hour of closing, marked as soon.
+  const pills = page.locator('.card:not([hidden]) [data-status-short]');
+  await expect(pills).toHaveText(['’til 2:30am', '’til 3am', '’til 3am', '’til 4am', '’til 4am', '24h', '24h']);
+  // At 2 AM: the 2:30 and 3 AM closers are within the hour; the 4 AM ones aren't.
+  for (const i of [0, 1, 2]) await expect(pills.nth(i)).toHaveClass(/soon/);
+  for (const i of [3, 4, 5]) await expect(pills.nth(i)).not.toHaveClass(/soon/);
 });
 
 test('E06 from 9 PM it opens on "Right now", using the current time with the time picker off', { tag: ANY }, async ({ page }) => {
@@ -200,8 +205,8 @@ test('E08c similar cuisines share one entry; places keep their own, and old link
   await page.goto('/?type=food&cuisine=diner'); // an old link, from before Diner joined Euromerican
   await expect(page.locator('input[name=cuisine][value=euromerican]')).toBeChecked();
   await expect(page.locator('input[name=cuisine][value=diner]')).toHaveCount(0);
-  await expect(page.locator('input[name=cuisine][value=euromerican] + span')).toHaveText('Euromerican');
-  await expect(page.locator('input[name=cuisine][value="southeast asian"] + span')).toHaveText('Southeast Asian');
+  await expect(page.locator('input[name=cuisine][value=euromerican] ~ .opt-text')).toHaveText('Euromerican');
+  await expect(page.locator('input[name=cuisine][value="southeast asian"] ~ .opt-text')).toHaveText('Southeast Asian');
   expect(await visibleNames(page)).toEqual(['Night Owl Diner (sample)']);
   await expect(page.locator('.card:not([hidden]) .meta')).toContainText('Diner'); // its own words on its card
   await page.goto('/?type=food&cuisine=southeast%20asian');
@@ -235,7 +240,7 @@ test.describe('fast food', { tag: ANY }, () => {
     await expect(page.locator('input[name=cuisine][value=coffee]')).toHaveCount(0); // only food places' cuisines (not the café's)…
     await expect(food).toBeChecked();
     expect(await food.evaluate((b: HTMLInputElement) => b.indeterminate)).toBe(true); // …and Food has a minus: all but fast food
-    await expect(page.locator('.chip-menu[data-filter=type] summary')).toHaveAccessibleName('Type: 4 picked'); // Bar, Club, Café, Food
+    await expect(page.locator('.chip-menu[data-filter=type] summary')).toHaveAccessibleName('Type: 5 picked'); // Bar, Club, Café, Venue, Food
     expect(await visibleNames(page)).not.toContain('Cook Spot (sample)');
     expect(page.url()).not.toContain('cuisine='); // the usual food is the default
     await pick(page, 'cuisine', 'fast food');
@@ -247,11 +252,13 @@ test.describe('fast food', { tag: ANY }, () => {
 });
 
 test('E09 a place can have several types', { tag: ANY }, async ({ page }) => {
-  for (const t of ['grocery', 'pharmacy']) {
+  for (const t of ['bar', 'venue']) {
     await page.goto(`/?type=${t}`);
-    expect(await visibleNames(page)).toEqual(['Poncey 24 Pharmacy (sample)']);
+    expect(await visibleNames(page)).toEqual(['Edgewood Hi-Fi (sample)']);
   }
-  await expect(page.locator('.card:not([hidden]) .meta')).toContainText('Grocery & Pharmacy');
+  await expect(page.locator('.card:not([hidden]) .meta')).toContainText('Bar & Venue');
+  await page.goto('/?type=grocery'); // Grocery is gone: old links show pharmacies
+  await expect(page.locator('input[name=type][value=pharmacy]')).toBeChecked();
 });
 
 test('E10 old Restaurant/Diner links map to Food', { tag: ANY }, async ({ page }) => {
@@ -263,7 +270,10 @@ test('E10 old Restaurant/Diner links map to Food', { tag: ANY }, async ({ page }
 test('E11 tags show on cards and are searchable', { tag: ANY }, async ({ page }) => {
   await page.goto('/?night=5&at=1440'); // Friday, midnight: the lounge is open
   const card = page.locator('.card:not([hidden])', { hasText: 'Castleberry Late Lounge' });
-  await expect(card.locator('.tag')).toHaveText(['Cover', '21+']); // short labels on cards
+  // Emoji on cards, named for screen readers and in a tooltip on hover.
+  const tags = card.locator('.tag-emoji');
+  await expect(tags).toHaveText(['🎟️', '🔞']);
+  expect(await tags.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')))).toEqual(['Cover charge', '21+']);
   await searchFor(page, 'cover');
   await expect(page.locator('#count')).toHaveText('1 place');
   expect(await visibleNames(page)).toEqual(['Castleberry Late Lounge (sample)']);
@@ -294,12 +304,15 @@ test.describe('near me', { tag: ANY }, () => {
     expect(miles).toEqual([...miles].sort((a, b) => a - b));
 
     await expect(page.locator('#within-chip')).toBeVisible(); // appears once Near me is on
-    await page.selectOption('select[name=within]', '1');
+    await page.locator('#within-chip summary').click();
+    await page.locator('.within-stop', { hasText: '1 mi' }).click(); // a stop under the slider
+    await expect(page.locator('input[name=within]')).toHaveValue('0');
+    await expect(page.locator('#within-chip .within-text')).toHaveText('Within 1 mi');
     await expect(page.locator('#count')).toHaveText('2 places');
     expect(page.url()).not.toContain('within'); // location stays out of shared links
 
     await page.click('#near-me'); // toggle off
-    await expect(page.locator('select[name=within]')).toBeDisabled();
+    await expect(page.locator('input[name=within]').first()).toBeDisabled(); // its fieldset is
     await expect(page.locator('#within-chip')).toBeHidden();
     await expect(page.locator('#count')).toHaveText('8 places');
   });
@@ -343,6 +356,47 @@ test('E16 map dots are fixed-size HTML markers, one per result', { tag: ANY }, a
   await expect.poll(async () => (await dots.first().boundingBox())!.width).toBe(before.width);
 });
 
+test('E07c "All night" is open at 5 AM: the places open around the clock', { tag: ANY }, async ({ page }) => {
+  await page.goto('/?night=tonight&at=1740');
+  await expect(page.locator('input[name=at][value="1740"]')).toBeChecked();
+  await expect(page.locator('#when-menu .when-text')).toHaveText('Tonight · all night');
+  const statuses = await page.locator('.card:not([hidden]) [data-status]').allTextContents();
+  expect(statuses.length).toBeGreaterThan(0);
+  expect(new Set(statuses)).toEqual(new Set(['Open 24 hours']));
+});
+
+test('E16c dots too close to name become a count, which zooms in when clicked', { tag: ANY }, async ({ page }) => {
+  await page.goto('/');
+  await waitForMap(page);
+  const map = page.locator('#map');
+  const bubbles = page.locator('.map-cluster');
+  // Zoomed out far enough that dots overlap, they group into bubbles, and their own dots hide.
+  for (let i = 0; i < 6 && !(await bubbles.count()); i++) {
+    await page.evaluate(() => document.querySelector<HTMLButtonElement>('.maplibregl-ctrl-zoom-out')!.click());
+    await page.waitForTimeout(400);
+  }
+  await expect(bubbles.first()).toBeVisible();
+  // Once the zoom has settled (the groups stop changing).
+  let settled = '';
+  await expect
+    .poll(async () => {
+      const prev = settled;
+      settled = (await map.getAttribute('data-groups'))!;
+      return settled !== '' && settled === prev;
+    }, { intervals: [500] })
+    .toBe(true);
+  const counts = settled.split(',').map(Number);
+  expect(counts.every((n) => n >= 2)).toBe(true);
+  const grouped = page.locator('.map-dot-place.is-grouped');
+  await expect(grouped).toHaveCount(counts.reduce((a, b) => a + b, 0));
+  await expect(grouped.first()).toBeHidden();
+  await expect(bubbles).toHaveText(counts.map(String));
+  // A bubble zooms in towards its places: fewer of them stay grouped.
+  const before = await grouped.count();
+  await bubbles.first().click();
+  await expect.poll(() => grouped.count()).toBeLessThan(before);
+});
+
 test('E17 map labels follow the results, best first', { tag: ANY }, async ({ page }) => {
   // The names are drawn into the map canvas (with collision handling), so check what it's given.
   await page.goto('/?type=bar');
@@ -356,7 +410,8 @@ test('E17 map labels follow the results, best first', { tag: ANY }, async ({ pag
 test('E18 map popup has Directions and Details buttons', async ({ page, isMobile }) => {
   await page.goto('/');
   await showList(page);
-  await page.locator('.card:not([hidden]) .locate').first().click(); // Night Owl Diner
+  if (isMobile) await page.locator('.card[data-id=night-owl-diner] .locate').click(); // a card's little map
+  else await page.locator('.maplibregl-marker[aria-label="Night Owl Diner (sample)"]').click(); // its dot
   const popup = page.locator('.maplibregl-popup');
   await expect(popup).toBeVisible();
   await expect(popup.locator('.popup-status')).toHaveText('Open 24 hours');
@@ -567,7 +622,7 @@ test.describe('phones', () => {
         const p = (await popup.boundingBox())!;
         const header = (await page.locator('#toolbar').boundingBox())!;
         const filters = (await page.locator('#filter-bar').boundingBox())!; // the chips and search, at the bottom
-        const btns = await page.locator('.maplibregl-ctrl-top-left > .maplibregl-ctrl').evaluateAll((els) => {
+        const btns = await page.locator('.maplibregl-ctrl-top-right > .maplibregl-ctrl').evaluateAll((els) => {
           const rs = els.map((e) => e.getBoundingClientRect());
           return { left: Math.min(...rs.map((r) => r.left)), bottom: Math.max(...rs.map((r) => r.bottom)) };
         });
@@ -598,8 +653,26 @@ test.describe('phones', () => {
   test('E27 tapping anywhere on a card opens the place', async ({ page }) => {
     await page.goto('/');
     await showList(page);
-    const meta = await page.locator('.card:not([hidden]) .meta').first().boundingBox();
+    // Open all night, so at the end: scrolled to the middle, clear of the floating filters.
+    await page.locator('.card[data-id=night-owl-diner]').evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    const meta = await page.locator('.card[data-id=night-owl-diner] .meta').boundingBox();
     await page.mouse.click(meta!.x + 10, meta!.y + 5);
     await expect(page).toHaveURL(/\/places\/night-owl-diner\/$/);
   });
+});
+
+test('E28 desktop: a card\'s little map opens the place; hovering a card lights its dot; tooltips wait a moment', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop-only');
+  await page.goto('/');
+  await waitForMap(page);
+  const card = page.locator('.card[data-id=night-owl-diner]');
+  await card.hover();
+  await expect(page.locator('#map')).toHaveAttribute('data-highlight', 'night-owl-diner');
+  await card.locator('.mini-map').hover();
+  const tip = page.locator('.tooltip');
+  await expect(tip).toBeHidden(); // not straight away…
+  await expect(tip).toHaveText('Midtown'); // …but after a pause: its neighborhood
+  await expect(tip).toBeVisible();
+  await card.locator('.mini-map').click();
+  await expect(page).toHaveURL(/\/places\/night-owl-diner\/$/);
 });

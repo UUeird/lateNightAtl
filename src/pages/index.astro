@@ -1,9 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { DEFAULT_OFF_TYPES, TAGS, TAG_SHORT, TYPES, cuisineGroup, typeLabel, type TypeKey } from '../data/taxonomy';
-import { DAY_NAMES, OPEN_UNTIL_TIMES, formatTime } from '../lib/hours';
+import { DEFAULT_OFF_TYPES, TAGS, TAG_EMOJI, TYPES, TYPE_EMOJI, cuisineEmoji, cuisineGroup, typeLabel, type TypeKey } from '../data/taxonomy';
+import { DAY_NAMES, OPEN_UNTIL_TIMES, WITHIN_STOPS, openUntilLabel } from '../lib/hours';
 import { url } from '../lib/url';
+import { MINIMAP, miniMapPoint } from '../data/minimap';
 
 
 const places = (await getCollection('places')).sort((a, b) => a.data.name.localeCompare(b.data.name));
@@ -36,6 +37,18 @@ const json = JSON.stringify(clientData).replace(/</g, '\\u003c');
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 /** "southeast asian" → "Southeast Asian" */
 const titleCase = (s: string) => s.replace(/\b\w/g, (ch) => ch.toUpperCase());
+/**
+ * A card's second line, after its status: what the place is, led by an emoji. Food places
+ * say their cuisines ("🍕 Pizza"), as Food goes without saying; other places say their
+ * type, then any cuisine ("🍸 Bar · American").
+ */
+function cardMeta(types: TypeKey[], cuisine: string[]) {
+  const other = types.filter((t) => t !== 'food');
+  const words = [...(other.length ? [typeLabel(other)] : []), ...cuisine.map(cap)];
+  if (!words.length) return `${TYPE_EMOJI.food} Food`;
+  const emoji = other.length ? TYPE_EMOJI[other[0]] : cuisineEmoji(cuisine[0]);
+  return `${emoji} ${words.join(' · ')}`;
+}
 ---
 <Base fitScreen hasMap>
   <div class="toolbar" id="toolbar">
@@ -68,23 +81,33 @@ const titleCase = (s: string) => s.replace(/\b\w/g, (ch) => ch.toUpperCase());
             <legend class="pick-legend">Open until</legend>
             <div class="pills pills-times">
               {OPEN_UNTIL_TIMES.map((t) => (
-                <label class="pill"><input type="radio" name="at" value={t} checked={t === 1260} /><span>{formatTime(t).replace('midnight', '12 AM')}</span></label>
+                <label class="pill"><input type="radio" name="at" value={t} checked={t === 1260} /><span>{openUntilLabel(t)}</span></label>
               ))}
             </div>
           </fieldset>
         </div>
       </details>
-      <label class="chip icon-chip when-chip within-chip" id="within-chip" title="Within" hidden>
-        <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3 3" /><circle cx="12" cy="12" r="2" /></svg>
-        <span class="chip-label">Within</span><span class="chip-short" aria-hidden="true">Within</span>
-        <select name="within" aria-label="Within" disabled>
-          <option value="">any</option>
-          <option value="1">1 mile</option>
-          <option value="3">3 miles</option>
-          <option value="5">5 miles</option>
-          <option value="10">10 miles</option>
-        </select>
-      </label>
+      {/* Within: how far from you, once Near me is on. Pills, like When. */}
+      <details class="chip-menu within-menu" id="within-chip" hidden>
+        <summary class="chip icon-chip when-chip within-chip" title="Within">
+          <svg class="cal-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3 3" /><circle cx="12" cy="12" r="2" /></svg>
+          <span class="chip-short within-short" aria-hidden="true">Within</span>
+          <span class="sr-only">Within: </span><span class="menu-text within-text">Any distance</span>
+        </summary>
+        <div class="menu-panel when-panel within-panel">
+          <fieldset class="pick-group" id="within-group" disabled>
+            <legend class="pick-legend">Within</legend>
+            {/* A slider from near to anywhere: drag it, click along it, or click a stop. */}
+            <input type="range" class="within-range" name="within" min="0" max={WITHIN_STOPS.length - 1} step="1" value={WITHIN_STOPS.length - 1}
+              aria-label="Within" aria-valuetext="Any distance" />
+            <div class="within-stops">
+              {WITHIN_STOPS.map((miles, i) => (
+                <button type="button" class="within-stop" data-stop={i}>{miles ? `${miles} mi` : 'Any'}</button>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+      </details>
       {/* What kind of place. Food is one of the types, with its cuisines under it. */}
       <details class="chip-menu" data-filter="type" data-all="All types" data-plural="picked">
         <summary class="chip icon-chip" title="Type">
@@ -94,30 +117,32 @@ const titleCase = (s: string) => s.replace(/\b\w/g, (ch) => ch.toUpperCase());
         </summary>
         <fieldset class="menu-panel">
           <legend class="sr-only">Type</legend>
-          {types.map(([value, text]) => (
-            <>
-              <label class="menu-option"><input type="checkbox" name="type" value={value} /><span>{text}</span></label>
-              {value === 'food' && cuisines.length > 0 && (
-                <fieldset class="menu-sub">
-                  <legend class="sr-only">Cuisine (any if none picked)</legend>
-                  {cuisines.map((c) => (
-                    <label class="menu-option"><input type="checkbox" name="cuisine" value={c} /><span>{titleCase(c)}</span></label>
-                  ))}
-                </fieldset>
-              )}
-            </>
-          ))}
-          <button type="button" class="menu-clear">Clear type</button>
+          {/* Every type but Food, as pills; then Food, heading its cuisines. Food's box
+              ticks or unticks them all, and shows a minus when only some are picked. */}
+          <div class="type-pills">
+            {types.filter(([value]) => value !== 'food').map(([value, text]) => (
+              <label class="menu-option"><input type="checkbox" name="type" value={value} /><span class="opt-emoji" aria-hidden="true">{TYPE_EMOJI[value as TypeKey]}</span><span class="opt-text">{text}</span></label>
+            ))}
+          </div>
+          {types.some(([value]) => value === 'food') && (
+            <fieldset class="menu-sub">
+              <legend class="sub-head">
+                <label class="sub-head-option"><input type="checkbox" name="type" value="food" /><span class="opt-emoji" aria-hidden="true">{TYPE_EMOJI.food}</span><span class="opt-text">Food</span></label>
+              </legend>
+              {cuisines.map((c) => (
+                <label class="menu-option"><input type="checkbox" name="cuisine" value={c} /><span class="opt-emoji" aria-hidden="true">{cuisineEmoji(c)}</span><span class="opt-text">{titleCase(c)}</span></label>
+              ))}
+            </fieldset>
+          )}
+          {/* Named for what it does: unticking everything shows every type. */}
+          <button type="button" class="menu-clear">Show all types</button>
         </fieldset>
       </details>
-      <button type="button" class="clear-btn" id="clear-filters" title="Clear type" hidden>Clear</button>
+      <button type="button" class="clear-btn" id="clear-filters" title="Show all types" hidden>Show all</button>
     </div>
   </form>
 
   <p class="geo-msg" id="geo-msg" role="status" hidden></p>
-  <div class="results-bar">
-    <p class="count" id="count" aria-live="polite">{places.length} places</p>
-  </div>
   </div>
 
   <!-- Phones show the map; the list slides over it from the right (tap or drag the tab on
@@ -133,23 +158,48 @@ const titleCase = (s: string) => s.replace(/\b\w/g, (ch) => ch.toUpperCase());
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
       </button>
     </div>
+    {/* The little map every card draws: defined once, used by each. */}
+    <svg class="sprite" aria-hidden="true">
+      <symbol id="atl-mini" viewBox={`0 0 ${MINIMAP.width} ${MINIMAP.height}`}>
+        <path class="mini-roads" d={MINIMAP.roads} />
+        <path class="mini-loop" d={MINIMAP.loop} />
+      </symbol>
+    </svg>
     <ol class="list" id="list">
-      {places.map(({ id, data }) => (
-        <li class="card" data-id={id}>
-          <h2><a class="card-link" href={url(`places/${id}/`)}>{data.name}</a></h2>
-          <p class="card-sub">
-            <span class="status"><span data-status></span><span class="distance" data-distance></span></span>
-            {data.tags.map((t) => <span class="tag" title={TAGS[t]}>{TAG_SHORT[t]}</span>)}
-            <span class="meta">{[data.area, typeLabel(data.type), ...data.cuisine.map(cap)].join(' · ')}</span>
-          </p>
-          <button type="button" class="locate" data-locate={id}>Map</button>
-        </li>
-      ))}
+      {places.map(({ id, data }) => {
+        const pin = miniMapPoint(data.lng, data.lat);
+        return (
+          <li class="card" data-id={id}>
+            <h2><a class="card-link" href={url(`places/${id}/`)}>{data.name}</a></h2>
+            <p class="card-sub">
+              {/* The status in full for screen readers; a compact pill on screen ("’til 2am"). */}
+              <span class="sr-only" data-status></span><span class="status-pill" data-status-short aria-hidden="true"></span>
+              <span class="distance" data-distance></span>
+              {/* Tags as emoji; the name shows on hover (desktop) and to screen readers. */}
+              {data.tags.map((t) => <span class="tag-emoji" role="img" aria-label={TAGS[t]} data-tip={TAGS[t]}>{TAG_EMOJI[t]}</span>)}
+              <span class="meta">{cardMeta(data.type, data.cuisine)}</span>
+            </p>
+            {/* Where it is in town, on a little map of the interstates. Phones: shows it on
+                the big map (behind the list). Desktop, where the big map is beside the list
+                and hovering the card lights its dot: opens the place, like the card. */}
+            <button type="button" class="locate mini-map" data-locate={id} aria-label={`${data.area}: show on the map`} data-tip={data.area}>
+              <svg viewBox={`0 0 ${MINIMAP.width} ${MINIMAP.height}`} aria-hidden="true">
+                <use href="#atl-mini" />
+                <circle class="mini-pin" cx={pin.x} cy={pin.y} r="7" />
+              </svg>
+            </button>
+          </li>
+        );
+      })}
       <li class="list-note" id="list-note">Hours change. Call ahead or check the business's own site before you go.</li>
     </ol>
     </div>
     <p class="empty" id="empty" hidden>Nothing matches. Try an earlier time or fewer filters.</p>
     <div class="map" id="map" aria-label="Map of places"></div>
+    {/* Desktop: floats over the top of the map. Phones show it in the list's tray instead. */}
+    <div class="results-bar">
+      <p class="count" id="count" aria-live="polite">{places.length} places</p>
+    </div>
   </div>
 
   <script type="application/json" id="places-data" set:html={json} />

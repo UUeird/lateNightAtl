@@ -112,11 +112,12 @@
     "lastVerified": "2026-11-13"
   },
   {
-    "id": "southern-feedstore",
-    "name": "Southern Feedstore",
+    "id": "woodys-cheesesteaks-southern-feedstore",
+    "name": "Woody's CheeseSteaks (Southern Feedstore)",
     "type": "food",
     "cuisine": [
-      "food hall"
+      "sandwiches",
+      "cheesesteaks"
     ],
     "area": "East Atlanta Village",
     "address": "1245 Glenwood Ave SE, Atlanta, GA 30316",
@@ -125,52 +126,302 @@
     "hours": {
       "sun": [
         [
-          "08:00",
+          "11:00",
           "00:00"
         ]
       ],
       "mon": [
         [
-          "08:00",
+          "11:00",
           "00:00"
         ]
       ],
       "tue": [
         [
-          "08:00",
+          "11:00",
           "00:00"
         ]
       ],
       "wed": [
         [
-          "08:00",
+          "11:00",
           "00:00"
         ]
       ],
       "thu": [
         [
-          "08:00",
+          "11:00",
           "00:00"
         ]
       ],
       "fri": [
         [
-          "08:00",
+          "11:00",
           "04:00"
         ]
       ],
       "sat": [
         [
-          "08:00",
+          "11:00",
           "04:00"
         ]
       ]
     },
-    "notes": "Food hall. Individual stalls keep their own hours and may close earlier.",
+    "url": "https://www.woodyscheesesteaks.com/popmenu-order/east-atlanta-village/menus/menu-square-sync",
+    "notes": "A stall in Southern Feedstore, an East Atlanta food hall. These are the hall's hours; the stall may close earlier.",
     "sources": [
-      "https://www.theinfatuation.com/atlanta/guides/late-night-restaurants"
+      "https://sfseav.com/",
+      "https://sfseav.com/dining"
     ],
-    "lastVerified": "2026-11-13"
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "sinful-sldrz",
+    "name": "Sinful Sldrz",
+    "type": "food",
+    "cuisine": [
+      "burgers"
+    ],
+    "area": "East Atlanta Village",
+    "address": "1245 Glenwood Ave SE, Atlanta, GA 30316",
+    "lat": 33.74004,
+    "lng": -84.34666,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ]
+    },
+    "url": "https://order.toasttab.com/online/sinful-slidrz-1245-glenwood-ave",
+    "notes": "A stall in Southern Feedstore, an East Atlanta food hall. These are the hall's hours; the stall may close earlier.",
+    "sources": [
+      "https://sfseav.com/",
+      "https://sfseav.com/dining"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "pizza-brasiliana",
+    "name": "Pizza Brasiliana",
+    "type": "food",
+    "cuisine": [
+      "pizza"
+    ],
+    "area": "East Atlanta Village",
+    "address": "1245 Glenwood Ave SE, Atlanta, GA 30316",
+    "lat": 33.74004,
+    "lng": -84.34666,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ]
+    },
+    "url": "https://order.toasttab.com/online/brasiliana-pizza-1245-glenwood-avenue-southeast",
+    "notes": "A stall in Southern Feedstore, an East Atlanta food hall. These are the hall's hours; the stall may close earlier.",
+    "sources": [
+      "https://sfseav.com/",
+      "https://sfseav.com/dining"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "spun-cow-creamery",
+    "name": "The Spun Cow Creamery",
+    "type": "food",
+    "cuisine": [
+      "sweets"
+    ],
+    "area": "East Atlanta Village",
+    "address": "1245 Glenwood Ave SE, Atlanta, GA 30316",
+    "lat": 33.74004,
+    "lng": -84.34666,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "04:00"
+        ]
+      ]
+    },
+    "url": "https://www.thespuncow.com/menu",
+    "notes": "A stall in Southern Feedstore, an East Atlanta food hall. These are the hall's hours; the stall may close earlier. Ice cream and milkshakes.",
+    "sources": [
+      "https://sfseav.com/",
+      "https://sfseav.com/dining"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "buteco-southern-feedstore",
+    "name": "Buteco (Southern Feedstore)",
+    "type": "bar",
+    "area": "East Atlanta Village",
+    "address": "1245 Glenwood Ave SE, Atlanta, GA 30316",
+    "lat": 33.74004,
+    "lng": -84.34666,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "22:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "00:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "02:30"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "02:30"
+        ]
+      ]
+    },
+    "url": "https://www.butecoatlanta.com/buteco-southern-feed-store",
+    "notes": "A Brazilian-style bar inside Southern Feedstore, an East Atlanta food hall. This location serves drinks only.",
+    "sources": [
+      "https://www.butecoatlanta.com/buteco-southern-feed-store"
+    ],
+    "lastVerified": "2026-11-16"
   },
   {
     "id": "sister-louisas-church",
@@ -235,7 +486,7 @@
   {
     "id": "clermont-lounge",
     "name": "Clermont Lounge",
-    "type": "club",
+    "type": "strip",
     "tags": [
       "cover",
       "21-plus"
@@ -285,9 +536,10 @@
     "phone": "(404) 874-4783",
     "notes": "Atlanta's oldest strip club, in the basement of Hotel Clermont. The cover charge changes night to night.",
     "sources": [
+      "https://clermontlounge.net/",
       "https://joinpearl.co/bars/atlanta-united-states-georgia/clermont-lounge"
     ],
-    "lastVerified": "2026-11-13"
+    "lastVerified": "2026-11-16"
   },
   {
     "id": "woodys-cheesesteaks",
@@ -1269,10 +1521,7 @@
   {
     "id": "cvs-emory-village",
     "name": "CVS (Emory Village)",
-    "type": [
-      "grocery",
-      "pharmacy"
-    ],
+    "type": "pharmacy",
     "area": "Druid Hills",
     "address": "1554 N Decatur Rd NE, Atlanta, GA 30307",
     "lat": 33.78804,
@@ -1331,10 +1580,7 @@
   {
     "id": "cvs-decatur",
     "name": "CVS (Decatur)",
-    "type": [
-      "grocery",
-      "pharmacy"
-    ],
+    "type": "pharmacy",
     "area": "Decatur",
     "address": "225 W Ponce de Leon Ave, Decatur, GA 30030",
     "lat": 33.77588,
@@ -1388,6 +1634,73 @@
       "https://www.cvs.com/store-locator/decatur-ga-pharmacies/225-west-ponce-deleon-avenue-decatur-ga-30030/storeid=2367"
     ],
     "lastVerified": "2026-11-13"
+  },
+  {
+    "id": "benchwarmers-decatur",
+    "name": "Benchwarmers (Decatur)",
+    "type": [
+      "bar",
+      "food"
+    ],
+    "cuisine": [
+      "wings",
+      "american"
+    ],
+    "area": "Decatur",
+    "address": "240 W Ponce de Leon Ave, Decatur, GA 30030",
+    "lat": 33.77549,
+    "lng": -84.29937,
+    "hours": {
+      "sun": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "mon": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "tue": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "wed": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "thu": [
+        [
+          "11:00",
+          "01:00"
+        ]
+      ],
+      "fri": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "11:00",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://www.benchwarmersgrill.com/",
+    "phone": "(678) 648-1493",
+    "notes": "Sports bar and grill.",
+    "sources": [
+      "https://www.benchwarmersgrill.com/"
+    ],
+    "lastVerified": "2026-11-16"
   },
   {
     "id": "trackside-tavern",
@@ -1815,5 +2128,816 @@
       "https://fellinisatlanta.com/roswell-rd/"
     ],
     "lastVerified": "2026-11-15"
+  },
+  {
+    "id": "taco-bell-howell-mill",
+    "name": "Taco Bell (Howell Mill)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "West Midtown",
+    "address": "1761 Howell Mill Rd NW, Atlanta, GA 30318",
+    "lat": 33.80207,
+    "lng": -84.41471,
+    "hours": {
+      "sun": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "09:00",
+          "03:00"
+        ]
+      ],
+      "sat": [
+        [
+          "09:00",
+          "03:00"
+        ]
+      ]
+    },
+    "url": "https://locations.tacobell.com/ga/atlanta/1761-howell-mill-rd-nw",
+    "phone": "(404) 355-4997",
+    "notes": "Dining room closes at 10 PM (midnight Friday and Saturday); drive-thru after that.",
+    "sources": [
+      "https://locations.tacobell.com/ga/atlanta/1761-howell-mill-rd-nw.html"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "taco-bell-n-druid-hills-rd",
+    "name": "Taco Bell (N Druid Hills Rd)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "North Druid Hills",
+    "address": "2420 N Druid Hills Rd NE, Atlanta, GA 30329",
+    "lat": 33.82721,
+    "lng": -84.32566,
+    "hours": {
+      "sun": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://locations.tacobell.com/ga/atlanta/2420-n-druid-hills-rd-ne",
+    "phone": "(404) 634-9698",
+    "notes": "Dining room closes at 10 PM; drive-thru after that.",
+    "sources": [
+      "https://locations.tacobell.com/ga/atlanta/2420-n-druid-hills-rd-ne.html"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "taco-bell-buford-hwy",
+    "name": "Taco Bell (Buford Hwy)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Buford Highway",
+    "address": "3385 Buford Hwy, Atlanta, GA 30329",
+    "lat": 33.84333,
+    "lng": -84.32759,
+    "hours": {
+      "sun": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "mon": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "tue": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "wed": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "thu": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "fri": [
+        [
+          "09:00",
+          "05:30"
+        ]
+      ],
+      "sat": [
+        [
+          "09:00",
+          "05:30"
+        ]
+      ]
+    },
+    "url": "https://locations.tacobell.com/ga/atlanta/3385-buford-hwy",
+    "phone": "(404) 321-0061",
+    "sources": [
+      "https://locations.tacobell.com/ga/atlanta/3385-buford-hwy.html"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "taco-bell-ponce",
+    "name": "Taco Bell (Ponce)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Old Fourth Ward",
+    "address": "429 Ponce de Leon Ave, Atlanta, GA 30308",
+    "lat": 33.77268,
+    "lng": -84.37299,
+    "hours": {
+      "sun": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "09:00",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://locations.tacobell.com/ga/atlanta/429-ponce-de-leon-ave",
+    "phone": "(404) 876-3559",
+    "notes": "Dining room closes at 10 PM; drive-thru after that.",
+    "sources": [
+      "https://locations.tacobell.com/ga/atlanta/429-ponce-de-leon-ave.html"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "taco-bell-spring-st",
+    "name": "Taco Bell (Spring St)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Midtown",
+    "address": "930 Spring St, Atlanta, GA 30309",
+    "lat": 33.78033,
+    "lng": -84.38918,
+    "hours": {
+      "sun": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "mon": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "tue": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "wed": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "thu": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "fri": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ],
+      "sat": [
+        [
+          "00:00",
+          "24:00"
+        ]
+      ]
+    },
+    "url": "https://locations.tacobell.com/ga/atlanta/930-spring-street",
+    "phone": "(404) 733-9000",
+    "notes": "Open 24 hours, every day.",
+    "sources": [
+      "https://locations.tacobell.com/ga/atlanta/930-spring-street.html"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "taco-bell-columbia-dr",
+    "name": "Taco Bell (Columbia Dr)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Decatur",
+    "address": "1170 Columbia Dr, Decatur, GA 30032",
+    "lat": 33.75485,
+    "lng": -84.26683,
+    "hours": {
+      "sun": [
+        [
+          "09:00",
+          "04:00"
+        ]
+      ],
+      "mon": [
+        [
+          "09:00",
+          "04:00"
+        ]
+      ],
+      "tue": [
+        [
+          "09:00",
+          "04:00"
+        ]
+      ],
+      "wed": [
+        [
+          "09:00",
+          "04:00"
+        ]
+      ],
+      "thu": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "fri": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ],
+      "sat": [
+        [
+          "09:00",
+          "05:00"
+        ]
+      ]
+    },
+    "url": "https://locations.tacobell.com/ga/decatur/1170-columbia-drive",
+    "phone": "(404) 284-7890",
+    "notes": "Dining room closes at midnight; drive-thru after that.",
+    "sources": [
+      "https://locations.tacobell.com/ga/decatur/1170-columbia-drive.html"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-ralph-david-abernathy",
+    "name": "Wendy's (Ralph David Abernathy)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "West End",
+    "address": "1025 Ralph David Abernathy Blvd SW, Atlanta, GA 30310",
+    "lat": 33.73844,
+    "lng": -84.42135,
+    "hours": {
+      "sun": [
+        [
+          "07:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/atlanta/1025-ralph-david-abernathy-rd",
+    "phone": "(404) 752-5744",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/atlanta/1025-ralph-david-abernathy-rd"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-howell-mill",
+    "name": "Wendy's (Howell Mill)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "West Midtown",
+    "address": "1795 Howell Mill Rd NW, Atlanta, GA 30318",
+    "lat": 33.80377,
+    "lng": -84.41353,
+    "hours": {
+      "sun": [
+        [
+          "07:00",
+          "01:00"
+        ]
+      ],
+      "mon": [
+        [
+          "06:30",
+          "01:00"
+        ]
+      ],
+      "tue": [
+        [
+          "06:30",
+          "01:00"
+        ]
+      ],
+      "wed": [
+        [
+          "06:30",
+          "01:00"
+        ]
+      ],
+      "thu": [
+        [
+          "06:30",
+          "01:00"
+        ]
+      ],
+      "fri": [
+        [
+          "06:30",
+          "01:00"
+        ]
+      ],
+      "sat": [
+        [
+          "06:30",
+          "01:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/atlanta/1795-howell-mill-road",
+    "phone": "(404) 351-0456",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/atlanta/1795-howell-mill-road"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-piedmont-rd",
+    "name": "Wendy's (Piedmont Rd)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Lindbergh",
+    "address": "1940 Piedmont Rd NE, Atlanta, GA 30324",
+    "lat": 33.81044,
+    "lng": -84.36683,
+    "hours": {
+      "sun": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "10:00",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/atlanta/1940-piedmont-road",
+    "phone": "(404) 876-8250",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/atlanta/1940-piedmont-road"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-toco-hills",
+    "name": "Wendy's (Toco Hills)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "North Druid Hills",
+    "address": "2957 N Druid Hills Rd NE, Atlanta, GA 30329",
+    "lat": 33.81501,
+    "lng": -84.31032,
+    "hours": {
+      "sun": [
+        [
+          "08:00",
+          "01:00"
+        ]
+      ],
+      "mon": [
+        [
+          "07:00",
+          "01:00"
+        ]
+      ],
+      "tue": [
+        [
+          "07:00",
+          "01:00"
+        ]
+      ],
+      "wed": [
+        [
+          "07:00",
+          "01:00"
+        ]
+      ],
+      "thu": [
+        [
+          "07:00",
+          "01:00"
+        ]
+      ],
+      "fri": [
+        [
+          "07:00",
+          "01:00"
+        ]
+      ],
+      "sat": [
+        [
+          "08:00",
+          "01:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/atlanta/2957-n-druid-hills-road",
+    "phone": "(404) 329-9385",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/atlanta/2957-n-druid-hills-road"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-moreland-ave",
+    "name": "Wendy's (Moreland Ave)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Reynoldstown",
+    "address": "427 Moreland Ave SE, Atlanta, GA 30316",
+    "lat": 33.74231,
+    "lng": -84.34965,
+    "hours": {
+      "sun": [
+        [
+          "07:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/atlanta/427-moreland-se",
+    "phone": "(404) 627-1616",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/atlanta/427-moreland-se"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-boulevard",
+    "name": "Wendy's (Boulevard)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Old Fourth Ward",
+    "address": "660 Boulevard NE, Atlanta, GA 30308",
+    "lat": 33.77272,
+    "lng": -84.37164,
+    "hours": {
+      "sun": [
+        [
+          "07:00",
+          "02:00"
+        ]
+      ],
+      "mon": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "tue": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "wed": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "thu": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "fri": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ],
+      "sat": [
+        [
+          "06:30",
+          "02:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/atlanta/660-boulevard-ne",
+    "phone": "(404) 874-8069",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/atlanta/660-boulevard-ne"
+    ],
+    "lastVerified": "2026-11-16"
+  },
+  {
+    "id": "wendys-scott-blvd",
+    "name": "Wendy's (Scott Blvd)",
+    "type": "food",
+    "cuisine": [
+      "fast food"
+    ],
+    "area": "Decatur",
+    "address": "1705 Scott Blvd, Decatur, GA 30033",
+    "lat": 33.79731,
+    "lng": -84.28303,
+    "hours": {
+      "sun": [
+        [
+          "10:00",
+          "00:00"
+        ]
+      ],
+      "mon": [
+        [
+          "10:00",
+          "01:00"
+        ]
+      ],
+      "tue": [
+        [
+          "10:00",
+          "01:00"
+        ]
+      ],
+      "wed": [
+        [
+          "10:00",
+          "01:00"
+        ]
+      ],
+      "thu": [
+        [
+          "10:00",
+          "01:00"
+        ]
+      ],
+      "fri": [
+        [
+          "10:00",
+          "01:00"
+        ]
+      ],
+      "sat": [
+        [
+          "10:00",
+          "01:00"
+        ]
+      ]
+    },
+    "url": "https://locations.wendys.com/united-states/ga/decatur/1705-scott-blvd",
+    "phone": "(404) 633-5396",
+    "sources": [
+      "https://locations.wendys.com/united-states/ga/decatur/1705-scott-blvd"
+    ],
+    "lastVerified": "2026-11-16"
   }
 ]

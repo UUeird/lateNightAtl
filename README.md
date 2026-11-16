@@ -59,12 +59,14 @@ List every page you relied on in `sources`, for the hours, tags and notes alike.
 A weekly GitHub Action (`.github/workflows/external-links.yml`) checks every link in the data and opens an issue listing any that are gone or have moved. Run it locally with `npm run check:links`.
 
 - **hours**: 24-hour `"HH:MM"`, Atlanta time. A close at or before the open time means it closes after midnight (`["18:00", "02:00"]`). A missing day means closed that day. Open 24 hours is `["00:00", "24:00"]`.
-- **type** is one value, or a list when a place is several things (`["grocery", "pharmacy"]` for a CVS).
+- **type** is one value, or a list when a place is several things (`["bar", "venue"]` for a bar with a stage).
 - **type** and **area** must be values from [`src/data/taxonomy.ts`](src/data/taxonomy.ts). Add new ones there.
 - **cuisine** is free text, lowercase. Cards, place pages and search show each place's own cuisines.
   - The Type filter's **Food** list is built from food places' cuisines (a bar's cuisine shows on its card but isn't filtered on). Similar cuisines share one entry there: `CUISINE_GROUPS` in the taxonomy maps, for example, `diner` and `american` to Euromerican and `greek` to Mediterranean. Add a mapping rather than renaming a place's cuisine.
+  - Each cuisine shows with an emoji in the Type menu: `CUISINE_EMOJI` in the taxonomy (types have `TYPE_EMOJI`). A cuisine with none listed gets 🍴; add one when you add a cuisine.
+  - Food hall stalls are listed one by one, at the hall's address, rather than as the hall. The map lists places that share a spot when you click their count.
   - `fast food` is special: it's listed under Food but unticked by default, and a fast food place only shows when Fast Food is ticked, even if it also serves a ticked cuisine.
-- **tags** (optional) flag things worth knowing before you go: `cover`, `cash-only`, `21-plus` (see `TAGS` in the taxonomy). Leave a tag off when unsure; no tag means "unknown", not "no". Put specifics such as price or which nights in **notes**.
+- **tags** (optional) flag things worth knowing before you go: `cover`, `cash-only`, `21-plus` (see `TAGS` in the taxonomy). List cards show each tag as its emoji (`TAG_EMOJI`), named in a tooltip on hover; place pages show emoji and name. Leave a tag off when unsure; no tag means "unknown", not "no". Put specifics such as price or which nights in **notes**.
 - **lat/lng**: right-click the spot in Google Maps or OpenStreetMap to copy them, or look up the address with OpenStreetMap's search ([Nominatim](https://nominatim.openstreetmap.org/)) and check it matches the place.
 - `npm run build` fails with a clear message if an entry is malformed.
 
@@ -74,6 +76,9 @@ The When filter picks a night and a time: a place is listed if it's open at that
 
 - **Right now** uses the current Atlanta time. It's the default from 9 PM until 5 AM.
 - Earlier in the day the default is **Tonight**, open until half an hour from now rounded up to the half hour (9 PM at the earliest, 4 AM at the latest).
+- The list shows the places closing soonest first (catch them while you can), all-night places last; with Near me on, nearest first. Each card's pill says when it closes ("’til 2am", "24h"), amber within an hour of closing.
+- Each card's little map (the interstates, with I-285 around them) shows where the place is in town; tap it to see it on the big map. It's drawn from `src/data/minimap.ts`, made by `scripts/build-minimap.py`.
+- The last "Open until" choice, **All night**, means open at 5 AM, when the night ends: in practice, the places open around the clock.
 - On tonight's view, a place that opens later than now is still listed, dimmed and marked "Not open yet", after the open ones.
 
 See [`src/lib/hours.ts`](src/lib/hours.ts).

@@ -62,7 +62,10 @@
   {
     "id": "edgewood-hi-fi",
     "name": "Edgewood Hi-Fi (sample)",
-    "type": "bar",
+    "type": [
+      "bar",
+      "venue"
+    ],
     "area": "Edgewood",
     "address": "200 Example Ave NE, Atlanta, GA 30312",
     "lat": 33.7542,
@@ -366,10 +369,7 @@
   {
     "id": "poncey-24-pharmacy",
     "name": "Poncey 24 Pharmacy (sample)",
-    "type": [
-      "grocery",
-      "pharmacy"
-    ],
+    "type": "pharmacy",
     "area": "Poncey-Highland",
     "address": "800 Example Ave NE, Atlanta, GA 30306",
     "lat": 33.7728,
@@ -426,7 +426,7 @@
     "type": "cafe",
     "cuisine": [
       "coffee",
-      "dessert"
+      "sweets"
     ],
     "area": "Decatur",
     "address": "900 Example St, Decatur, GA 30030",

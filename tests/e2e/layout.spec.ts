@@ -18,7 +18,7 @@ async function smallTargets(page: Page) {
   return page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>('button, select, input, summary, .btn')]
       .filter((el) => el.checkVisibility() && el.getClientRects().length)
-      .map((el) => el.closest<HTMLElement>('.menu-option') ?? el) // a checkbox's target is its whole row
+      .map((el) => el.closest<HTMLElement>('.menu-option, .sub-head-option') ?? el) // a checkbox's target is its whole label
       .map((el) => {
         const r = el.getBoundingClientRect();
         return { el: el.id || el.getAttribute('aria-label') || el.className || el.tagName, w: Math.round(r.width), h: Math.round(r.height) };
